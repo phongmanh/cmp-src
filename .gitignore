@@ -1,27 +1,47 @@
-# Compiled class file
-*.class
-
-# Log file
-*.log
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
-*.jar
-*.war
-*.nar
-*.ear
-*.zip
-*.tar.gz
-*.rar
-
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
-replay_pid*
-
-# Kotlin Gradle plugin data, see https://kotlinlang.org/docs/whatsnew20.html#new-directory-for-kotlin-data-in-gradle-projects
+# ##########################################
+# 1. Gradle and Kotlin Multiplatform Build
+# ##########################################
+.gradle/
+build/
+**/build/
+!src/**/build/
 .kotlin/
+*.lock
+*yarn.lock
+
+# ##########################################
+# 2. Android and General IDE (IntelliJ / Android Studio)
+# ##########################################
+*.iml
+.idea/
+.idea.DS_Store
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+*.jks
+*.keystore
+
+# ##########################################
+# 3. Apple / iOS Development (Xcode & CocoaPods)
+# ##########################################
+# Ignore personal Xcode environments and build paths
+xcuserdata/
+*.xcworkspace/
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/**
+!*.xcodeproj/project.xcworkspace/**
+!*.xcworkspace/contents.xcworkspacedata/**
+**/xcshareddata/WorkspaceSettings.xcsettings
+
+# CocoaPods specific exclusions (if using CocoaPods integration)
+.cocoapods/
+Pods/
+
+# ##########################################
+# 4. OS Generated Files
+# ##########################################
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
