@@ -32,6 +32,8 @@ Detailed conventions for all mobile projects (Java / Kotlin). Referenced from ro
 - Naming: `PascalCase` classes, `camelCase` functions/variables, `SCREAMING_SNAKE_CASE` constants.
 - Keep functions small (< 30 lines as a guideline); one function, one job.
 - No magic numbers/strings — extract to constants or resources.
+- Write Javadoc for all classes, methods and fields: Clear, and concise
+- Logging start/end for each call. Clear and necessary to trace and maintenance
 
 ## 4. UI & Resources
 

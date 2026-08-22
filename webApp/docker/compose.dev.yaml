@@ -1,0 +1,53 @@
+# Development environment: stock nginx serving a bundle built on the host and mounted straight out
+# of webApp/build. There is no image to rebuild — run the Gradle task again and reload the page.
+# Use compose.yaml when you want the packaged production image.
+#
+#   ./gradlew :webApp:wasmJsBrowserDevelopmentExecutableDistribution
+#   docker compose -f webApp/docker/compose.dev.yaml up -d --wait
+#
+# The fastest inner loop is still `./gradlew :webApp:wasmJsBrowserDevelopmentRun`, which needs no
+# container at all. This file is for the two things that dev server cannot show you: the bundle
+# behind the same nginx configuration production uses, and same-origin calls to the local API.
+#
+# Everything here is defaulted; set WEB_DIST or WEB_PORT in the environment to override.
+name: cmpsrc-web-dev
+
+services:
+  web:
+    # No build stage. The image is only nginx; the site is the mount below.
+    image: nginx:alpine
+    volumes:
+      # Long syntax for create_host_path: false — without it Docker silently creates an empty
+      # directory when the bundle has not been built, and the app 404s instead of failing here.
+      # Paths are relative to this file's directory. Point WEB_DIST at any other build/dist
+      # subdirectory (js/developmentExecutable, composeWebCompatibility/productionExecutable, ...)
+      # to serve a different bundle; only the compatibility one carries the JS fallback.
+      - type: bind
+        source: ${WEB_DIST:-../build/dist/wasmJs/developmentExecutable}
+        target: /usr/share/nginx/html
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./nginx.dev.conf
+        target: /etc/nginx/conf.d/default.conf
+        read_only: true
+    ports:
+      # Loopback only: a development bundle is unminified, ships source maps, and is usually built
+      # against a local backend, so none of it should be reachable from the network. 8082 because
+      # the local API server takes 8080 and its database UI 8081.
+      - "127.0.0.1:${WEB_PORT:-8082}:80"
+    extra_hosts:
+      # Only Linux needs this: Docker Desktop resolves host.docker.internal by itself, Docker
+      # Engine does not, and nginx.dev.conf's /api/ proxy resolves the name at startup — so
+      # without the entry the container would fail to start there rather than 502 later.
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    healthcheck:
+      # 127.0.0.1, not localhost: the container resolves localhost to ::1 first, and nginx's
+      # `listen 80` binds IPv4 only, so the IPv6 attempt is refused and the check never passes.
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/healthz"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s

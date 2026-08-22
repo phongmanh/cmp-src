@@ -1,0 +1,61 @@
+<resources>
+    <string name="app_name">CMPsrc</string>
+
+    <!-- Login screen -->
+    <string name="login_title">Welcome back</string>
+    <string name="login_subtitle">Sign in to continue to CMPsrc</string>
+    <string name="login_email_label">Email</string>
+    <string name="login_email_placeholder">you@example.com</string>
+    <string name="login_password_label">Password</string>
+    <string name="login_password_placeholder">Enter your password</string>
+    <string name="login_show_password">Show password</string>
+    <string name="login_hide_password">Hide password</string>
+    <string name="login_forgot_password">Forgot password?</string>
+    <string name="login_submit">Sign in</string>
+    <string name="login_submit_in_progress">Signing in</string>
+    <string name="login_submit_success">Signed in</string>
+    <string name="login_divider">or continue with</string>
+    <string name="login_google">Google</string>
+    <string name="login_facebook">Facebook</string>
+    <string name="login_no_account">New here?</string>
+    <string name="login_sign_up">Create an account</string>
+    <string name="login_not_implemented">Not wired up in this build yet.</string>
+
+    <!-- Field validation -->
+    <string name="validation_email_blank">Enter your email address</string>
+    <string name="validation_email_malformed">That doesn't look like an email address</string>
+    <string name="validation_password_blank">Enter your password</string>
+    <string name="validation_password_too_short">Use at least %1$d characters</string>
+
+    <!-- Sign-in failures -->
+    <string name="error_invalid_credentials">That email and password don't match an account</string>
+    <string name="error_network">Can't reach the server. Check your connection and try again</string>
+    <string name="error_cancelled">Sign-in was cancelled</string>
+    <string name="error_provider_unavailable">%1$s sign-in isn't available right now</string>
+    <string name="error_unknown">Something went wrong. Please try again</string>
+
+    <!-- Home screen -->
+    <string name="home_greeting">Hi, %1$s</string>
+    <string name="home_signed_in_as">Signed in as %1$s</string>
+    <string name="home_user_unnamed">Signed-in user</string>
+    <string name="home_signed_in_with">via %1$s</string>
+    <string name="home_running_on">Running on %1$s</string>
+    <string name="home_sign_out">Sign out</string>
+    <string name="home_welcome_back">Welcome back</string>
+    <string name="home_placeholder_body">Nothing here yet. This tab isn't wired up in this build.</string>
+    <string name="home_notifications_unavailable">Notifications aren't wired up in this build yet.</string>
+
+    <!-- Home bottom navigation -->
+    <string name="home_tab_home">Home</string>
+    <string name="home_tab_search">Search</string>
+    <string name="home_tab_activity">Activity</string>
+    <string name="home_tab_profile">Profile</string>
+
+    <!-- Content descriptions -->
+    <string name="cd_app_logo">CMPsrc logo</string>
+    <string name="cd_email_icon">Email</string>
+    <string name="cd_password_icon">Password</string>
+    <string name="cd_google_logo">Google logo</string>
+    <string name="cd_facebook_logo">Facebook logo</string>
+    <string name="cd_notifications">Notifications</string>
+</resources>

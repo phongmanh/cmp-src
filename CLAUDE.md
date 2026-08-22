@@ -27,6 +27,85 @@ Follow this naming/source-set convention when adding new expect/actual declarati
 
 Shared drawables/resources live under `shared/src/commonMain/composeResources/` and are accessed via generated accessors imported from `cmpsrc.shared.generated.resources.Res` (e.g. `Res.drawable.compose_multiplatform`).
 
+### Navigation
+
+Navigation 3 — `androidx.navigation3:navigation3-runtime` (androidx's own multiplatform publication) plus `org.jetbrains.androidx.navigation3:navigation3-ui` for the multiplatform `NavDisplay`. The back stack is held by `AppRoot` in `App.kt`; destinations are the `@Serializable` keys in `core/navigation/AppRoute.kt`.
+
+Adding a destination is three edits:
+
+1. a new subtype of `AppRoute`, carrying whatever arguments the destination needs;
+2. a `subclass(...)` line in `appNavConfiguration` — only Android can resolve back-stack keys reflectively, so every other target needs them registered, and `AppRouteTest` fails if this is missed;
+3. an `entry<...>` block in `AppRoot`'s `entryProvider`.
+
+Screens never navigate themselves. A route composable reports what happened (`onSignedIn`, `onSignedOut`) and `AppRoot` decides what that does to the back stack — see `resetTo` for handovers that must not leave the previous screen behind.
+
+### Networking
+
+Ktor client, driven by the shared `api-contract` module (`com.example:api-contract`, resolved from
+mavenLocal — `useMavenLocal=true` in `gradle.properties`). That module publishes the routes
+(`ApiRoutes`), the DTOs, the error shape (`ErrorResponse`/`ErrorCode`) and the field limits, so the
+app never spells a path or a payload by hand. A route the server renames breaks the build here.
+
+`core/network` holds the plumbing:
+
+- `HttpClientFactory.kt` — `createHttpClient(...)` installs ContentNegotiation, bearer `Auth` with
+  refresh, `HttpTimeout`, retry (5xx on idempotent methods only) and `Logging`. One client is a
+  `single` in `AppModule`; it owns a connection pool, so never build one per call.
+- `ApiConfig.kt` — base URL and timeouts, injected rather than global. Which backend the app talks
+  to is `ApiEnvironment.ACTIVE` (`LOCAL` or `PRODUCTION`) — one line, one file, every target;
+  `ApiConfig(ApiEnvironment.PRODUCTION)` or `ApiConfig(baseUrl = ...)` overrides it per caller.
+  `PRODUCTION_BASE_URL` is a shared constant; only `localApiHost()` stays `expect`/`actual`,
+  because only the Android emulator reaches the host at `10.0.2.2`.
+- `ApiResult.kt` / `ApiCall.kt` — every call returns `ApiResult<T>`; `sendRequest` is the one place
+  an exception becomes an `ApiError`, so nothing above the data layer catches anything.
+- `TokenStore.kt` — what the `Auth` plugin reads and refreshes into. The bound implementation is
+  `InMemoryTokenStore`, which is **not** persistent or secure storage; replacing it is a new
+  `TokenStore` in `AppModule` and nothing else.
+
+The signed-in user is the contract's `UserResponse` end to end — `AuthResult.Success`,
+`AppRoute.Home`, and the home UI all carry it, and there is no parallel `AuthUser` model to keep
+in sync. Its `displayName`, `email` and `avatarUrl` are nullable, so anything that renders a user
+goes through the helpers in `feature/home/component/UserIdentity.kt` (`displayLabel()`,
+`signedInProvider()`, and the `sampleUser()` fixture previews and tests share). `SocialProvider`
+stays a domain enum, bridged to the wire by its `key`/`fromKey`.
+
+Per-feature API classes live with the feature (`feature/auth/data/remote/AuthApi.kt`), not in
+`core`. A typed POST must set `contentType(ContentType.Application.Json)` — ContentNegotiation
+silently declines to serialize a body without it, and the call fails before leaving the device.
+
+Engine actuals do **not** follow the one-file-per-target rule exactly, because the source-set
+hierarchy has intermediate sets that would collide:
+
+- `iosMain` (not `nativeMain`) provides Darwin — it covers every Apple target.
+- `webMain` (not `jsMain` + `wasmJsMain`) provides the `Js` engine for both browser targets.
+
+Declaring these a level up, or in both leaves, is a duplicate-`actual` compile error.
+
+Android talks to a local dev server over cleartext only in debug: `androidApp/src/debug/` carries a
+network security config allowing `10.0.2.2` and `localhost` and nothing else. Release builds keep
+the platform's HTTPS-only default.
+
+### Auth flow
+
+`AuthRepositoryImpl` is the whole flow, and it is network-backed — there is no local demo account.
+
+- **Email/password** — `AuthApi.login`, then one `GET /users/me`. A `TokenResponse`'s copy of the
+  user has an empty `linkedProviders` by contract, and the home screen reads that list, so a
+  sign-in hydrates it. A failed hydration is not a failed sign-in: the tokens are already stored,
+  so the token response's user stands in.
+- **Social** — `SocialAuthClient.requestCredential(provider)` returns a `SocialCredential`, never a
+  session: the provider token is exchanged at `POST /auth/social` and the server issues the tokens.
+  Every platform actual still delegates to `DemoSocialAuthClient`, which returns a placeholder
+  token — the exchange after it is real, so social sign-in works only against a deployment that
+  accepts one.
+- **Sign-out** — `HomeViewModel` → `SignOutUseCase` → `AuthApi.logout`, which drops the local
+  tokens whether or not the server answered. `signOut()` is `NonCancellable`, because the caller
+  is a screen on its way out and a cancelled call would leave a live refresh token behind.
+
+Failures are mapped once, in `feature/auth/data/AuthMapping.kt`. Only the email/password path can
+report `AuthError.InvalidCredentials`; the same 401 on the social path becomes `Unknown`, since the
+user never typed a password to get wrong.
+
 ## Gradle/toolchain notes
 
 - Type-safe project accessors are enabled (`settings.gradle.kts`); reference other modules as `projects.shared`, not string paths.

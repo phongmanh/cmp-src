@@ -1,0 +1,3 @@
+*
+!webApp/docker
+!webApp/build/dist/composeWebCompatibility/productionExecutable

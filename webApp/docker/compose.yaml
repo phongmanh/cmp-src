@@ -1,0 +1,47 @@
+# Production deployment: the packaged image, serving a bundle baked in at build time.
+# Build the bundle first — Compose only packages it:
+#
+#   ./gradlew :webApp:composeCompatibilityBrowserDistribution
+#   docker compose -f webApp/docker/compose.yaml up -d --wait --build
+#
+# Use compose.dev.yaml to serve a bundle straight out of webApp/build without an image build.
+# Everything here is defaulted; set WEB_PORT or WEB_TAG in the environment to override.
+#
+# Without `name:` the project would be called "docker", after this file's parent directory.
+name: cmpsrc-web
+
+services:
+  web:
+    build:
+      # Repo root, because the Dockerfile's COPY paths are repo-relative. BuildKit picks up
+      # webApp/docker/Dockerfile.dockerignore automatically and trims the context to ~37 MB.
+      context: ../..
+      dockerfile: webApp/docker/Dockerfile
+    # Tag the release rather than overwriting :latest — WEB_TAG=2026.08.22 docker compose ... build
+    image: cmpsrc-web:${WEB_TAG:-latest}
+    ports:
+      # host:container — nginx listens on 80 inside the container. Published on every interface
+      # because the TLS terminator usually runs elsewhere; prefix "127.0.0.1:" when it does not.
+      - "${WEB_PORT:-8080}:80"
+    restart: unless-stopped
+    healthcheck:
+      # 127.0.0.1, not localhost: the container resolves localhost to ::1 first, and nginx's
+      # `listen 80` binds IPv4 only, so the IPv6 attempt is refused and the check never passes.
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/healthz"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  # The API this app talks to is not built from this repo, so there is nothing to wire up by
+  # default. To serve both from one origin — which removes CORS entirely — add the service here,
+  # add the `location /api/ { proxy_pass http://backend:8080/; ... }` block from §2 of
+  # docs/web-docker-deploy.md to nginx.conf, and point ApiConfig.PRODUCTION_BASE_URL at the page's
+  # own origin. Compose's network resolves `backend` to the container by service name.
+  # compose.dev.yaml does exactly this against a server running on the host.
+  #
+  # backend:
+  #   image: <your-api-image>
+  #   restart: unless-stopped
+  #   expose:
+  #     - "8080"
