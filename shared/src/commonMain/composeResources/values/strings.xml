@@ -58,4 +58,9 @@
     <string name="cd_google_logo">Google logo</string>
     <string name="cd_facebook_logo">Facebook logo</string>
     <string name="cd_notifications">Notifications</string>
+    <string name="signup_has_account">Already has a account?</string>
+    <string name="signup_submit">Sign up</string>
+    <string name="signup_title">Welcome</string>
+    <string name="signup_subtitle">Create an account with your email</string>
 </resources>
+

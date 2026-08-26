@@ -18,4 +18,9 @@ interface AuthRepository {
      * there is no outcome a caller could usefully act on.
      */
     suspend fun signOut()
+
+    /**
+     * Register an account with email and password
+     */
+    suspend fun register(email: String, password: String): AuthResult
 }

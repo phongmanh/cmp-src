@@ -23,6 +23,9 @@ sealed interface AppRoute : NavKey {
     @Serializable
     data object Login : AppRoute
 
+    @Serializable
+    data object SignUp : AppRoute
+
     /** Where a successful sign-in lands, showing the [user] it signed in as. */
     @Serializable
     data class Home(val user: UserResponse) : AppRoute
@@ -40,6 +43,7 @@ internal val appNavConfiguration = SavedStateConfiguration {
     serializersModule = SerializersModule {
         polymorphic(NavKey::class) {
             subclass(AppRoute.Login::class)
+            subclass(AppRoute.SignUp::class)
             subclass(AppRoute.Home::class)
         }
     }

@@ -12,8 +12,10 @@ import com.liam.cmp_src.feature.auth.domain.repository.AuthRepository
 import com.liam.cmp_src.feature.auth.domain.usecase.SignInWithEmailUseCase
 import com.liam.cmp_src.feature.auth.domain.usecase.SignInWithSocialUseCase
 import com.liam.cmp_src.feature.auth.domain.usecase.SignOutUseCase
+import com.liam.cmp_src.feature.auth.domain.usecase.SignUpUseCase
 import com.liam.cmp_src.feature.auth.domain.usecase.ValidateCredentialsUseCase
-import com.liam.cmp_src.feature.auth.presentation.LoginViewModel
+import com.liam.cmp_src.feature.auth.presentation.login.LoginViewModel
+import com.liam.cmp_src.feature.auth.presentation.signup.SignUpViewModel
 import com.liam.cmp_src.feature.home.HomeViewModel
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.CoroutineDispatcher
@@ -50,7 +52,9 @@ val appModule = module {
     factoryOf(::SignInWithSocialUseCase)
     factoryOf(::SignOutUseCase)
     factoryOf(::ValidateCredentialsUseCase)
+    factoryOf(::SignUpUseCase)
 
     viewModelOf(::LoginViewModel)
     viewModelOf(::HomeViewModel)
+    viewModelOf(::SignUpViewModel)
 }

@@ -34,23 +34,22 @@ class AuthRepositoryImpl(
     private val dispatcher: CoroutineDispatcher,
 ) : AuthRepository {
 
-    override suspend fun signInWithEmail(email: String, password: String): AuthResult =
-        withContext(dispatcher) {
-            authApi.login(email = email, password = password).toAuthResult()
-        }
+    override suspend fun signInWithEmail(email: String, password: String): AuthResult = withContext(dispatcher) {
+        authApi.login(email = email, password = password).toAuthResult()
+    }
 
-    override suspend fun signInWith(provider: SocialProvider): AuthResult =
-        withContext(dispatcher) {
-            when (val credential = socialAuthClient.requestCredential(provider)) {
-                // The sheet was dismissed or the SDK failed: nothing to exchange, and no call
-                // worth making.
-                is SocialCredential.Denied -> AuthResult.Failure(credential.error)
+    override suspend fun signInWith(provider: SocialProvider): AuthResult = withContext(dispatcher) {
+        when (val credential = socialAuthClient.requestCredential(provider)) {
+            // The sheet was dismissed or the SDK failed: nothing to exchange, and no call
+            // worth making.
+            is SocialCredential.Denied -> AuthResult.Failure(credential.error)
 
-                is SocialCredential.Granted -> authApi
-                    .signInWithSocial(provider = provider.toContract(), token = credential.token)
-                    .toAuthResult(provider)
-            }
+            is SocialCredential.Granted -> authApi.signInWithSocial(
+                    provider = provider.toContract(),
+                    token = credential.token
+                ).toAuthResult(provider)
         }
+    }
 
     /**
      * Ends the session, and reports nothing back: [AuthApi.logout] drops the local tokens whether
@@ -65,6 +64,13 @@ class AuthRepositoryImpl(
             authApi.logout()
         }
     }
+
+    override suspend fun register(
+        email: String, password: String
+    ): AuthResult = withContext(dispatcher) {
+        authApi.register(email = email, password = password).toAuthResult()
+    }
+
 
     private suspend fun ApiResult<TokenResponse>.toAuthResult(
         provider: SocialProvider? = null,
@@ -83,6 +89,5 @@ class AuthRepositoryImpl(
      * A failure there is not a failed sign-in: the tokens are already stored and the session is
      * open, so the response's own copy of the user stands in.
      */
-    private suspend fun UserResponse.withLinkedProviders(): UserResponse =
-        authApi.currentUser().getOrNull() ?: this
+    private suspend fun UserResponse.withLinkedProviders(): UserResponse = authApi.currentUser().getOrNull() ?: this
 }

@@ -23,7 +23,8 @@ import com.liam.cmp_src.core.navigation.appNavConfiguration
 import com.liam.cmp_src.core.navigation.resetTo
 import com.liam.cmp_src.core.ui.theme.AppTheme
 import com.liam.cmp_src.di.appModule
-import com.liam.cmp_src.feature.auth.presentation.LoginRoute
+import com.liam.cmp_src.feature.auth.presentation.login.LoginRoute
+import com.liam.cmp_src.feature.auth.presentation.signup.SignUpRoute
 import com.liam.cmp_src.feature.home.HomeRoute
 import org.koin.compose.KoinApplication
 import org.koin.dsl.koinConfiguration
@@ -81,6 +82,14 @@ private fun AppRoot() {
             entry<AppRoute.Login> {
                 LoginRoute(
                     onSignedIn = { user -> backStack.resetTo(AppRoute.Home(user)) },
+                    onSignUp = { backStack.add(AppRoute.SignUp) },
+                )
+            }
+
+            entry<AppRoute.SignUp> {
+                SignUpRoute(
+                    goHome = { user -> backStack.resetTo(AppRoute.Home(user)) },
+                    backToLogin = { backStack.removeLastOrNull() },
                 )
             }
 
@@ -97,8 +106,8 @@ private fun AppRoot() {
 /** The one transition the app uses: the outgoing screen recedes as the incoming one settles in. */
 private fun rootTransition(): ContentTransform =
     (fadeIn(tween(ROOT_TRANSITION_MILLIS)) +
-        scaleIn(tween(ROOT_TRANSITION_MILLIS), initialScale = ROOT_ENTER_SCALE))
+            scaleIn(tween(ROOT_TRANSITION_MILLIS), initialScale = ROOT_ENTER_SCALE))
         .togetherWith(
             fadeOut(tween(ROOT_TRANSITION_MILLIS)) +
-                scaleOut(tween(ROOT_TRANSITION_MILLIS), targetScale = ROOT_EXIT_SCALE),
+                    scaleOut(tween(ROOT_TRANSITION_MILLIS), targetScale = ROOT_EXIT_SCALE),
         )

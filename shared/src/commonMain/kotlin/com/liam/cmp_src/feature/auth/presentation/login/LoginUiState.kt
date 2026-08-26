@@ -1,4 +1,4 @@
-package com.liam.cmp_src.feature.auth.presentation
+package com.liam.cmp_src.feature.auth.presentation.login
 
 import com.liam.cmp_src.feature.auth.domain.model.AuthError
 import com.liam.cmp_src.feature.auth.domain.model.CredentialErrors
@@ -22,7 +22,7 @@ sealed interface LoginStatus {
      * The attempt failed. [nonce] increments per failure so the UI can re-run the shake
      * animation when the same error happens twice in a row.
      */
-    data class Failed(val error: AuthError, val nonce: Int) : LoginStatus
+    data class Failed(val error: AuthError) : LoginStatus
 
     data object Succeeded : LoginStatus
 }
@@ -47,7 +47,4 @@ data class LoginUiState(
 
     val error: AuthError?
         get() = (status as? LoginStatus.Failed)?.error
-
-    val errorNonce: Int
-        get() = (status as? LoginStatus.Failed)?.nonce ?: 0
 }

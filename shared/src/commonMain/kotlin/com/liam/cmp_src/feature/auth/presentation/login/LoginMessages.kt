@@ -1,4 +1,4 @@
-package com.liam.cmp_src.feature.auth.presentation
+package com.liam.cmp_src.feature.auth.presentation.login
 
 import androidx.compose.runtime.Composable
 import com.liam.cmp_src.feature.auth.domain.model.AuthError
@@ -34,7 +34,7 @@ fun AuthError.asMessage(): String = when (this) {
     is AuthError.ProviderUnavailable ->
         stringResource(Res.string.error_provider_unavailable, provider.asLabel())
 
-    is AuthError.Unknown -> stringResource(Res.string.error_unknown)
+    is AuthError.Unknown -> message ?: stringResource(Res.string.error_unknown)
 }
 
 @Composable

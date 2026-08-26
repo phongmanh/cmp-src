@@ -1,8 +1,8 @@
-package com.liam.cmp_src.feature.auth.presentation
+package com.liam.cmp_src.feature.auth.presentation.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.api.user.UserResponse
+import com.liam.cmp_src.core.SUCCESS_HOLD_MILLIS
 import com.liam.cmp_src.feature.auth.domain.model.AuthResult
 import com.liam.cmp_src.feature.auth.domain.model.CredentialErrors
 import com.liam.cmp_src.feature.auth.domain.model.SocialProvider
@@ -38,8 +38,6 @@ class LoginViewModel(
     private val _events = MutableSharedFlow<LoginEvent>(extraBufferCapacity = 1)
     val events: SharedFlow<LoginEvent> = _events.asSharedFlow()
 
-    private var failureCount = 0
-
     fun onAction(action: LoginAction) {
         when (action) {
             LoginAction.ScreenEntered -> _uiState.update { it.clearedAfterSignIn() }
@@ -68,9 +66,11 @@ class LoginViewModel(
 
             is LoginAction.SocialSignInClicked -> submitSocial(action.provider)
 
-            LoginAction.ForgotPasswordClicked,
+            LoginAction.ForgotPasswordClicked
+                -> viewModelScope.launch { _events.emit(LoginEvent.ShowNotImplemented) }
+
             LoginAction.SignUpClicked,
-            -> viewModelScope.launch { _events.emit(LoginEvent.ShowNotImplemented) }
+                -> viewModelScope.launch { _events.emit(LoginEvent.SignUpClicked) }
         }
     }
 
@@ -113,9 +113,8 @@ class LoginViewModel(
             }
 
             is AuthResult.Failure -> {
-                failureCount++
                 _uiState.update {
-                    it.copy(status = LoginStatus.Failed(result.error, failureCount))
+                    it.copy(status = LoginStatus.Failed(result.error))
                 }
             }
         }
@@ -136,8 +135,4 @@ class LoginViewModel(
      */
     private fun LoginUiState.clearedAfterSignIn(): LoginUiState =
         if (status is LoginStatus.Succeeded) LoginUiState() else this
-
-    companion object {
-        const val SUCCESS_HOLD_MILLIS = 550L
-    }
 }

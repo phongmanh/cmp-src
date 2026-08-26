@@ -30,6 +30,7 @@ import io.ktor.http.contentType
 import io.ktor.http.encodedPath
 import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.json
+import io.ktor.util.Digest
 import kotlinx.serialization.json.Json
 
 /**
@@ -139,7 +140,7 @@ fun createHttpClient(
             }
 
             sendWithoutRequest { request ->
-                UNAUTHENTICATED_PATHS.none { request.url.encodedPath.endsWith(it) }
+                request.url.encodedPath !in UNAUTHENTICATED_PATHS
             }
         }
     }

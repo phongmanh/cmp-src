@@ -1,4 +1,4 @@
-package com.liam.cmp_src.feature.auth.presentation
+package com.liam.cmp_src.feature.auth.presentation.login
 
 import com.liam.cmp_src.feature.auth.domain.model.SocialProvider
 

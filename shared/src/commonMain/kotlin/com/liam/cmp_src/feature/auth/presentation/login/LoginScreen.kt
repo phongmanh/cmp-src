@@ -1,56 +1,26 @@
-package com.liam.cmp_src.feature.auth.presentation
+package com.liam.cmp_src.feature.auth.presentation.login
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContentPadding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.api.user.UserResponse
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import cmpsrc.shared.generated.resources.*
+import com.example.api.user.UserResponse
 import com.liam.cmp_src.core.ui.component.StaggeredEntrance
 import com.liam.cmp_src.core.ui.modifier.handCursor
 import com.liam.cmp_src.core.ui.theme.AppTheme
@@ -58,36 +28,10 @@ import com.liam.cmp_src.core.ui.theme.Dimens
 import com.liam.cmp_src.core.ui.theme.auroraColors
 import com.liam.cmp_src.feature.auth.domain.model.AuthError
 import com.liam.cmp_src.feature.auth.domain.model.SocialProvider
-import com.liam.cmp_src.feature.auth.presentation.component.ActionButtonState
-import com.liam.cmp_src.feature.auth.presentation.component.AnimatedAuthBackground
-import com.liam.cmp_src.feature.auth.presentation.component.AuthTextField
-import com.liam.cmp_src.feature.auth.presentation.component.BrandMark
-import com.liam.cmp_src.feature.auth.presentation.component.PrimaryActionButton
-import com.liam.cmp_src.feature.auth.presentation.component.SocialSignInButton
-import cmpsrc.shared.generated.resources.Res
-import cmpsrc.shared.generated.resources.cd_email_icon
-import cmpsrc.shared.generated.resources.cd_password_icon
-import cmpsrc.shared.generated.resources.ic_email
-import cmpsrc.shared.generated.resources.ic_lock
-import cmpsrc.shared.generated.resources.login_divider
-import cmpsrc.shared.generated.resources.login_email_label
-import cmpsrc.shared.generated.resources.login_email_placeholder
-import cmpsrc.shared.generated.resources.login_forgot_password
-import cmpsrc.shared.generated.resources.login_no_account
-import cmpsrc.shared.generated.resources.login_not_implemented
-import cmpsrc.shared.generated.resources.login_password_label
-import cmpsrc.shared.generated.resources.login_password_placeholder
-import cmpsrc.shared.generated.resources.login_sign_up
-import cmpsrc.shared.generated.resources.login_submit
-import cmpsrc.shared.generated.resources.login_subtitle
-import cmpsrc.shared.generated.resources.login_title
+import com.liam.cmp_src.feature.auth.presentation.component.*
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
-
-private const val SHAKE_STEP_MILLIS = 55
-private const val SHAKE_AMPLITUDE = 16f
-private const val ERROR_REVEAL_MILLIS = 220
 
 /**
  * Login screen wired to its [LoginViewModel].
@@ -98,6 +42,7 @@ private const val ERROR_REVEAL_MILLIS = 220
 @Composable
 fun LoginRoute(
     onSignedIn: (UserResponse) -> Unit,
+    onSignUp: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: LoginViewModel = koinViewModel(),
 ) {
@@ -115,6 +60,8 @@ fun LoginRoute(
                 // value it captured on first composition, which is the empty one.
                 LoginEvent.ShowNotImplemented ->
                     snackbarHostState.showSnackbar(getString(Res.string.login_not_implemented))
+
+                LoginEvent.SignUpClicked -> onSignUp()
             }
         }
     }
@@ -293,7 +240,7 @@ private fun LoginCard(
                 }
             }
 
-            ErrorBanner(error = state.error, nonce = state.errorNonce)
+            ErrorBanner(error = state.error)
 
             Spacer(Modifier.size(Dimens.spaceMd))
 
@@ -321,80 +268,6 @@ private fun LoginCard(
                 onProviderClick = { onAction(LoginAction.SocialSignInClicked(it)) },
             )
         }
-    }
-}
-
-/**
- * Slides the sign-in failure into view and shakes it.
- *
- * The shake is keyed on [nonce] rather than on the error value so that failing twice with
- * the same error still re-runs the animation — otherwise a repeated wrong password would
- * look like nothing happened.
- */
-@Composable
-private fun ErrorBanner(error: AuthError?, nonce: Int) {
-    // Hold the last error so the text does not blank out mid-exit-animation.
-    var lastError by remember { mutableStateOf(error) }
-    if (error != null) lastError = error
-
-    val shakeOffset = remember { Animatable(0f) }
-    LaunchedEffect(nonce) {
-        if (nonce == 0) return@LaunchedEffect
-        shakeOffset.snapTo(0f)
-        listOf(
-            SHAKE_AMPLITUDE,
-            -SHAKE_AMPLITUDE,
-            SHAKE_AMPLITUDE * 0.6f,
-            -SHAKE_AMPLITUDE * 0.6f,
-            0f,
-        ).forEach { target ->
-            shakeOffset.animateTo(target, tween(SHAKE_STEP_MILLIS))
-        }
-    }
-
-    AnimatedVisibility(
-        visible = error != null,
-        enter = fadeIn(tween(ERROR_REVEAL_MILLIS)) + expandVertically(tween(ERROR_REVEAL_MILLIS)),
-        exit = fadeOut(tween(ERROR_REVEAL_MILLIS)) + shrinkVertically(tween(ERROR_REVEAL_MILLIS)),
-    ) {
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = Dimens.spaceSm)
-                .graphicsLayer { translationX = shakeOffset.value },
-            shape = RoundedCornerShape(Dimens.radiusSm),
-            color = MaterialTheme.colorScheme.errorContainer,
-        ) {
-            Text(
-                text = lastError?.asMessage().orEmpty(),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onErrorContainer,
-                modifier = Modifier.padding(
-                    horizontal = Dimens.spaceMd,
-                    vertical = Dimens.spaceSm,
-                ),
-            )
-        }
-    }
-}
-
-@Composable
-private fun DividerWithLabel(label: String) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        HorizontalDivider(
-            modifier = Modifier.weight(1f),
-            color = auroraColors.glassBorder,
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = Dimens.spaceMd),
-        )
-        HorizontalDivider(
-            modifier = Modifier.weight(1f),
-            color = auroraColors.glassBorder,
-        )
     }
 }
 
@@ -463,7 +336,7 @@ private fun LoginScreenErrorPreview() {
             state = LoginUiState(
                 email = "demo@cmpsrc.dev",
                 password = "wrong-password",
-                status = LoginStatus.Failed(AuthError.InvalidCredentials, nonce = 1),
+                status = LoginStatus.Failed(AuthError.InvalidCredentials),
             ),
             onAction = {},
         )

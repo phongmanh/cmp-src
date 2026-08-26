@@ -57,7 +57,7 @@ import com.liam.cmp_src.core.ui.modifier.handCursor
 import com.liam.cmp_src.core.ui.theme.AppTheme
 import com.liam.cmp_src.core.ui.theme.Dimens
 import com.liam.cmp_src.core.ui.theme.auroraColors
-import com.liam.cmp_src.feature.auth.presentation.asLabel
+import com.liam.cmp_src.feature.auth.presentation.login.asLabel
 import com.liam.cmp_src.feature.auth.presentation.component.AnimatedAuthBackground
 import com.liam.cmp_src.feature.home.component.HomeBottomBar
 import com.liam.cmp_src.feature.home.component.HomeTopBar

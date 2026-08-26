@@ -9,10 +9,10 @@ import com.liam.cmp_src.feature.auth.domain.repository.AuthRepository
 import com.liam.cmp_src.feature.auth.domain.usecase.SignInWithEmailUseCase
 import com.liam.cmp_src.feature.auth.domain.usecase.SignInWithSocialUseCase
 import com.liam.cmp_src.feature.auth.domain.usecase.ValidateCredentialsUseCase
-import com.liam.cmp_src.feature.auth.presentation.LoginAction
-import com.liam.cmp_src.feature.auth.presentation.LoginEvent
-import com.liam.cmp_src.feature.auth.presentation.LoginStatus
-import com.liam.cmp_src.feature.auth.presentation.LoginViewModel
+import com.liam.cmp_src.feature.auth.presentation.login.LoginAction
+import com.liam.cmp_src.feature.auth.presentation.login.LoginEvent
+import com.liam.cmp_src.feature.auth.presentation.login.LoginStatus
+import com.liam.cmp_src.feature.auth.presentation.login.LoginViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -145,25 +145,6 @@ class LoginViewModelTest {
         advanceUntilIdle()
 
         assertTrue(events.none { it is LoginEvent.NavigateToHome })
-    }
-
-    @Test
-    fun repeatedFailuresIncrementTheNonceSoTheShakeReplays() = runTest(testDispatcher) {
-        val repository = FakeAuthRepository(
-            emailResult = AuthResult.Failure(AuthError.InvalidCredentials),
-        )
-        val viewModel = viewModelWith(repository)
-        viewModel.enterValidCredentials()
-
-        viewModel.onAction(LoginAction.Submit)
-        advanceUntilIdle()
-        val firstNonce = assertIs<LoginStatus.Failed>(viewModel.uiState.value.status).nonce
-
-        viewModel.onAction(LoginAction.Submit)
-        advanceUntilIdle()
-        val secondNonce = assertIs<LoginStatus.Failed>(viewModel.uiState.value.status).nonce
-
-        assertTrue(secondNonce > firstNonce)
     }
 
     @Test

@@ -42,14 +42,14 @@ class AuthApi(
         email: String,
         password: String,
         displayName: String? = null,
-    ): ApiResult<TokenResponse> = signInCall {
+    ): ApiResult<TokenResponse> = authCall {
         postJson(
             path = ApiRoutes.Auth.REGISTER,
             body = RegisterRequest(email = email, password = password, displayName = displayName),
         )
     }
 
-    suspend fun login(email: String, password: String): ApiResult<TokenResponse> = signInCall {
+    suspend fun login(email: String, password: String): ApiResult<TokenResponse> = authCall {
         postJson(ApiRoutes.Auth.LOGIN, LoginRequest(email = email, password = password))
     }
 
@@ -62,7 +62,7 @@ class AuthApi(
     suspend fun signInWithSocial(
         provider: SocialProvider,
         token: String,
-    ): ApiResult<TokenResponse> = signInCall {
+    ): ApiResult<TokenResponse> = authCall {
         postJson(ApiRoutes.Auth.SOCIAL, SocialSignInRequest(provider = provider, token = token))
     }
 
@@ -105,7 +105,7 @@ class AuthApi(
         }
 
     /** Runs a call that returns a fresh session, and adopts its tokens when it succeeds. */
-    private suspend fun signInCall(
+    private suspend fun authCall(
         request: suspend () -> HttpResponse,
     ): ApiResult<TokenResponse> {
         val result = apiCall<TokenResponse> { request() }
