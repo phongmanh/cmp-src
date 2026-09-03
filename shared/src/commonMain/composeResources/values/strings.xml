@@ -51,6 +51,18 @@
     <string name="home_tab_activity">Activity</string>
     <string name="home_tab_profile">Profile</string>
 
+    <!-- Profile screen -->
+    <string name="profile_email_verified">Verified</string>
+    <string name="profile_email_unverified">Unverified</string>
+    <string name="profile_member_since">Member since %1$s</string>
+    <string name="profile_linked_accounts">Linked accounts</string>
+    <string name="profile_no_linked_accounts">No linked accounts yet</string>
+    <string name="profile_edit">Edit profile</string>
+    <string name="profile_change_password">Change password</string>
+    <string name="profile_error_title">Couldn't load your profile</string>
+    <string name="profile_try_again">Try again</string>
+    <string name="profile_loading">Loading your profile</string>
+
     <!-- Content descriptions -->
     <string name="cd_app_logo">CMPsrc logo</string>
     <string name="cd_email_icon">Email</string>
@@ -58,6 +70,8 @@
     <string name="cd_google_logo">Google logo</string>
     <string name="cd_facebook_logo">Facebook logo</string>
     <string name="cd_notifications">Notifications</string>
+    <string name="cd_edit_icon">Edit</string>
+    <string name="cd_verified">Email verified</string>
     <string name="signup_has_account">Already has a account?</string>
     <string name="signup_submit">Sign up</string>
     <string name="signup_title">Welcome</string>

@@ -246,6 +246,43 @@ class AuthRepositoryImplTest {
         assertNull(tokenStore.tokens.value)
     }
 
+    @Test
+    fun `reading the current user returns the profile with its linked providers`() = runTest {
+        val tokenStore = InMemoryTokenStore(AuthTokens(ACCESS_TOKEN, REFRESH_TOKEN))
+        val repository = repository(tokenStore = tokenStore) {
+            respondJson(json.encodeToString(USER_RESPONSE))
+        }
+
+        val success = assertIs<AuthResult.Success>(repository.currentUser())
+        assertEquals(USER_RESPONSE, success.user)
+    }
+
+    @Test
+    fun `an expired session is not reported as a wrong email and password`() = runTest {
+        val tokenStore = InMemoryTokenStore(AuthTokens("expired-access", "revoked-refresh"))
+        val repository = repository(tokenStore = tokenStore) {
+            respondJson(
+                body = json.encodeToString(
+                    ErrorResponse(ErrorCode.UNAUTHENTICATED, "Token expired"),
+                ),
+                status = HttpStatusCode.Unauthorized,
+            )
+        }
+
+        // The user never typed a password to get wrong here — the session simply ran out.
+        val failure = assertIs<AuthResult.Failure>(repository.currentUser())
+        assertIs<AuthError.Unknown>(failure.error)
+    }
+
+    @Test
+    fun `an unreachable server is a network failure on the profile call too`() = runTest {
+        val tokenStore = InMemoryTokenStore(AuthTokens(ACCESS_TOKEN, REFRESH_TOKEN))
+        val repository = repository(tokenStore = tokenStore) { throw IOException("offline") }
+
+        val failure = assertIs<AuthResult.Failure>(repository.currentUser())
+        assertEquals(AuthError.Network, failure.error)
+    }
+
     // ---- fixtures -------------------------------------------------------------------------
 
     private fun TestScope.repository(

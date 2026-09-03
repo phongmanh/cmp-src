@@ -13,6 +13,8 @@ import kotlin.time.Clock
 class FakeAuthRepository(
     var emailResult: AuthResult = AuthResult.Success(TEST_USER),
     var socialResult: AuthResult = AuthResult.Success(TEST_USER),
+    var registerResult: AuthResult = AuthResult.Success(TEST_USER),
+    var currentUserResult: AuthResult = AuthResult.Success(TEST_USER),
 ) : AuthRepository {
 
     var lastEmail: String? = null
@@ -26,6 +28,10 @@ class FakeAuthRepository(
     var socialCallCount = 0
         private set
     var signOutCallCount = 0
+        private set
+    var registerCallCount = 0
+        private set
+    var currentUserCallCount = 0
         private set
 
     override suspend fun signInWithEmail(email: String, password: String): AuthResult {
@@ -43,6 +49,18 @@ class FakeAuthRepository(
 
     override suspend fun signOut() {
         signOutCallCount++
+    }
+
+    override suspend fun register(email: String, password: String): AuthResult {
+        registerCallCount++
+        lastEmail = email
+        lastPassword = password
+        return registerResult
+    }
+
+    override suspend fun currentUser(): AuthResult {
+        currentUserCallCount++
+        return currentUserResult
     }
 
     companion object {

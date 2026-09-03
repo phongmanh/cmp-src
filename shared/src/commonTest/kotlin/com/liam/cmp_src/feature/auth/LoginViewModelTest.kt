@@ -322,14 +322,24 @@ class LoginViewModelTest {
     }
 
     @Test
-    fun secondaryActionsEmitNotImplemented() = runTest(testDispatcher) {
+    fun forgotPasswordEmitsNotImplemented() = runTest(testDispatcher) {
         val viewModel = viewModelWith(FakeAuthRepository())
         val events = collectEvents(viewModel)
 
         viewModel.onAction(LoginAction.ForgotPasswordClicked)
+        advanceUntilIdle()
+
+        assertEquals(1, events.count { it is LoginEvent.ShowNotImplemented })
+    }
+
+    @Test
+    fun signUpAsksToNavigateRatherThanApologising() = runTest(testDispatcher) {
+        val viewModel = viewModelWith(FakeAuthRepository())
+        val events = collectEvents(viewModel)
+
         viewModel.onAction(LoginAction.SignUpClicked)
         advanceUntilIdle()
 
-        assertEquals(2, events.count { it is LoginEvent.ShowNotImplemented })
+        assertEquals<List<LoginEvent>>(listOf(LoginEvent.SignUpClicked), events)
     }
 }

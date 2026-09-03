@@ -40,6 +40,12 @@ object Dimens {
     val hairline = 1.dp
     val focusRing = 2.dp
 
+    // Loading skeletons — the placeholder bars stand in for a line of text, so their heights
+    // track the type scale they replace rather than being picked per screen.
+    val skeletonLineSm = 12.dp
+    val skeletonLineMd = 16.dp
+    val skeletonLineLg = 22.dp
+
     // App shell — top bar and bottom navigation.
     val topBarHeight = 64.dp
     val navBarHeight = 64.dp

@@ -71,6 +71,17 @@ class AuthRepositoryImpl(
         authApi.register(email = email, password = password).toAuthResult()
     }
 
+    /**
+     * Re-reads the signed-in user. Unlike the sign-in paths this needs no `withLinkedProviders`
+     * hop — `GET /users/me` is the call that fills that list in.
+     */
+    override suspend fun currentUser(): AuthResult = withContext(dispatcher) {
+        when (val result = authApi.currentUser()) {
+            is ApiResult.Success -> AuthResult.Success(result.data)
+            is ApiResult.Failure -> AuthResult.Failure(result.error.toSessionError())
+        }
+    }
+
 
     private suspend fun ApiResult<TokenResponse>.toAuthResult(
         provider: SocialProvider? = null,

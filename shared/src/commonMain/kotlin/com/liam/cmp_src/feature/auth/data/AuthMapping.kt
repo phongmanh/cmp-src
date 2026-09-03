@@ -52,6 +52,21 @@ private fun ApiError.Http.toAuthError(provider: SocialProvider?): AuthError = wh
 }
 
 /**
+ * Maps a failure on a call made *with* an existing session, such as `GET /users/me`.
+ *
+ * Deliberately not [toAuthError]: that turns a 401 into [AuthError.InvalidCredentials], which is
+ * only ever true of the email/password path. A 401 here means the session expired after the client
+ * had already failed to refresh it, and telling the user their password is wrong when they never
+ * typed one would be a lie.
+ */
+internal fun ApiError.toSessionError(): AuthError = when (this) {
+    ApiError.Network, ApiError.Timeout -> AuthError.Network
+    is ApiError.Http -> AuthError.Unknown(message)
+    is ApiError.Serialization -> AuthError.Unknown(message)
+    is ApiError.Unknown -> AuthError.Unknown(message)
+}
+
+/**
  * The contract's spelling of this provider.
  *
  * An exhaustive `when` rather than `ContractSocialProvider.valueOf(name)`: the two enums are free

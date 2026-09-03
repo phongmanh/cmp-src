@@ -108,6 +108,8 @@ data class AuroraColors(
     val googleContent: Color,
     val facebookSurface: Color,
     val facebookContent: Color,
+    val skeletonBase: Color,
+    val skeletonHighlight: Color,
 )
 
 internal val DarkAuroraColors = AuroraColors(
@@ -123,6 +125,10 @@ internal val DarkAuroraColors = AuroraColors(
     googleContent = Ink100,
     facebookSurface = White.copy(alpha = 0.10f),
     facebookContent = Ink100,
+    // A placeholder sits *inside* a glass card, so it cannot reuse the card's own fill — it
+    // would vanish into it. On a dark card the bar is a lift, and the sweep lifts further.
+    skeletonBase = White.copy(alpha = 0.07f),
+    skeletonHighlight = White.copy(alpha = 0.17f),
 )
 
 internal val LightAuroraColors = AuroraColors(
@@ -138,4 +144,8 @@ internal val LightAuroraColors = AuroraColors(
     googleContent = Color(0xFF3C4043),
     facebookSurface = White,
     facebookContent = Color(0xFF1C1E21),
+    // Inverted against the dark theme: the light card is already near-white, so the bar is a
+    // shadow on it and the sweep is the bar lightening back towards the card.
+    skeletonBase = Ink900.copy(alpha = 0.10f),
+    skeletonHighlight = Ink900.copy(alpha = 0.03f),
 )

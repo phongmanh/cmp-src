@@ -9,6 +9,7 @@ import com.liam.cmp_src.feature.auth.data.remote.AuthApi
 import com.liam.cmp_src.feature.auth.data.social.SocialAuthClient
 import com.liam.cmp_src.feature.auth.data.social.createSocialAuthClient
 import com.liam.cmp_src.feature.auth.domain.repository.AuthRepository
+import com.liam.cmp_src.feature.auth.domain.usecase.GetCurrentUserUseCase
 import com.liam.cmp_src.feature.auth.domain.usecase.SignInWithEmailUseCase
 import com.liam.cmp_src.feature.auth.domain.usecase.SignInWithSocialUseCase
 import com.liam.cmp_src.feature.auth.domain.usecase.SignOutUseCase
@@ -17,6 +18,7 @@ import com.liam.cmp_src.feature.auth.domain.usecase.ValidateCredentialsUseCase
 import com.liam.cmp_src.feature.auth.presentation.login.LoginViewModel
 import com.liam.cmp_src.feature.auth.presentation.signup.SignUpViewModel
 import com.liam.cmp_src.feature.home.HomeViewModel
+import com.liam.cmp_src.feature.profile.ProfileViewModel
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -53,8 +55,10 @@ val appModule = module {
     factoryOf(::SignOutUseCase)
     factoryOf(::ValidateCredentialsUseCase)
     factoryOf(::SignUpUseCase)
+    factoryOf(::GetCurrentUserUseCase)
 
     viewModelOf(::LoginViewModel)
     viewModelOf(::HomeViewModel)
     viewModelOf(::SignUpViewModel)
+    viewModelOf(::ProfileViewModel)
 }

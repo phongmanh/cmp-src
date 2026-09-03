@@ -15,22 +15,17 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -52,28 +47,25 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.api.user.UserResponse
+import com.liam.cmp_src.core.ui.component.GlassCard
 import com.liam.cmp_src.core.ui.component.StaggeredEntrance
-import com.liam.cmp_src.core.ui.modifier.handCursor
 import com.liam.cmp_src.core.ui.theme.AppTheme
 import com.liam.cmp_src.core.ui.theme.Dimens
 import com.liam.cmp_src.core.ui.theme.auroraColors
-import com.liam.cmp_src.feature.auth.presentation.login.asLabel
 import com.liam.cmp_src.feature.auth.presentation.component.AnimatedAuthBackground
 import com.liam.cmp_src.feature.home.component.HomeBottomBar
 import com.liam.cmp_src.feature.home.component.HomeTopBar
-import com.liam.cmp_src.feature.home.component.UserAvatar
 import com.liam.cmp_src.feature.home.component.displayLabel
 import com.liam.cmp_src.feature.home.component.sampleUser
-import com.liam.cmp_src.feature.home.component.signedInProvider
+import com.liam.cmp_src.feature.profile.ProfileRoute
+import com.liam.cmp_src.feature.profile.ProfileScreen
+import com.liam.cmp_src.feature.profile.ProfileUiState
 import com.liam.cmp_src.getPlatform
 import cmpsrc.shared.generated.resources.Res
 import cmpsrc.shared.generated.resources.home_greeting
 import cmpsrc.shared.generated.resources.home_notifications_unavailable
 import cmpsrc.shared.generated.resources.home_placeholder_body
 import cmpsrc.shared.generated.resources.home_running_on
-import cmpsrc.shared.generated.resources.home_sign_out
-import cmpsrc.shared.generated.resources.home_signed_in_as
-import cmpsrc.shared.generated.resources.home_signed_in_with
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -109,6 +101,9 @@ fun HomeRoute(
     HomeScreen(
         user = user,
         onSignOut = viewModel::onSignOut,
+        // The profile tab is a whole feature with its own ViewModel, handed in as a slot so
+        // HomeScreen itself stays stateless and Koin-free (and therefore previewable).
+        profileTab = { ProfileRoute(onLogout = onSignedOut) },
         modifier = modifier,
     )
 }
@@ -124,6 +119,7 @@ fun HomeRoute(
 fun HomeScreen(
     user: UserResponse,
     onSignOut: () -> Unit,
+    profileTab: @Composable () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var isVisible by remember { mutableStateOf(false) }
@@ -190,7 +186,7 @@ fun HomeScreen(
                     tab = tab,
                     user = user,
                     isVisible = isVisible,
-                    onSignOut = onSignOut,
+                    profileTab = profileTab,
                     contentPadding = contentPadding,
                 )
             }
@@ -217,7 +213,7 @@ private fun HomeTabContent(
     tab: HomeTab,
     user: UserResponse,
     isVisible: Boolean,
-    onSignOut: () -> Unit,
+    profileTab: @Composable () -> Unit,
     contentPadding: PaddingValues,
     modifier: Modifier = Modifier,
 ) {
@@ -235,11 +231,7 @@ private fun HomeTabContent(
         ) {
             when (tab) {
                 HomeTab.HOME -> HomeOverview(user = user, isVisible = isVisible)
-                HomeTab.PROFILE -> ProfilePanel(
-                    user = user,
-                    isVisible = isVisible,
-                    onSignOut = onSignOut,
-                )
+                HomeTab.PROFILE -> profileTab()
 
                 HomeTab.SEARCH, HomeTab.ACTIVITY -> TabPlaceholder(
                     tab = tab,
@@ -275,78 +267,6 @@ private fun HomeOverview(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )
-        }
-    }
-}
-
-/** The account tab: the signed-in identity, and the way back out of it. */
-@Composable
-private fun ProfilePanel(
-    user: UserResponse,
-    isVisible: Boolean,
-    onSignOut: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val glass = auroraColors
-
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        StaggeredEntrance(visible = isVisible, index = 1) {
-            GlassCard {
-                UserAvatar(
-                    user = user,
-                    size = Dimens.avatarLg,
-                    textStyle = MaterialTheme.typography.headlineMedium,
-                )
-                Spacer(Modifier.size(Dimens.spaceLg))
-                Text(
-                    text = user.displayLabel(),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    textAlign = TextAlign.Center,
-                )
-                user.email?.let { email ->
-                    Text(
-                        text = stringResource(Res.string.home_signed_in_as, email),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center,
-                    )
-                }
-                user.signedInProvider()?.let { provider ->
-                    Text(
-                        text = stringResource(Res.string.home_signed_in_with, provider.asLabel()),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center,
-                    )
-                }
-            }
-        }
-
-        Spacer(Modifier.size(Dimens.spaceLg))
-
-        StaggeredEntrance(visible = isVisible, index = 2) {
-            OutlinedButton(
-                onClick = onSignOut,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(Dimens.buttonHeight)
-                    .handCursor(),
-                shape = RoundedCornerShape(Dimens.radiusMd),
-                // The default outline token is far too dark to read against the
-                // aurora backdrop; match the glass treatment used on the login card.
-                border = BorderStroke(Dimens.hairline, glass.glassBorder),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    containerColor = glass.glassFill,
-                    contentColor = MaterialTheme.colorScheme.onBackground,
-                ),
-            ) {
-                Text(stringResource(Res.string.home_sign_out))
-            }
         }
     }
 }
@@ -395,29 +315,6 @@ private fun TabPlaceholder(
     }
 }
 
-/** The one card treatment every tab's content sits in. */
-@Composable
-private fun GlassCard(
-    modifier: Modifier = Modifier,
-    content: @Composable ColumnScope.() -> Unit,
-) {
-    val glass = auroraColors
-
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(Dimens.radiusXl),
-        color = glass.glassFill,
-        border = BorderStroke(Dimens.hairline, glass.glassBorder),
-    ) {
-        Column(
-            modifier = Modifier.padding(Dimens.spaceXl),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(Dimens.spaceXs),
-            content = content,
-        )
-    }
-}
-
 @Preview
 @Composable
 private fun HomeScreenPreview() {
@@ -425,6 +322,12 @@ private fun HomeScreenPreview() {
         HomeScreen(
             user = sampleUser(),
             onSignOut = {},
+            profileTab = {
+                ProfileScreen(
+                    state = ProfileUiState.Success(sampleUser()),
+                    onAction = {},
+                )
+            },
         )
     }
 }
