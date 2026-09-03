@@ -31,7 +31,7 @@ enum class ApiEnvironment {
          * backend; nothing else needs to change. Anything that must not follow the switch — a
          * test, a staging build — passes its own environment or base URL to [ApiConfig] instead.
          */
-        val ACTIVE: ApiEnvironment = LOCAL
+        val ACTIVE: ApiEnvironment = PRODUCTION
     }
 }
 
@@ -73,7 +73,7 @@ data class ApiConfig(
          * Transport Security both permit cleartext to the local host alone, so an `http://` URL
          * here fails on device rather than falling back.
          */
-        const val PRODUCTION_BASE_URL = "https://api.example.com"
+        const val PRODUCTION_BASE_URL = "https://cmp-backend-lake.vercel.app/"
     }
 }
 

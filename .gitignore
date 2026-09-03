@@ -45,3 +45,5 @@ Pods/
 .DS_Store?
 ._*
 Thumbs.db
+.vercel
+.env*
