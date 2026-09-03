@@ -23,6 +23,34 @@ if [[ ! -f "$DIST/index.html" ]]; then
     exit 1
 fi
 
+# The CLI signs in with a short-lived OAuth access token and only renews it while running an
+# authenticated command. A deploy started on a token that went stale since the last one dies with
+# "Error: Not authorized" — after the upload, with the renewal landing a moment too late to be of
+# any use. So spend one cheap authenticated call up front and let it do the renewing.
+ensure_signed_in() {
+    # Credentials supplied explicitly are the caller's to manage, and `vercel login` would not
+    # touch them anyway.
+    if [[ -n "${VERCEL_TOKEN:-}" || " $* " == *" --token"* ]]; then
+        return
+    fi
+
+    if vercel whoami >/dev/null 2>&1; then
+        return
+    fi
+
+    # Dead rather than merely stale: no refresh token left to spend, so this needs a browser.
+    if [[ ! -t 0 ]]; then
+        echo "Vercel session has expired, and there is no terminal to sign in from." >&2
+        echo "Run: vercel login" >&2
+        exit 1
+    fi
+
+    echo "Vercel session has expired — signing in." >&2
+    vercel login
+}
+
+ensure_signed_in "$@"
+
 # Stage rather than deploy $DIST in place: the source maps have to go (they expose the Kotlin
 # sources), and vercel.json has to sit at the root of what gets uploaded.
 rm -rf "$STAGE"

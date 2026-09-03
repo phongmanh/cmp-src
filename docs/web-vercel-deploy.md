@@ -44,6 +44,14 @@ cannot delete it; the script copies it into the staged directory each run. First
 vercel link --yes --project cmp-src
 ```
 
+Credentials look after themselves. The CLI signs in with a short-lived OAuth access token and only
+renews it while running an authenticated command, so a deploy started on a token that went stale
+since the last one fails with `Error: Not authorized` — having renewed the token a moment too late
+to use it. The script spends one `vercel whoami` before staging to force that renewal early. A
+session that is dead rather than merely stale has no refresh token left to spend, so it falls back
+to `vercel login`, or exits telling you to run it when there is no terminal to sign in from.
+`VERCEL_TOKEN` in the environment or `--token` on the command line skips the check entirely.
+
 ## 3. `webApp/vercel/vercel.json`
 
 Two header rules, mirroring `nginx.conf`:
