@@ -28,6 +28,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,12 +51,14 @@ import com.liam.cmp_src.feature.auth.presentation.component.ActionButtonState
 import com.liam.cmp_src.feature.auth.presentation.component.PrimaryActionButton
 import com.liam.cmp_src.feature.auth.presentation.login.asMessage
 import com.liam.cmp_src.feature.home.component.sampleUser
+import com.liam.cmp_src.feature.profile.changepassword.ChangePasswordDialog
 import com.liam.cmp_src.feature.profile.component.ProfileActionDivider
 import com.liam.cmp_src.feature.profile.component.ProfileActionRow
 import com.liam.cmp_src.feature.profile.component.ProfileHeader
 import com.liam.cmp_src.feature.profile.component.ProfileLinkedAccounts
 import com.liam.cmp_src.feature.profile.component.ProfileSkeleton
 import cmpsrc.shared.generated.resources.Res
+import cmpsrc.shared.generated.resources.change_password_success
 import cmpsrc.shared.generated.resources.home_sign_out
 import cmpsrc.shared.generated.resources.ic_edit
 import cmpsrc.shared.generated.resources.ic_lock
@@ -63,6 +67,7 @@ import cmpsrc.shared.generated.resources.profile_change_password
 import cmpsrc.shared.generated.resources.profile_edit
 import cmpsrc.shared.generated.resources.profile_error_title
 import cmpsrc.shared.generated.resources.profile_try_again
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -84,11 +89,18 @@ fun ProfileRoute(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    // Whether the dialog is up is screen state, not a back-stack entry, so it lives here and
+    // survives rotation. The dialog is hosted by the route rather than by ProfileScreen, which
+    // keeps that composable Koin-free and previewable.
+    var isChangingPassword by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
             when (event) {
                 ProfileEvent.GoToLogin -> onLogout()
+                ProfileEvent.OpenChangePassword -> isChangingPassword = true
                 // getString rather than stringResource: read here, a composable-scoped
                 // resource would have been captured before the event arrived.
                 ProfileEvent.ShowNotImplemented ->
@@ -103,6 +115,20 @@ fun ProfileRoute(
         snackbarHostState = snackbarHostState,
         modifier = modifier,
     )
+
+    if (isChangingPassword) {
+        ChangePasswordDialog(
+            onDismiss = { isChangingPassword = false },
+            // The session outlives the change — the server keeps this device signed in — so the
+            // profile stays exactly as it was and only the confirmation is new.
+            onChanged = {
+                isChangingPassword = false
+                scope.launch {
+                    snackbarHostState.showSnackbar(getString(Res.string.change_password_success))
+                }
+            },
+        )
+    }
 }
 
 /**

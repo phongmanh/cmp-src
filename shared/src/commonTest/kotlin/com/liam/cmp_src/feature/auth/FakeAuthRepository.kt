@@ -15,6 +15,7 @@ class FakeAuthRepository(
     var socialResult: AuthResult = AuthResult.Success(TEST_USER),
     var registerResult: AuthResult = AuthResult.Success(TEST_USER),
     var currentUserResult: AuthResult = AuthResult.Success(TEST_USER),
+    var changePasswordResult: AuthResult = AuthResult.Success(TEST_USER),
 ) : AuthRepository {
 
     var lastEmail: String? = null
@@ -32,6 +33,12 @@ class FakeAuthRepository(
     var registerCallCount = 0
         private set
     var currentUserCallCount = 0
+        private set
+    var changePasswordCallCount = 0
+        private set
+    var lastCurrentPassword: String? = null
+        private set
+    var lastNewPassword: String? = null
         private set
 
     override suspend fun signInWithEmail(email: String, password: String): AuthResult {
@@ -61,6 +68,13 @@ class FakeAuthRepository(
     override suspend fun currentUser(): AuthResult {
         currentUserCallCount++
         return currentUserResult
+    }
+
+    override suspend fun changePassword(currentPassword: String, newPassword: String): AuthResult {
+        changePasswordCallCount++
+        lastCurrentPassword = currentPassword
+        lastNewPassword = newPassword
+        return changePasswordResult
     }
 
     companion object {

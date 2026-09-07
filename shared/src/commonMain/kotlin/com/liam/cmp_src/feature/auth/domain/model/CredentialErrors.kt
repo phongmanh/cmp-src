@@ -10,6 +10,18 @@ sealed interface EmailError {
 sealed interface PasswordError {
     data object Blank : PasswordError
     data class TooShort(val minLength: Int) : PasswordError
+
+    /**
+     * Longer than the server will accept. [maxLength] is in characters; the byte ceiling BCrypt
+     * imposes is reported the same way, because "shorten it" is the only remedy either way.
+     */
+    data class TooLong(val maxLength: Int) : PasswordError
+
+    /** A new password identical to the one it was meant to replace. */
+    data object SameAsCurrent : PasswordError
+
+    /** A confirmation that does not match the new password above it. */
+    data object Mismatch : PasswordError
 }
 
 /**
@@ -24,5 +36,25 @@ data class CredentialErrors(
 
     companion object {
         val NONE = CredentialErrors()
+    }
+}
+
+/**
+ * The same idea for the change-password form, which has three password fields and no email.
+ *
+ * Separate from [CredentialErrors] rather than reusing its single `password` slot: one slot for
+ * three inputs would render the same message under all of them, and the user could not tell which
+ * field it was about.
+ */
+data class ChangePasswordErrors(
+    val currentPassword: PasswordError? = null,
+    val newPassword: PasswordError? = null,
+    val confirmPassword: PasswordError? = null,
+) {
+    val hasErrors: Boolean
+        get() = currentPassword != null || newPassword != null || confirmPassword != null
+
+    companion object {
+        val NONE = ChangePasswordErrors()
     }
 }

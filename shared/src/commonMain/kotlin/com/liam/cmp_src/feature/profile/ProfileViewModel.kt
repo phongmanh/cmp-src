@@ -41,8 +41,11 @@ class ProfileViewModel(
         when (action) {
             ProfileAction.Retry -> load()
             ProfileAction.Logout -> logout()
-            ProfileAction.EditProfile,
-            ProfileAction.ChangePassword,
+
+            ProfileAction.ChangePassword
+                -> viewModelScope.launch { _events.emit(ProfileEvent.OpenChangePassword) }
+
+            ProfileAction.EditProfile
                 -> viewModelScope.launch { _events.emit(ProfileEvent.ShowNotImplemented) }
         }
     }

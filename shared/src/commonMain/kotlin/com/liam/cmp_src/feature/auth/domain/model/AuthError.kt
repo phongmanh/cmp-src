@@ -11,6 +11,21 @@ sealed interface AuthError {
     /** Email/password pair did not match an account. */
     data object InvalidCredentials : AuthError
 
+    /**
+     * The current password given to a change-password attempt was wrong.
+     *
+     * Distinct from [InvalidCredentials]: the caller is already signed in and never typed an
+     * email, so telling them "that email and password don't match" would name a field they did
+     * not fill in.
+     */
+    data object WrongPassword : AuthError
+
+    /**
+     * The account signs in through a provider only, so it has no password to replace. Reaching a
+     * password from here needs a set-password flow, which this build does not have.
+     */
+    data object PasswordNotSet : AuthError
+
     /** Request could not reach the auth backend. */
     data object Network : AuthError
 

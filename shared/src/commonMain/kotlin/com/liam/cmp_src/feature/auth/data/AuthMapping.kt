@@ -76,3 +76,32 @@ internal fun SocialProvider.toContract(): ContractSocialProvider = when (this) {
     SocialProvider.GOOGLE -> ContractSocialProvider.GOOGLE
     SocialProvider.FACEBOOK -> ContractSocialProvider.FACEBOOK
 }
+
+/**
+ * Maps a failure from `POST /auth/password`.
+ *
+ * Deliberately neither [toAuthError] nor [toSessionError]. The call is made with a live session
+ * *and* a typed password, so a 401 means "that is not your current password" — not the sign-in
+ * path's [AuthError.InvalidCredentials], which names an email the user never entered here, and not
+ * an expired session.
+ *
+ * Note that a 401 on this path has already cost a token refresh: `/auth/password` is an
+ * authenticated route, so the client's `Auth` plugin spends the refresh token and replays the
+ * request before the second 401 reaches this function. That is the right trade — the same status
+ * also covers a genuinely stale access token, and the server cannot tell the two apart by code.
+ *
+ * Nothing carries the server's own text into the UI: `ErrorResponse.message` is written in English
+ * for an API consumer, so an unclassified failure resolves to the app's generic wording instead.
+ */
+internal fun ApiError.toChangePasswordError(): AuthError = when (this) {
+    ApiError.Network, ApiError.Timeout -> AuthError.Network
+    is ApiError.Http -> when {
+        code == ErrorCode.PASSWORD_NOT_SET -> AuthError.PasswordNotSet
+        code == ErrorCode.UNAUTHENTICATED -> AuthError.WrongPassword
+        status == HttpStatusCode.Unauthorized.value -> AuthError.WrongPassword
+        else -> AuthError.Unknown()
+    }
+
+    is ApiError.Serialization -> AuthError.Unknown()
+    is ApiError.Unknown -> AuthError.Unknown()
+}

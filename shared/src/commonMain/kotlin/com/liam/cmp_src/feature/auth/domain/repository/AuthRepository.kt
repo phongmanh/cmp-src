@@ -32,4 +32,16 @@ interface AuthRepository {
      * has to be able to say so.
      */
     suspend fun currentUser(): AuthResult
+
+    /**
+     * Replaces the signed-in user's password.
+     *
+     * [currentPassword] is required on top of the access token, so a device somebody walked up to
+     * cannot be used to lock its owner out.
+     *
+     * Succeeding ends every *other* session and leaves this one open on a fresh token pair, which
+     * the data layer adopts. The returned [AuthResult.Success] therefore carries a user whose
+     * `linkedProviders` is empty, as it is in any token response — nothing reads it on this path.
+     */
+    suspend fun changePassword(currentPassword: String, newPassword: String): AuthResult
 }

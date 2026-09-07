@@ -1,6 +1,7 @@
 package com.liam.cmp_src.feature.auth.data.remote
 
 import com.example.api.ApiRoutes
+import com.example.api.auth.ChangePasswordRequest
 import com.example.api.auth.LoginRequest
 import com.example.api.auth.RegisterRequest
 import com.example.api.auth.SocialProvider
@@ -88,6 +89,26 @@ class AuthApi(
         tokenStore.clear()
         client.invalidateAuthCache()
         return result
+    }
+
+    /**
+     * Replaces the signed-in user's password, and adopts the pair the server hands back.
+     *
+     * Succeeding revokes every refresh token the account had, including the one this call was made
+     * with — so going through [authCall] is not an optimisation here, it is what keeps the device
+     * signed in. Skipping the save would leave the client holding a token the server just killed.
+     */
+    suspend fun changePassword(
+        currentPassword: String,
+        newPassword: String,
+    ): ApiResult<TokenResponse> = authCall {
+        postJson(
+            path = ApiRoutes.Auth.PASSWORD,
+            body = ChangePasswordRequest(
+                currentPassword = currentPassword,
+                newPassword = newPassword,
+            ),
+        )
     }
 
     /**

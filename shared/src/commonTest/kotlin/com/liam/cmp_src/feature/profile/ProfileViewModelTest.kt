@@ -138,14 +138,25 @@ class ProfileViewModelTest {
 
         viewModel.onAction(ProfileAction.EditProfile)
         advanceUntilIdle()
+
+        assertEquals<List<ProfileEvent>>(listOf(ProfileEvent.ShowNotImplemented), events)
+        // The profile itself is untouched by an action that does nothing.
+        assertIs<ProfileUiState.Success>(viewModel.state.value)
+    }
+
+    /** The dialog is the route's business; the ViewModel only asks for it to be put up. */
+    @Test
+    fun changingPasswordAsksForTheDialogAndLeavesTheProfileAlone() = runTest(testDispatcher) {
+        val repository = FakeAuthRepository()
+        val viewModel = viewModelWith(repository)
+        val events = collectEvents(viewModel)
+        advanceUntilIdle()
+
         viewModel.onAction(ProfileAction.ChangePassword)
         advanceUntilIdle()
 
-        assertEquals<List<ProfileEvent>>(
-            listOf(ProfileEvent.ShowNotImplemented, ProfileEvent.ShowNotImplemented),
-            events,
-        )
-        // The profile itself is untouched by an action that does nothing.
+        assertEquals<List<ProfileEvent>>(listOf(ProfileEvent.OpenChangePassword), events)
         assertIs<ProfileUiState.Success>(viewModel.state.value)
+        assertEquals(0, repository.changePasswordCallCount)
     }
 }

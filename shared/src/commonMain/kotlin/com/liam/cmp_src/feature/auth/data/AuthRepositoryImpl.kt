@@ -45,9 +45,9 @@ class AuthRepositoryImpl(
             is SocialCredential.Denied -> AuthResult.Failure(credential.error)
 
             is SocialCredential.Granted -> authApi.signInWithSocial(
-                    provider = provider.toContract(),
-                    token = credential.token
-                ).toAuthResult(provider)
+                provider = provider.toContract(),
+                token = credential.token
+            ).toAuthResult(provider)
         }
     }
 
@@ -82,6 +82,25 @@ class AuthRepositoryImpl(
         }
     }
 
+    /**
+     * Unlike the sign-in paths this takes no `withLinkedProviders()` hop: the caller is changing a
+     * password, not reading a profile, so the extra `GET /users/me` would buy nothing.
+     *
+     * Failures map through [toChangePasswordError] rather than [toAuthError] — a 401 here means the
+     * current password was wrong, not that an email and password failed to match.
+     */
+    override suspend fun changePassword(
+        currentPassword: String,
+        newPassword: String,
+    ): AuthResult = withContext(dispatcher) {
+        when (
+            val result =
+                authApi.changePassword(currentPassword = currentPassword, newPassword = newPassword)
+        ) {
+            is ApiResult.Success -> AuthResult.Success(result.data.user)
+            is ApiResult.Failure -> AuthResult.Failure(result.error.toChangePasswordError())
+        }
+    }
 
     private suspend fun ApiResult<TokenResponse>.toAuthResult(
         provider: SocialProvider? = null,

@@ -9,13 +9,18 @@ import cmpsrc.shared.generated.resources.Res
 import cmpsrc.shared.generated.resources.error_cancelled
 import cmpsrc.shared.generated.resources.error_invalid_credentials
 import cmpsrc.shared.generated.resources.error_network
+import cmpsrc.shared.generated.resources.error_password_not_set
 import cmpsrc.shared.generated.resources.error_provider_unavailable
 import cmpsrc.shared.generated.resources.error_unknown
+import cmpsrc.shared.generated.resources.error_wrong_current_password
 import cmpsrc.shared.generated.resources.login_facebook
 import cmpsrc.shared.generated.resources.login_google
 import cmpsrc.shared.generated.resources.validation_email_blank
 import cmpsrc.shared.generated.resources.validation_email_malformed
 import cmpsrc.shared.generated.resources.validation_password_blank
+import cmpsrc.shared.generated.resources.validation_password_mismatch
+import cmpsrc.shared.generated.resources.validation_password_same_as_current
+import cmpsrc.shared.generated.resources.validation_password_too_long
 import cmpsrc.shared.generated.resources.validation_password_too_short
 import org.jetbrains.compose.resources.stringResource
 
@@ -29,6 +34,8 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun AuthError.asMessage(): String = when (this) {
     AuthError.InvalidCredentials -> stringResource(Res.string.error_invalid_credentials)
+    AuthError.WrongPassword -> stringResource(Res.string.error_wrong_current_password)
+    AuthError.PasswordNotSet -> stringResource(Res.string.error_password_not_set)
     AuthError.Network -> stringResource(Res.string.error_network)
     AuthError.Cancelled -> stringResource(Res.string.error_cancelled)
     is AuthError.ProviderUnavailable ->
@@ -47,6 +54,9 @@ fun EmailError.asMessage(): String = when (this) {
 fun PasswordError.asMessage(): String = when (this) {
     PasswordError.Blank -> stringResource(Res.string.validation_password_blank)
     is PasswordError.TooShort -> stringResource(Res.string.validation_password_too_short, minLength)
+    is PasswordError.TooLong -> stringResource(Res.string.validation_password_too_long, maxLength)
+    PasswordError.SameAsCurrent -> stringResource(Res.string.validation_password_same_as_current)
+    PasswordError.Mismatch -> stringResource(Res.string.validation_password_mismatch)
 }
 
 @Composable
