@@ -101,7 +101,7 @@ class AuthRepositoryImplTest {
         // The tokens are already stored, so the session is open — the response's own copy of the
         // user stands in for the one the profile call would have returned.
         assertEquals(TOKEN_RESPONSE.user, success.user)
-        assertEquals(AuthTokens(ACCESS_TOKEN, REFRESH_TOKEN), tokenStore.tokens.value)
+        assertEquals(AuthTokens(ACCESS_TOKEN, REFRESH_TOKEN), tokenStore.current())
     }
 
     @Test
@@ -224,7 +224,7 @@ class AuthRepositoryImplTest {
 
         repository.signOut()
 
-        assertNull(tokenStore.tokens.value)
+        assertNull(tokenStore.current())
     }
 
     @Test
@@ -243,7 +243,7 @@ class AuthRepositoryImplTest {
             loggedOutWith,
             "the session being ended has to identify itself",
         )
-        assertNull(tokenStore.tokens.value)
+        assertNull(tokenStore.current())
     }
 
     @Test

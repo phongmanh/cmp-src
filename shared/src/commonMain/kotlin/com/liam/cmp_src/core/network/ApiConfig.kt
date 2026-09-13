@@ -73,7 +73,7 @@ data class ApiConfig(
          * Transport Security both permit cleartext to the local host alone, so an `http://` URL
          * here fails on device rather than falling back.
          */
-        const val PRODUCTION_BASE_URL = "https://cmp-backend-lake.vercel.app/"
+        const val PRODUCTION_BASE_URL = "https://cmp-backend-lake.vercel.app"
     }
 }
 

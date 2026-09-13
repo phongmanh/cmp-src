@@ -6,6 +6,10 @@ plugins {
 
 dependencies {
     implementation(projects.shared)
+
+    // Only so `main` can hand FileKit an application id before the window opens — see main.kt.
+    // Every other target initialises itself.
+    implementation(libs.filekit.dialogs.compose)
 }
 
 compose.desktop {

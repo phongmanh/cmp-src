@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Backup and transfer rules for API 31 and up. Same reasoning as backup_rules.xml.
+
+  device-transfer matters on its own: a direct device-to-device migration copies the database but
+  not the keystore key, so without this the new device would start with an unreadable session.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="database" path="app.db" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="database" path="app.db" />
+    </device-transfer>
+</data-extraction-rules>

@@ -46,7 +46,9 @@ class ProfileViewModel(
                 -> viewModelScope.launch { _events.emit(ProfileEvent.OpenChangePassword) }
 
             ProfileAction.EditProfile
-                -> viewModelScope.launch { _events.emit(ProfileEvent.ShowNotImplemented) }
+                -> viewModelScope.launch { _events.emit(ProfileEvent.OpenEditProfile) }
+
+            is ProfileAction.UserUpdated -> _state.value = ProfileUiState.Success(action.user)
         }
     }
 

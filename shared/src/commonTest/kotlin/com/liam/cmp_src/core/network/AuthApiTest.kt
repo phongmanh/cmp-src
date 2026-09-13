@@ -65,7 +65,7 @@ class AuthApiTest {
 
         assertIs<ApiResult.Success<TokenResponse>>(result)
         assertEquals(TOKEN_RESPONSE.accessToken, result.data.accessToken)
-        assertEquals(AuthTokens(ACCESS_TOKEN, REFRESH_TOKEN), tokenStore.tokens.value)
+        assertEquals(AuthTokens(ACCESS_TOKEN, REFRESH_TOKEN), tokenStore.current())
     }
 
     @Test
@@ -86,7 +86,7 @@ class AuthApiTest {
         val error = assertIs<ApiError.Http>(failure.error)
         assertEquals(HttpStatusCode.Unauthorized.value, error.status)
         assertEquals(ErrorCode.UNAUTHENTICATED, error.code)
-        assertNull(tokenStore.tokens.value, "a failed sign-in must not open a session")
+        assertNull(tokenStore.current(), "a failed sign-in must not open a session")
     }
 
     @Test
@@ -166,7 +166,7 @@ class AuthApiTest {
             paths,
             "the rejected call should be retried once, after a refresh",
         )
-        assertEquals(AuthTokens(ACCESS_TOKEN, REFRESH_TOKEN), tokenStore.tokens.value)
+        assertEquals(AuthTokens(ACCESS_TOKEN, REFRESH_TOKEN), tokenStore.current())
     }
 
     @Test
@@ -183,7 +183,7 @@ class AuthApiTest {
 
         assertIs<ApiError.Http>(failure.error)
         assertEquals(1, refreshAttempts)
-        assertNull(tokenStore.tokens.value, "a spent refresh token must not be kept")
+        assertNull(tokenStore.current(), "a spent refresh token must not be kept")
     }
 
     @Test
@@ -233,7 +233,7 @@ class AuthApiTest {
         val result = api.logout()
 
         assertTrue(result is ApiResult.Failure)
-        assertNull(tokenStore.tokens.value)
+        assertNull(tokenStore.current())
     }
 
     // ---- fixtures -------------------------------------------------------------------------

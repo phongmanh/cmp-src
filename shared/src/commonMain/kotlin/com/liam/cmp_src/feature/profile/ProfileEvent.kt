@@ -8,6 +8,6 @@ sealed interface ProfileEvent {
     /** Put the change-password dialog on screen. */
     data object OpenChangePassword : ProfileEvent
 
-    /** The user tapped something this build does not implement yet. */
-    data object ShowNotImplemented : ProfileEvent
+    /** Put the edit-profile dialog on screen. */
+    data object OpenEditProfile : ProfileEvent
 }

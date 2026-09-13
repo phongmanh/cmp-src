@@ -1,7 +1,7 @@
 package com.liam.cmp_src.core.network
 
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /** The credential pair a `TokenResponse` hands back, kept apart from the user it came with. */
@@ -13,15 +13,25 @@ data class AuthTokens(
 /**
  * Holds the tokens the Ktor `Auth` plugin attaches to requests and refreshes when they expire.
  *
- * An interface because *where* the tokens live is a platform decision — EncryptedSharedPreferences
- * on Android, the Keychain on iOS — while everything above this only needs to read and write them.
- * [InMemoryTokenStore] is the default and deliberately forgets everything on restart: it keeps the
- * network layer honest without pretending to be secure storage.
+ * An interface because *where* the tokens live is a platform decision — a SQLite file on Android,
+ * iOS and desktop, memory in the browser — while everything above this only needs to read and
+ * write them. `RoomTokenStore` is the persistent implementation; [InMemoryTokenStore] is the
+ * fallback for targets without a SQLite driver, and for tests.
  */
 interface TokenStore {
 
-    /** Emits the current tokens, or `null` while signed out. */
-    val tokens: StateFlow<AuthTokens?>
+    /** Emits the stored credentials and re-emits on every change. `null` means signed out. */
+    val tokens: Flow<AuthTokens?>
+
+    /**
+     * Reads the credentials once, now.
+     *
+     * Suspending rather than a `StateFlow.value` read: persistent storage cannot answer inline,
+     * and a `StateFlow` seeded with `null` would report a signed-in user as signed out until its
+     * first emission landed. The `Auth` plugin's `loadTokens` is itself suspending, so the one
+     * caller that has to be right on the very first request can simply wait here.
+     */
+    suspend fun current(): AuthTokens?
 
     suspend fun save(tokens: AuthTokens)
 
@@ -34,14 +44,16 @@ interface TokenStore {
  * Backed by a [MutableStateFlow] so concurrent reads and writes from the `Auth` plugin's refresh
  * path are safe on every target without a platform lock.
  *
- * Not persistent, and not secure storage. Replace it before shipping — a real implementation is a
- * new [TokenStore] bound in the DI module, and nothing else changes.
+ * Not persistent, and not secure storage. It is what the browser targets get, because
+ * `androidx.sqlite:sqlite-bundled` publishes no js/wasmJs variants.
  */
 class InMemoryTokenStore(initial: AuthTokens? = null) : TokenStore {
 
     private val state = MutableStateFlow(initial)
 
-    override val tokens: StateFlow<AuthTokens?> = state.asStateFlow()
+    override val tokens: Flow<AuthTokens?> = state.asStateFlow()
+
+    override suspend fun current(): AuthTokens? = state.value
 
     override suspend fun save(tokens: AuthTokens) {
         state.value = tokens

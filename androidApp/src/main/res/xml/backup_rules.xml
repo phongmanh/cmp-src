@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Cloud backup rules for API 23 to 30.
+
+  The token database is excluded because the key that decrypts it never leaves the device: the
+  Android keystore does not back keys up. Restoring the file onto new hardware would bring back
+  ciphertext nothing can read, so excluding it turns a confusing post-restore state into a clean
+  signed-out one. A credentials file has no business in a cloud backup regardless.
+-->
+<full-backup-content>
+    <exclude domain="database" path="app.db" />
+</full-backup-content>

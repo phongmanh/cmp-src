@@ -14,11 +14,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import coil3.compose.AsyncImage
 import com.example.api.user.UserResponse
 import com.liam.cmp_src.core.ui.theme.AppTheme
 import com.liam.cmp_src.core.ui.theme.Dimens
@@ -26,11 +28,12 @@ import com.liam.cmp_src.core.ui.theme.Dimens
 private val WHITESPACE = Regex("\\s+")
 
 /**
- * The user's initials in a gradient circle.
+ * The user's picture, over their initials in a gradient circle.
  *
- * [UserResponse.avatarUrl] is deliberately ignored: nothing in this build loads remote images, and
- * initials render identically on all five targets with no new dependency. Swapping in a real
- * image later is a change inside this one composable.
+ * The initials are always drawn and the image is laid over them, rather than being swapped in as a
+ * Coil placeholder. That way the circle is never empty: an account with no [UserResponse.avatarUrl]
+ * gets the initials, and so does one whose picture is still loading or failed to load, with no
+ * second code path to keep in step.
  *
  * Decorative by default — the top bar shows the user's name right beside it, so announcing the
  * initials again would only repeat what the reader has already heard.
@@ -64,6 +67,19 @@ fun UserAvatar(
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onPrimary,
         )
+
+        user.avatarUrl?.takeIf { it.isNotBlank() }?.let { avatarUrl ->
+            AsyncImage(
+                model = avatarUrl,
+                // The Box already clears its semantics; a description here would be announced
+                // through it and repeat the name sitting next to the circle.
+                contentDescription = null,
+                modifier = Modifier.matchParentSize(),
+                // An uploaded avatar arrives square, but a provider's can be any shape, and a
+                // letterboxed face inside a circle reads as a mistake.
+                contentScale = ContentScale.Crop,
+            )
+        }
     }
 }
 

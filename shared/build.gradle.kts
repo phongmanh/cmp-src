@@ -1,8 +1,11 @@
+import androidx.room3.gradle.RoomExtension
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
     id("cmpsrc.cmp.library")
     id("cmpsrc.cmp.koin")
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.androidx.room3)
 }
 
 kotlin {
@@ -42,12 +45,15 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.ktor.client.okhttp)
+            implementation(libs.androidx.sqlite.bundled)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
+            implementation(libs.androidx.sqlite.bundled)
         }
         jvmMain.dependencies {
             implementation(libs.ktor.client.okhttp)
+            implementation(libs.androidx.sqlite.bundled)
         }
         // One engine for both browser targets: `ktor-client-js` publishes js and wasmJs
         // variants, so the engine actual lives in webMain rather than being duplicated.
@@ -75,6 +81,10 @@ kotlin {
             implementation(libs.ktor.serialization.json)
             implementation(libs.ktor.client.logging)
             implementation(libs.ktor.client.auth)
+            implementation(libs.androidx.room3.runtime)
+            implementation(libs.coil.compose)
+            implementation(libs.coil.network.ktor3)
+            implementation(libs.filekit.dialogs.compose)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -92,6 +102,26 @@ configurations.all {
     resolutionStrategy.cacheDynamicVersionsFor(0, "seconds")
 }
 
+// The Room plugin registers its extension only once it has found a KSP-processed target, so the
+// generated `room { }` accessor doesn't exist at script-compile time — configure it by type.
+extensions.configure<RoomExtension> {
+    schemaDirectory("$projectDir/schemas")
+}
+
 dependencies {
     androidRuntimeClasspath(libs.compose.uiTooling)
+
+    // KSP has no cross-target configuration: the Room compiler is added per target, and the
+    // list has to track `kotlin { }` above — a target added there without a line here compiles
+    // its @Database annotations to nothing.
+    listOf(
+        "kspAndroid",
+        "kspJvm",
+        "kspJs",
+        "kspWasmJs",
+        "kspIosArm64",
+        "kspIosSimulatorArm64",
+    ).forEach { configuration ->
+        add(configuration, libs.androidx.room3.compiler)
+    }
 }

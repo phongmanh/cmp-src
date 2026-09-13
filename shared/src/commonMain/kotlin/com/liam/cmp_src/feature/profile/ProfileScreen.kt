@@ -57,16 +57,22 @@ import com.liam.cmp_src.feature.profile.component.ProfileActionRow
 import com.liam.cmp_src.feature.profile.component.ProfileHeader
 import com.liam.cmp_src.feature.profile.component.ProfileLinkedAccounts
 import com.liam.cmp_src.feature.profile.component.ProfileSkeleton
+import com.liam.cmp_src.feature.profile.profileinfo.ProfileInfoAction
+import com.liam.cmp_src.feature.profile.profileinfo.ProfileInfoDialog
+import com.liam.cmp_src.feature.profile.profileinfo.ProfileInfoViewModel
 import cmpsrc.shared.generated.resources.Res
 import cmpsrc.shared.generated.resources.change_password_success
 import cmpsrc.shared.generated.resources.home_sign_out
 import cmpsrc.shared.generated.resources.ic_edit
 import cmpsrc.shared.generated.resources.ic_lock
-import cmpsrc.shared.generated.resources.login_not_implemented
 import cmpsrc.shared.generated.resources.profile_change_password
 import cmpsrc.shared.generated.resources.profile_edit
 import cmpsrc.shared.generated.resources.profile_error_title
 import cmpsrc.shared.generated.resources.profile_try_again
+import io.github.vinceglb.filekit.dialogs.FileKitType
+import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
+import io.github.vinceglb.filekit.name
+import io.github.vinceglb.filekit.readBytes
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
@@ -77,34 +83,48 @@ private const val STATE_CROSSFADE_MILLIS = 240
 /**
  * Profile wired to its [ProfileViewModel].
  *
- * Same split as `LoginRoute` and `HomeRoute`: the route owns the ViewModel and reports what
+ * Same split as `LoginRoute` and `HomeRoute`: the route owns the ViewModels and reports what
  * happened, while the stateless [ProfileScreen] below takes a state and a callback and can be
- * previewed without Koin. [onLogout] fires only once the session has actually been ended.
+ * previewed without Koin. [onLogout] fires only once the session has actually been ended, and
+ * [onProfileUpdated] every time the edit dialog writes, so the shell around this tab can refresh
+ * the name and picture it is showing.
  */
 @Composable
 fun ProfileRoute(
     onLogout: () -> Unit,
+    onProfileUpdated: (UserResponse) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ProfileViewModel = koinViewModel(),
+    editViewModel: ProfileInfoViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    // Whether the dialog is up is screen state, not a back-stack entry, so it lives here and
-    // survives rotation. The dialog is hosted by the route rather than by ProfileScreen, which
+    // Whether a dialog is up is screen state, not a back-stack entry, so it lives here and
+    // survives rotation. Both dialogs are hosted by the route rather than by ProfileScreen, which
     // keeps that composable Koin-free and previewable.
     var isChangingPassword by rememberSaveable { mutableStateOf(false) }
+    var isEditingProfile by rememberSaveable { mutableStateOf(false) }
+
+    // FileKit requires its launchers to be remembered in a stable scope, never inside a dialog or
+    // a popup — on iOS one remembered inside a transient surface never delivers its result — so
+    // the picker lives here and the dialog is handed a way to open it. [editViewModel] is the same
+    // instance the dialog resolves, both being scoped to this back-stack entry, which is what lets
+    // the file land in the ViewModel without a round trip through the dialog's own state.
+    val photoPicker = rememberFilePickerLauncher(type = FileKitType.Image) { file ->
+        if (file == null) return@rememberFilePickerLauncher
+        scope.launch {
+            editViewModel.onAction(ProfileInfoAction.PhotoPicked(file.readBytes(), file.name))
+        }
+    }
 
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
             when (event) {
                 ProfileEvent.GoToLogin -> onLogout()
                 ProfileEvent.OpenChangePassword -> isChangingPassword = true
-                // getString rather than stringResource: read here, a composable-scoped
-                // resource would have been captured before the event arrived.
-                ProfileEvent.ShowNotImplemented ->
-                    snackbarHostState.showSnackbar(getString(Res.string.login_not_implemented))
+                ProfileEvent.OpenEditProfile -> isEditingProfile = true
             }
         }
     }
@@ -127,6 +147,23 @@ fun ProfileRoute(
                     snackbarHostState.showSnackbar(getString(Res.string.change_password_success))
                 }
             },
+        )
+    }
+
+    // Only over a loaded profile: the dialog edits an account, and there is nothing to edit until
+    // one has been read.
+    (state as? ProfileUiState.Success)?.user?.takeIf { isEditingProfile }?.let { user ->
+        ProfileInfoDialog(
+            user = user,
+            viewModel = editViewModel,
+            onPickPhoto = photoPicker::launch,
+            // No snackbar here: the dialog stays open and confirms in place, and a snackbar behind
+            // its scrim would be showing something nobody can see.
+            onUpdated = { updated ->
+                viewModel.onAction(ProfileAction.UserUpdated(updated))
+                onProfileUpdated(updated)
+            },
+            onDismiss = { isEditingProfile = false },
         )
     }
 }

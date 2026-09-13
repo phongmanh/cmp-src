@@ -37,6 +37,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -58,6 +59,7 @@ import com.liam.cmp_src.feature.home.component.HomeTopBar
 import com.liam.cmp_src.feature.home.component.displayLabel
 import com.liam.cmp_src.feature.home.component.sampleUser
 import com.liam.cmp_src.feature.profile.ProfileRoute
+import kotlinx.serialization.json.Json
 import com.liam.cmp_src.feature.profile.ProfileScreen
 import com.liam.cmp_src.feature.profile.ProfileUiState
 import com.liam.cmp_src.getPlatform
@@ -90,6 +92,15 @@ fun HomeRoute(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = koinViewModel(),
 ) {
+    // The navigation key carries the account as it was at sign-in and cannot be rewritten without
+    // rebuilding this entry — which would discard the selected tab and every ViewModel under it,
+    // the instant somebody saved their name. So the current account is held here instead, seeded
+    // from the key and updated by the profile tab, and saved so it survives process death rather
+    // than reverting to whatever the key still remembers.
+    var currentUser by rememberSaveable(user, stateSaver = UserResponseSaver) {
+        mutableStateOf(user)
+    }
+
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
             when (event) {
@@ -99,14 +110,31 @@ fun HomeRoute(
     }
 
     HomeScreen(
-        user = user,
+        user = currentUser,
         onSignOut = viewModel::onSignOut,
         // The profile tab is a whole feature with its own ViewModel, handed in as a slot so
         // HomeScreen itself stays stateless and Koin-free (and therefore previewable).
-        profileTab = { ProfileRoute(onLogout = onSignedOut) },
+        profileTab = {
+            ProfileRoute(
+                onLogout = onSignedOut,
+                onProfileUpdated = { updated -> currentUser = updated },
+            )
+        },
         modifier = modifier,
     )
 }
+
+/**
+ * Saves the signed-in account across process death.
+ *
+ * Through the contract's own JSON rather than a hand-written field list: `UserResponse` is
+ * `@Serializable` and owned by the server, so a field added there must not need a second
+ * definition here to survive being backgrounded.
+ */
+private val UserResponseSaver = Saver<UserResponse, String>(
+    save = { Json.encodeToString(it) },
+    restore = { Json.decodeFromString<UserResponse>(it) },
+)
 
 /**
  * The signed-in app shell: a glass header, a floating navigation pill, and whichever tab's

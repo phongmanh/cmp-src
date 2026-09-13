@@ -111,12 +111,12 @@ fun createHttpClient(
     install(Auth) {
         bearer {
             loadTokens {
-                tokenStore.tokens.value?.let { BearerTokens(it.accessToken, it.refreshToken) }
+                tokenStore.current()?.let { BearerTokens(it.accessToken, it.refreshToken) }
             }
 
             refreshTokens {
                 val refreshToken = oldTokens?.refreshToken
-                    ?: tokenStore.tokens.value?.refreshToken
+                    ?: tokenStore.current()?.refreshToken
                     ?: return@refreshTokens null
 
                 // `client` here is the same client with this plugin disabled, so refreshing

@@ -12,7 +12,9 @@ androidx-lifecycle = "2.11.0-beta01"
 androidx-savedstate = "1.4.0"
 androidx-testExt = "1.3.0"
 apiContract = "1.0.0-SNAPSHOT"
+coil3 = "3.5.0"
 composeMultiplatform = "1.11.1"
+filekit = "0.15.0"
 junit = "4.13.2"
 kotlin = "2.4.0"
 kotlin-wrappers = "2026.6.1"
@@ -22,6 +24,9 @@ koin-bom = "4.2.2"
 material3 = "1.11.0-alpha07"
 navigation3 = "1.1.1"
 ktor = "3.5.2"
+room3 = "3.0.2"
+sqlite = "2.7.0"
+ksp = "2.3.11"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -86,6 +91,25 @@ ktor-client-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor" }
 ktor-client-js = { module = "io.ktor:ktor-client-js", version.ref = "ktor" }
 ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
 
+# Coil 3 — image loading for every target. The Ktor 3 fetcher is what lets avatar requests
+# go through the HttpClient already in the graph instead of a second one of Coil's own.
+#
+# Held at the last release built against Compose Multiplatform 1.11.1. Coil 3.6 moved to 1.12.0,
+# and because that arrives transitively it would quietly drag this project's pinned Compose up
+# with it — a version bump nobody asked for, decided by an image loader.
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil3" }
+coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coil3" }
+
+# FileKit — the photo picker. The -compose flavour supplies Android's ActivityResultRegistry
+# itself, which is why androidApp needs no initialisation of its own. Held at the last release
+# built against Compose Multiplatform 1.11.1, for the same reason as Coil above.
+filekit-dialogs-compose = { module = "io.github.vinceglb:filekit-dialogs-compose", version.ref = "filekit" }
+
+# Room
+androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
+androidx-room3-runtime = { module = "androidx.room3:room3-runtime", version.ref = "room3" }
+androidx-room3-compiler = { module = "androidx.room3:room3-compiler", version.ref = "room3" }
+
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidMultiplatformLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
@@ -93,3 +117,5 @@ composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "composeMul
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+androidx-room3 = { id = "androidx.room3", version.ref = "room3" }

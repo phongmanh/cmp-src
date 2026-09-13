@@ -29,6 +29,7 @@
     <string name="validation_password_too_long">Use at most %1$d characters</string>
     <string name="validation_password_same_as_current">Pick something different from your current password</string>
     <string name="validation_password_mismatch">These two don't match</string>
+    <string name="validation_display_name_too_long">Use at most %1$d characters</string>
 
     <!-- Sign-in failures -->
     <string name="error_invalid_credentials">That email and password don't match an account</string>
@@ -38,6 +39,9 @@
     <string name="error_unknown">Something went wrong. Please try again</string>
     <string name="error_wrong_current_password">That isn't your current password</string>
     <string name="error_password_not_set">This account signs in through a provider, so there's no password to change</string>
+    <string name="error_unsupported_image">That file isn't a JPEG or PNG we can use. Pick another one</string>
+    <string name="error_image_too_large">That picture is too big. Pick one under %1$d MB</string>
+    <string name="error_too_many_uploads">That's a lot of pictures at once. Try again in a minute</string>
 
     <!-- Home screen -->
     <string name="home_greeting">Hi, %1$s</string>
@@ -81,6 +85,20 @@
     <string name="change_password_cancel">Cancel</string>
     <string name="change_password_success">Your password has been changed</string>
 
+    <!-- Edit profile dialog -->
+    <string name="edit_profile_title">Edit profile</string>
+    <string name="edit_profile_subtitle">Your name and your picture are saved separately.</string>
+    <string name="edit_profile_name_label">Display name</string>
+    <string name="edit_profile_name_placeholder">What people should call you</string>
+    <string name="edit_profile_save_name">Save name</string>
+    <string name="edit_profile_change_photo">Change photo</string>
+    <string name="edit_profile_remove_photo">Remove photo</string>
+    <string name="edit_profile_photo_warning">Saving a new name will also clear the photo you uploaded.</string>
+    <string name="edit_profile_done">Done</string>
+    <string name="edit_profile_name_saved">Your name has been updated</string>
+    <string name="edit_profile_photo_saved">Your photo has been updated</string>
+    <string name="edit_profile_photo_removed">Your photo has been removed</string>
+
     <!-- Content descriptions -->
     <string name="cd_app_logo">CMPsrc logo</string>
     <string name="cd_email_icon">Email</string>
@@ -90,6 +108,7 @@
     <string name="cd_notifications">Notifications</string>
     <string name="cd_edit_icon">Edit</string>
     <string name="cd_verified">Email verified</string>
+    <string name="cd_name_icon">Name</string>
     <string name="signup_has_account">Already has a account?</string>
     <string name="signup_submit">Sign up</string>
     <string name="signup_title">Welcome</string>

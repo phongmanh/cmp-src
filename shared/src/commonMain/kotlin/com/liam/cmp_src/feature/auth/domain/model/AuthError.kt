@@ -1,7 +1,7 @@
 package com.liam.cmp_src.feature.auth.domain.model
 
 /**
- * Everything that can go wrong while signing in, as a closed set.
+ * Everything that can go wrong while signing in or while changing an account, as a closed set.
  *
  * These carry no user-facing text on purpose — the presentation layer maps each case to a
  * string resource, so the domain stays localization-agnostic and testable without resources.
@@ -25,6 +25,21 @@ sealed interface AuthError {
      * password from here needs a set-password flow, which this build does not have.
      */
     data object PasswordNotSet : AuthError
+
+    /**
+     * The picked file is not a picture this server will store: not a JPEG or a PNG, too large for
+     * it to open, or too damaged to read.
+     *
+     * One case rather than three because the remedy is the same for all of them — pick a
+     * different file — and the distinction would only ever be noise to the person holding it.
+     */
+    data object UnsupportedImage : AuthError
+
+    /** The picked file is bigger than the server accepts. [maxBytes] is what it will take. */
+    data class ImageTooLarge(val maxBytes: Long) : AuthError
+
+    /** Too many pictures uploaded too quickly. Waiting is the only remedy. */
+    data object TooManyUploads : AuthError
 
     /** Request could not reach the auth backend. */
     data object Network : AuthError

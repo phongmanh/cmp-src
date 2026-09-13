@@ -129,8 +129,9 @@ class ProfileViewModelTest {
         assertEquals<List<ProfileEvent>>(listOf(ProfileEvent.GoToLogin), events)
     }
 
+    /** The dialog is the route's business; the ViewModel only asks for it to be put up. */
     @Test
-    fun unbuiltActionsSaySoInsteadOfFailing() = runTest(testDispatcher) {
+    fun editingAsksForTheDialogAndLeavesTheProfileAlone() = runTest(testDispatcher) {
         val repository = FakeAuthRepository()
         val viewModel = viewModelWith(repository)
         val events = collectEvents(viewModel)
@@ -139,9 +140,28 @@ class ProfileViewModelTest {
         viewModel.onAction(ProfileAction.EditProfile)
         advanceUntilIdle()
 
-        assertEquals<List<ProfileEvent>>(listOf(ProfileEvent.ShowNotImplemented), events)
-        // The profile itself is untouched by an action that does nothing.
+        assertEquals<List<ProfileEvent>>(listOf(ProfileEvent.OpenEditProfile), events)
         assertIs<ProfileUiState.Success>(viewModel.state.value)
+    }
+
+    /**
+     * The edit dialog's write already answered with the whole account, so the screen adopts it
+     * rather than spending a second read to learn the same thing.
+     */
+    @Test
+    fun anEditIsAdoptedWithoutReReadingTheProfile() = runTest(testDispatcher) {
+        val repository = FakeAuthRepository()
+        val viewModel = viewModelWith(repository)
+        advanceUntilIdle()
+        val readsSoFar = repository.currentUserCallCount
+
+        val renamed = FakeAuthRepository.TEST_USER.copy(displayName = "Ada Lovelace")
+        viewModel.onAction(ProfileAction.UserUpdated(renamed))
+        advanceUntilIdle()
+
+        val state = assertIs<ProfileUiState.Success>(viewModel.state.value)
+        assertEquals(renamed, state.user)
+        assertEquals(readsSoFar, repository.currentUserCallCount)
     }
 
     /** The dialog is the route's business; the ViewModel only asks for it to be put up. */
