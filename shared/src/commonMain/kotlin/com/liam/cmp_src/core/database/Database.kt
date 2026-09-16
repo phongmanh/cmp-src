@@ -22,12 +22,12 @@ internal const val DATABASE_VERSION = 2
 /**
  * Finishes a platform's [builder] into a usable database.
  *
- * The driver is *not* set here: `androidx.sqlite:sqlite-bundled` publishes no js/wasmJs variants,
- * so it cannot live in `commonMain`. Each platform's `getDatabaseBuilder` picks its own driver and
- * this function only applies the settings that are the same everywhere.
+ * The driver is *not* set here: each platform's `getDatabaseBuilder` picks its own driver and
+ * resolves its own database path, and this function only applies the settings that are the same
+ * on both.
  *
- * `Dispatchers.Default` rather than `Dispatchers.IO`, which does not exist on the JS and Wasm
- * targets — the same reason `AppModule` injects `Default`.
+ * Queries run on `Dispatchers.Default`, the same dispatcher `AppModule` injects, so nothing in
+ * the app has a second opinion about which pool touches the database.
  *
  * The destructive fallback is safe *only* while this database holds nothing but a session the
  * user can recreate by signing in again. **Replace it with a real migration before adding a

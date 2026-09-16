@@ -13,10 +13,10 @@ data class AuthTokens(
 /**
  * Holds the tokens the Ktor `Auth` plugin attaches to requests and refreshes when they expire.
  *
- * An interface because *where* the tokens live is a platform decision — a SQLite file on Android,
- * iOS and desktop, memory in the browser — while everything above this only needs to read and
- * write them. `RoomTokenStore` is the persistent implementation; [InMemoryTokenStore] is the
- * fallback for targets without a SQLite driver, and for tests.
+ * An interface because *where* the tokens live is a platform decision — a SQLite file on both
+ * Android and iOS, with the row encrypted by that platform's key store — while everything above
+ * this only needs to read and write them. `RoomTokenStore` is the persistent implementation;
+ * [InMemoryTokenStore] is the fallback for tests.
  */
 interface TokenStore {
 
@@ -44,8 +44,8 @@ interface TokenStore {
  * Backed by a [MutableStateFlow] so concurrent reads and writes from the `Auth` plugin's refresh
  * path are safe on every target without a platform lock.
  *
- * Not persistent, and not secure storage. It is what the browser targets get, because
- * `androidx.sqlite:sqlite-bundled` publishes no js/wasmJs variants.
+ * Not persistent, and not secure storage: it is a test double, and nothing in the shipped
+ * graph binds it — both targets bind `RoomTokenStore`.
  */
 class InMemoryTokenStore(initial: AuthTokens? = null) : TokenStore {
 

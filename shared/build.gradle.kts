@@ -1,5 +1,4 @@
 import androidx.room3.gradle.RoomExtension
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
     id("cmpsrc.cmp.library")
@@ -17,17 +16,6 @@ kotlin {
             baseName = "Shared"
             isStatic = true
         }
-    }
-    
-    jvm()
-    
-    js {
-        browser()
-    }
-    
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs {
-        browser()
     }
     
     androidLibrary {
@@ -50,15 +38,6 @@ kotlin {
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
             implementation(libs.androidx.sqlite.bundled)
-        }
-        jvmMain.dependencies {
-            implementation(libs.ktor.client.okhttp)
-            implementation(libs.androidx.sqlite.bundled)
-        }
-        // One engine for both browser targets: `ktor-client-js` publishes js and wasmJs
-        // variants, so the engine actual lives in webMain rather than being duplicated.
-        webMain.dependencies {
-            implementation(libs.ktor.client.js)
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
@@ -91,9 +70,6 @@ kotlin {
             implementation(libs.kotlinx.coroutinesTest)
             implementation(libs.ktor.client.mock)
         }
-        jsMain.dependencies {
-            implementation(libs.wrappers.browser)
-        }
     }
 }
 
@@ -116,9 +92,6 @@ dependencies {
     // its @Database annotations to nothing.
     listOf(
         "kspAndroid",
-        "kspJvm",
-        "kspJs",
-        "kspWasmJs",
         "kspIosArm64",
         "kspIosSimulatorArm64",
     ).forEach { configuration ->

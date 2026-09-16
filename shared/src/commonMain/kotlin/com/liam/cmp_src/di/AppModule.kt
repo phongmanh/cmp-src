@@ -39,9 +39,8 @@ import org.koin.dsl.module
 /**
  * The app's object graph.
  *
- * `Dispatchers.Default` rather than `Dispatchers.IO` because IO does not exist on the JS and
- * Wasm targets; injecting it here (instead of referencing a dispatcher inside the repository)
- * is what lets tests swap in a `TestDispatcher`.
+ * One `CoroutineDispatcher` for the whole graph, injected here rather than referenced inside
+ * each repository — that indirection is what lets tests swap in a `TestDispatcher`.
  *
  * The [HttpClient] is a `single` because it owns a connection pool and a coroutine scope —
  * one per call would leak both. [ApiConfig] is a separate binding so a test or a staging build

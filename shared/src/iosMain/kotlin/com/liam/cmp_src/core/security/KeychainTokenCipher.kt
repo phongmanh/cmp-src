@@ -50,8 +50,8 @@ private const val KEY_BITS = 256
 /**
  * iOS encryption using a P-256 key kept in the Keychain.
  *
- * **Why elliptic curve rather than AES**, when Android and desktop both use AES-GCM: Kotlin/Native
- * has no AES-GCM primitive. The CommonCrypto bindings expose CBC, CTR, CFB, OFB and ECB and no GCM
+ * **Why elliptic curve rather than AES**, when Android uses AES-GCM: Kotlin/Native has no
+ * AES-GCM primitive. The CommonCrypto bindings expose CBC, CTR, CFB, OFB and ECB and no GCM
  * mode at all, and unauthenticated CBC is not an acceptable way to store a credential. The Security
  * framework's ECIES does authenticated encryption for us — ephemeral ECDH, an X9.63 key derivation
  * and AES-GCM underneath — and it is reachable with no cinterop definition and no dependency.

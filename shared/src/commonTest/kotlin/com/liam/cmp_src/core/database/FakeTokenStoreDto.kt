@@ -6,8 +6,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
- * Stands in for Room in `commonTest`, which has no SQLite driver to run against — `sqlite-bundled`
- * publishes no js/wasmJs variants. Coverage of the real schema stays in `jvmTest`.
+ * Stands in for Room in `commonTest`, which cannot assume a working SQLite driver: it runs on
+ * the Android host JVM as well as the iOS simulator, and `sqlite-bundled`'s Android artifact
+ * ships no native library the host JVM can load. Coverage of the real schema stays in the
+ * platform test source sets.
  */
 class FakeTokenStoreDto(initial: EncryptedAuthTokens? = null) : TokenStoreDto {
 

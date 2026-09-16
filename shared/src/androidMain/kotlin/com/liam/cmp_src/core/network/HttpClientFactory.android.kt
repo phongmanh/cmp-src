@@ -5,8 +5,8 @@ import io.ktor.client.engine.okhttp.OkHttp
 import java.util.concurrent.TimeUnit
 
 /**
- * OkHttp — the stack Android already ships around, and the one the desktop target uses too, so
- * both JVM platforms behave identically under a flaky connection.
+ * OkHttp — the stack Android already ships around, with its own connect timeout because the
+ * common `HttpTimeout` plugin does not set one.
  */
 actual fun platformEngine(): HttpClientEngine = OkHttp.create {
     config {

@@ -7,8 +7,9 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 /**
  * Shows the hand cursor over something clickable, and the plain arrow when it is not.
  *
- * Only desktop and web have a cursor to answer to; on touch platforms this is inert, which is
- * why every clickable in the shared UI can carry it unconditionally.
+ * Only a pointing device has a cursor to answer to — an Android device in desktop mode or on
+ * ChromeOS, an iPad with a trackpad. Under a finger this is inert, which is why every clickable
+ * in the shared UI can carry it unconditionally.
  *
  * Pass the same flag that drives the control's `enabled`, so the cursor cannot promise a click
  * the control will not accept.

@@ -39,10 +39,10 @@ private const val ROOT_ENTER_SCALE = 0.94f
 private const val ROOT_EXIT_SCALE = 1.04f
 
 /**
- * Entry point shared by every platform shell (Android `MainActivity`, desktop `main`,
- * `ComposeViewport` on web, `MainViewController` on iOS).
+ * Entry point shared by both platform shells (Android `MainActivity`, iOS
+ * `MainViewController`).
  *
- * Koin is started here rather than in each platform's entry point, so the five shells stay
+ * Koin is started here rather than in each platform's entry point, so the two shells stay
  * identical and need no DI wiring of their own.
  */
 @Composable

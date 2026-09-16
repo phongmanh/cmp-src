@@ -88,7 +88,7 @@ fun HomeBottomBar(
         contentAlignment = Alignment.Center,
     ) {
         Surface(
-            // Capped so the pill stays a pill on desktop and in a browser window, where an
+            // Capped so the pill stays a pill on a tablet or an unfolded device, where an
             // unbounded bar would stretch the four tabs across the whole screen.
             modifier = Modifier
                 .widthIn(max = Dimens.navBarMaxWidth)

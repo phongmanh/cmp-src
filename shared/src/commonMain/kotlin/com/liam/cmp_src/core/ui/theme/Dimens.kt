@@ -58,7 +58,7 @@ object Dimens {
     val screenPadding = 24.dp
     /**
      * Widest the floating navigation bar is allowed to get. Without a cap it stretches the full
-     * width of a desktop or browser window, where a centred pill reads as intended instead.
+     * width of a tablet or unfolded device, where a centred pill reads as intended instead.
      */
     val navBarMaxWidth = 520.dp
     /**

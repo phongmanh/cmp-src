@@ -13,10 +13,9 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
 
 /**
- * What [RoomTokenStore] does with a cipher, on every target.
- *
- * Named apart from `RoomTokenStoreTest` in `jvmTest` on purpose: that source set inherits this one,
- * and two classes sharing a fully qualified name will not compile.
+ * What [RoomTokenStore] does with a cipher, on every target — against a [FakeTokenStoreDto],
+ * because `commonTest` has no SQLite driver to run the real schema on. The platform test source
+ * sets cover the real database.
  */
 class TokenStoreEncryptionTest {
 

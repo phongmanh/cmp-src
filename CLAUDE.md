@@ -4,14 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project overview
 
-CMPsrc is a Kotlin Multiplatform / Compose Multiplatform project generated from the JetBrains KMP wizard. All shared UI and logic lives in a single `shared` module; each platform module is a thin shell that just hosts the shared `App()` composable. Package/namespace across all modules is `com.liam.cmp_src`.
+CMPsrc is a Kotlin Multiplatform / Compose Multiplatform project targeting **mobile only — Android and iOS**. All shared UI and logic lives in a single `shared` module; each platform module is a thin shell that just hosts the shared `App()` composable. Package/namespace across all modules is `com.liam.cmp_src`.
+
+The desktop (JVM) and browser (JS/Wasm) targets that this project started with have been removed. Adding one back is not a one-line change: it needs the target in `shared/build.gradle.kts`, a matching `ksp<Target>` line for the Room compiler, `Platform`/`PlatformModule`/`HttpClientFactory`/`ApiConfig`/`SocialAuthClient` actuals, and — for JS/Wasm — the Node/Yarn/Binaryen ivy repositories back in `settings.gradle.kts`, because `FAIL_ON_PROJECT_REPOS` rejects the ones the Kotlin plugin registers for itself.
 
 ## Module layout
 
-- `shared` — the core module. Contains the shared Compose UI (`App.kt`), shared logic, and `expect`/`actual` platform declarations. Targets: `androidLibrary`, `jvm`, `js` (browser), `wasmJs` (browser), `iosArm64`/`iosSimulatorArm64`.
+- `shared` — the core module. Contains the shared Compose UI (`App.kt`), shared logic, and `expect`/`actual` platform declarations. Targets: `androidLibrary`, `iosArm64`/`iosSimulatorArm64`.
 - `androidApp` — Android application shell. `MainActivity` just calls `setContent { App() }`.
-- `desktopApp` — JVM application shell using `androidx.compose.ui.window.application`/`Window`, entry point `com.liam.cmp_src.MainKt`.
-- `webApp` — JS + Wasm browser application shell using `ComposeViewport`.
 - `iosApp` — native Xcode/SwiftUI project. `iOSApp.swift` hosts `ContentView`, which wraps the `Shared.framework` produced by the `shared` module's iOS targets via `MainViewController()` (`shared/src/iosMain/.../MainViewController.kt`).
 
 The app modules have essentially no logic of their own — new features and platform-specific behavior belong in `shared`, with app-module changes limited to wiring/entry points.
@@ -19,7 +19,7 @@ The app modules have essentially no logic of their own — new features and plat
 ### expect/actual pattern
 
 `shared/src/commonMain/.../Platform.kt` declares `expect fun getPlatform(): Platform`. Each target provides an actual in a sibling source set named `Platform.<target>.kt`:
-- `androidMain/Platform.android.kt`, `iosMain/Platform.ios.kt`, `jsMain/Platform.js.kt`, `jvmMain/Platform.jvm.kt`, `wasmJsMain/Platform.wasmJs.kt`
+- `androidMain/Platform.android.kt`, `iosMain/Platform.ios.kt`
 
 Follow this naming/source-set convention when adding new expect/actual declarations.
 
@@ -34,7 +34,7 @@ Navigation 3 — `androidx.navigation3:navigation3-runtime` (androidx's own mult
 Adding a destination is three edits:
 
 1. a new subtype of `AppRoute`, carrying whatever arguments the destination needs;
-2. a `subclass(...)` line in `appNavConfiguration` — only Android can resolve back-stack keys reflectively, so every other target needs them registered, and `AppRouteTest` fails if this is missed;
+2. a `subclass(...)` line in `appNavConfiguration` — only Android can resolve back-stack keys reflectively, so iOS needs them registered, and `AppRouteTest` fails if this is missed;
 3. an `entry<...>` block in `AppRoot`'s `entryProvider`.
 
 Screens never navigate themselves. A route composable reports what happened (`onSignedIn`, `onSignedOut`) and `AppRoot` decides what that does to the back stack — see `resetTo` for handovers that must not leave the previous screen behind.
@@ -58,9 +58,10 @@ app never spells a path or a payload by hand. A route the server renames breaks 
   because only the Android emulator reaches the host at `10.0.2.2`.
 - `ApiResult.kt` / `ApiCall.kt` — every call returns `ApiResult<T>`; `sendRequest` is the one place
   an exception becomes an `ApiError`, so nothing above the data layer catches anything.
-- `TokenStore.kt` — what the `Auth` plugin reads and refreshes into. The bound implementation is
-  `InMemoryTokenStore`, which is **not** persistent or secure storage; replacing it is a new
-  `TokenStore` in `AppModule` and nothing else.
+- `TokenStore.kt` — what the `Auth` plugin reads and refreshes into. Both targets bind
+  `RoomTokenStore` (via `rememberPlatformModule`), which keeps the session in SQLite with the row
+  encrypted by the platform key store — Android Keystore, iOS Keychain. `InMemoryTokenStore` is
+  the test double.
 
 The signed-in user is the contract's `UserResponse` end to end — `AuthResult.Success`,
 `AppRoute.Home`, and the home UI all carry it, and there is no parallel `AuthUser` model to keep
@@ -73,13 +74,9 @@ Per-feature API classes live with the feature (`feature/auth/data/remote/AuthApi
 `core`. A typed POST must set `contentType(ContentType.Application.Json)` — ContentNegotiation
 silently declines to serialize a body without it, and the call fails before leaving the device.
 
-Engine actuals do **not** follow the one-file-per-target rule exactly, because the source-set
-hierarchy has intermediate sets that would collide:
-
-- `iosMain` (not `nativeMain`) provides Darwin — it covers every Apple target.
-- `webMain` (not `jsMain` + `wasmJsMain`) provides the `Js` engine for both browser targets.
-
-Declaring these a level up, or in both leaves, is a duplicate-`actual` compile error.
+Engine actuals do **not** follow the one-file-per-target rule exactly: `iosMain` (not `nativeMain`)
+provides Darwin, and it covers every Apple target. Declaring it a level up, or once per iOS leaf,
+is a duplicate-`actual` compile error.
 
 Android talks to a local dev server over cleartext only in debug: `androidApp/src/debug/` carries a
 network security config allowing `10.0.2.2` and `localhost` and nothing else. Release builds keep
@@ -95,7 +92,7 @@ the platform's HTTPS-only default.
   so the token response's user stands in.
 - **Social** — `SocialAuthClient.requestCredential(provider)` returns a `SocialCredential`, never a
   session: the provider token is exchanged at `POST /auth/social` and the server issues the tokens.
-  Every platform actual still delegates to `DemoSocialAuthClient`, which returns a placeholder
+  Both platform actuals still delegate to `DemoSocialAuthClient`, which returns a placeholder
   token — the exchange after it is real, so social sign-in works only against a deployment that
   accepts one.
 - **Sign-out** — `HomeViewModel` → `SignOutUseCase` → `AuthApi.logout`, which drops the local
@@ -122,9 +119,6 @@ Build everything:
 
 Run an app:
 ```
-./gradlew :desktopApp:run                       # Desktop (JVM)
-./gradlew :webApp:jsBrowserDevelopmentRun        # Web (JS, webpack dev server)
-./gradlew :webApp:wasmJsBrowserDevelopmentRun    # Web (Wasm, webpack dev server)
 ./gradlew :androidApp:installDebug               # Android (installs to connected device/emulator)
 ```
 iOS: open `iosApp/iosApp.xcodeproj` in Xcode and run — the shared framework is built/embedded automatically as part of the Xcode build.
@@ -136,21 +130,22 @@ Lint (Android):
 
 ### Tests
 
-Test sources live per-target under `shared/src/{commonTest,androidHostTest,jvmTest,iosTest}`.
+Test sources live per-target under `shared/src/{commonTest,androidHostTest,iosTest}`.
 
 ```
 ./gradlew :shared:allTests                                   # every shared-module target
-./gradlew :shared:jvmTest                                    # commonTest + jvmTest, JVM-executed
 ./gradlew :shared:testAndroidHostTest                        # commonTest + androidHostTest, JVM-executed
 ./gradlew :shared:iosSimulatorArm64Test                       # commonTest + iosTest, iOS simulator
-./gradlew :shared:jsBrowserTest                               # commonTest + jsMain tests, in-browser
-./gradlew :shared:wasmJsBrowserTest                           # commonTest + wasmJsMain tests, in-browser
 ./gradlew :androidApp:testDebugUnitTest                       # androidApp module's own unit tests
 ```
 
-Run a single test class (works with `jvmTest`/`testAndroidHostTest`/`testDebugUnitTest`):
+`testAndroidHostTest` is the fast loop for common code — it runs `commonTest` on the host JVM and
+needs no device. `commonTest` itself has no SQLite driver to run against, so coverage of the real
+schema lives in the platform test source sets (see `iosTest/KeychainTokenCipherTest`).
+
+Run a single test class (works with `testAndroidHostTest`/`testDebugUnitTest`):
 ```
-./gradlew :shared:jvmTest --tests "com.liam.cmp_src.SharedLogicDesktopTest"
+./gradlew :shared:testAndroidHostTest --tests "com.liam.cmp_src.SharedLogicAndroidHostTest"
 ```
 
 ## Global rules

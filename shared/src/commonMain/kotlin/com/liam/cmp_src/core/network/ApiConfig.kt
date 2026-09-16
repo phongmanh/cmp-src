@@ -3,10 +3,9 @@ package com.liam.cmp_src.core.network
 /**
  * Which backend the app talks to.
  *
- * The choice lives here, not in per-target code, so switching is one edit in one file and every
- * target — Android, iOS, desktop, browser — moves together. Only [LOCAL] still needs a
- * platform-specific value, and only for its host (see [localApiHost]); the production URL is a
- * single shared constant.
+ * The choice lives here, not in per-target code, so switching is one edit in one file and both
+ * targets — Android and iOS — move together. Only [LOCAL] still needs a platform-specific value,
+ * and only for its host (see [localApiHost]); the production URL is a single shared constant.
  */
 enum class ApiEnvironment {
     /** A dev server on the machine running the app, reached over cleartext HTTP. */
@@ -58,8 +57,8 @@ data class ApiConfig(
 
         /**
          * Applied by each engine in `HttpClientFactory.<target>.kt` rather than by the common
-         * `HttpTimeout` plugin, because the browser engine cannot honour a connect timeout set
-         * from common code and quietly ignores it.
+         * `HttpTimeout` plugin: a connect timeout is an engine setting, and OkHttp and Darwin
+         * each take it on their own config rather than from the plugin.
          */
         const val CONNECT_TIMEOUT_MILLIS = 15_000L
 
@@ -67,7 +66,7 @@ data class ApiConfig(
         const val LOCAL_PORT = 8080
 
         /**
-         * The deployed backend, shared by every target.
+         * The deployed backend, shared by both targets.
          *
          * HTTPS is not optional: the Android debug-only network security config and iOS App
          * Transport Security both permit cleartext to the local host alone, so an `http://` URL
@@ -81,9 +80,9 @@ data class ApiConfig(
  * The host that reaches a locally running server from this target — the one thing [ApiEnvironment]
  * cannot state once for everyone.
  *
- * Every target sees the host machine as `localhost` except the Android emulator, which is its own
- * virtual device and reaches the host's loopback at `10.0.2.2`. A single shared constant would
- * silently fail on exactly one target, which is why this stays `expect`/`actual` while the
- * production URL does not.
+ * The iOS simulator shares the host's loopback and sees it as `localhost`; the Android emulator
+ * is its own virtual device and reaches the host's loopback at `10.0.2.2`. A single shared
+ * constant would silently fail on one of the two, which is why this stays `expect`/`actual`
+ * while the production URL does not.
  */
 internal expect fun localApiHost(): String

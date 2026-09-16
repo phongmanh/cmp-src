@@ -17,14 +17,6 @@ gradlePlugin {
             implementationClass = "android.AndroidApplicationConvention"
         }
 
-        register("cmpApplicationDesktop") {
-            id = "cmpsrc.cmp.application.desktop"
-            implementationClass = "desktop.DesktopApplicationConventionPlugin"
-        }
-        register("cmpApplicationWeb") {
-            id = "cmpsrc.cmp.application.web"
-            implementationClass = "web.WebApplicationConventionPlugin"
-        }
         register("cmpLibrary") {
             id = "cmpsrc.cmp.library"
             implementationClass = "cmp.CmpLibraryConventionPlugin"

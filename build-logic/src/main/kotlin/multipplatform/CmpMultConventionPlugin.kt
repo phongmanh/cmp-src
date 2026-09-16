@@ -7,9 +7,8 @@ import org.gradle.api.Project
 /**
  * Applies JetBrains Compose Multiplatform + its Kotlin compiler plugin, plus
  * kotlinx.serialization (every Compose module here uses @Serializable Navigation 3
- * keys) — the plugin ids every Compose-enabled Kotlin Multiplatform/JVM convention
- * needs (cmp.CmpLibraryConventionPlugin, desktop.DesktopApplicationConventionPlugin,
- * web.WebApplicationConventionPlugin). Apply this common plugin instead of re-applying
+ * keys) — the plugin ids every Compose-enabled Kotlin Multiplatform convention needs
+ * (cmp.CmpLibraryConventionPlugin). Apply this common plugin instead of re-applying
  * those ids directly in each one.
  */
 class CmpMultConventionPlugin : Plugin<Project> {

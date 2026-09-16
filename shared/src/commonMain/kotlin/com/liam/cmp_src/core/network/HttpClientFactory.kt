@@ -38,7 +38,7 @@ import kotlinx.serialization.json.Json
  *
  * Actuals live in `HttpClientFactory.<target>.kt`, matching the `Platform.<target>.kt` convention.
  * Each one sets its own connect timeout from [ApiConfig.CONNECT_TIMEOUT_MILLIS], because that knob
- * is engine-level and the browser engine ignores it when set from common code.
+ * is engine-level rather than something the common `HttpTimeout` plugin can set.
  */
 expect fun platformEngine(): HttpClientEngine
 

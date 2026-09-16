@@ -29,8 +29,8 @@ class RoomTokenStore(
 
     /**
      * `flowOn` because decryption would otherwise run wherever this is collected, which on Android
-     * is the main thread. `Default` rather than `IO` for the reason `getRoomDatabase` gives: `IO`
-     * does not exist on the JS and Wasm targets.
+     * is the main thread. `Default` to match the database's own query context — see
+     * `getRoomDatabase`.
      */
     override val tokens: Flow<AuthTokens?> = dao.tokens()
         .map { it?.decryptWith(cipher) }
