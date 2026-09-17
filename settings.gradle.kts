@@ -41,3 +41,9 @@ plugins {
 include(":androidApp")
 include(":shared")
 
+include(":core:domain")
+include(":core:network")
+include(":core:security")
+include(":core:database")
+include(":core:testing")
+

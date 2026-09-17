@@ -3,12 +3,11 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 plugins {
     id("cmpsrc.cmp.library")
     id("cmpsrc.cmp.koin")
-    id("cmpsrc.room")
 }
 
 kotlin {
-    // Targets, the Android namespace, host tests, Compose and Room all come from the conventions
-    // above. What only this module does is link the framework the iOS app imports.
+    // Targets, the Android namespace, host tests and Compose all come from the conventions above.
+    // What only this module does is link the framework the iOS app imports.
     targets.withType<KotlinNativeTarget>().configureEach {
         binaries.framework {
             baseName = "Shared"
@@ -17,13 +16,12 @@ kotlin {
     }
 
     sourceSets {
-        androidMain.dependencies {
-            implementation(libs.ktor.client.okhttp)
-        }
-        iosMain.dependencies {
-            implementation(libs.ktor.client.darwin)
-        }
         commonMain.dependencies {
+            implementation(projects.core.domain)
+            implementation(projects.core.network)
+            implementation(projects.core.security)
+            implementation(projects.core.database)
+
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.androidx.lifecycle.viewmodelNavigation3)
@@ -43,6 +41,7 @@ kotlin {
             implementation(libs.filekit.dialogs.compose)
         }
         commonTest.dependencies {
+            implementation(projects.core.testing)
             implementation(libs.ktor.client.mock)
         }
     }
