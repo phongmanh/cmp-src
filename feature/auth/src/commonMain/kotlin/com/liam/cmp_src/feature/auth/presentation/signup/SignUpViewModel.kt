@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.time.Duration.Companion.microseconds
+import kotlin.time.Duration.Companion.milliseconds
 
 class SignUpViewModel(
     private val signUpUseCase: SignUpUseCase,
@@ -60,7 +60,7 @@ class SignUpViewModel(
                 is AuthResult.Failure -> _state.update { it.copy(status = SignUpUiStatus.Failed(result.error)) }
                 is AuthResult.Success -> {
                     _state.update { it.copy(status = SignUpUiStatus.Succeeded) }
-                    delay(SUCCESS_HOLD_MILLIS.microseconds)
+                    delay(SUCCESS_HOLD_MILLIS.milliseconds)
                     _effect.send(SignUpEvent.NavigateToHome(result.user))
                 }
             }
