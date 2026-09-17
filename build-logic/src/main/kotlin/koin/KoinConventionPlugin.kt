@@ -11,16 +11,18 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
  * the `koin-bom` platform so every Koin artifact stays on one coordinated release. Platform
  * modules that need Koin's Android-specific extras (e.g. `androidContext()`) add
  * `koin-android` themselves — this convention only covers what's usable from common code.
- * Used via `id("cmpsrc.cmp.koin")` alongside `cmpsrc.cmp.library`.
+ * Used via `id("cmpsrc.cmp.koin")` alongside `cmpsrc.cmp.library`, in either order.
  */
 class KoinConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
-        extensions.configure<KotlinMultiplatformExtension> {
-            sourceSets.getByName("commonMain").dependencies {
-                implementation(project.dependencies.platform(libs.findLibrary("koin-bom").get()))
-                implementation(libs.findLibrary("koin-core").get())
-                implementation(libs.findLibrary("koin-compose").get())
-                implementation(libs.findLibrary("koin-compose-viewmodel").get())
+        pluginManager.withPlugin("org.jetbrains.kotlin.multiplatform") {
+            extensions.configure<KotlinMultiplatformExtension> {
+                sourceSets.getByName("commonMain").dependencies {
+                    implementation(project.dependencies.platform(libs.findLibrary("koin-bom").get()))
+                    implementation(libs.findLibrary("koin-core").get())
+                    implementation(libs.findLibrary("koin-compose").get())
+                    implementation(libs.findLibrary("koin-compose-viewmodel").get())
+                }
             }
         }
     }

@@ -8,6 +8,8 @@ dependencies {
     implementation(libs.compose.gradlePlugin)
     implementation(libs.composeCompiler.gradlePlugin)
     implementation(libs.kotlinSerialization.gradlePlugin)
+    implementation(libs.ksp.gradlePlugin)
+    implementation(libs.androidx.room3.gradlePlugin)
 }
 
 gradlePlugin {
@@ -17,6 +19,10 @@ gradlePlugin {
             implementationClass = "android.AndroidApplicationConvention"
         }
 
+        register("kmpLibrary") {
+            id = "cmpsrc.kmp.library"
+            implementationClass = "kmp.KmpLibraryConventionPlugin"
+        }
         register("cmpLibrary") {
             id = "cmpsrc.cmp.library"
             implementationClass = "cmp.CmpLibraryConventionPlugin"
@@ -32,6 +38,10 @@ gradlePlugin {
         register("cmpKoin") {
             id = "cmpsrc.cmp.koin"
             implementationClass = "koin.KoinConventionPlugin"
+        }
+        register("room") {
+            id = "cmpsrc.room"
+            implementationClass = "room.RoomConventionPlugin"
         }
     }
 }

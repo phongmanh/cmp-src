@@ -1,39 +1,62 @@
 package cmp
 
-import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
-import compileSdkVersion
-import minSdkVersion
+import androidLibraryTarget
+import libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
-import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.configure
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.gradle.kotlin.dsl.dependencies
+import org.jetbrains.compose.ComposeExtension
+import org.jetbrains.compose.resources.ResourcesExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import pathSegments
+
+/** The Compose artifacts every UI module compiles against. */
+private val COMPOSE_LIBRARIES = listOf(
+    "compose-runtime",
+    "compose-foundation",
+    "compose-material3",
+    "compose-ui",
+    "compose-components-resources",
+    "compose-uiToolingPreview",
+)
 
 /**
- * Applies Kotlin Multiplatform + the KMP Android library target + Compose, and
- * configures the shared Android baseline (compileSdk, minSdk, JVM target) on the
- * `androidLibrary` target. Per-module targets/source sets/dependencies stay in
- * the consuming module (see `shared/build.gradle.kts`).
+ * A Compose Multiplatform library: `cmpsrc.kmp.library` plus Compose, its compiler plugin and
+ * kotlinx.serialization (`cmpsrc.cmp.multiplatform`), the Compose artifacts, and Compose
+ * resources packaged for Android.
+ *
+ * Each module's generated `Res` lives in `cmpsrc.<module path>.generated.resources` — `:shared`
+ * keeps the package it always had, and `:feature:auth` gets `cmpsrc.feature.auth.generated.resources`
+ * — so resources from two modules never collide. `Res` stays internal unless a module whose
+ * resources others read sets `publicResClass` itself.
  */
 class CmpLibraryConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
         with(pluginManager) {
-            apply("org.jetbrains.kotlin.multiplatform")
-            apply("com.android.kotlin.multiplatform.library")
+            // Compose first: the base convention checks for it when it sets up host tests.
             apply("cmpsrc.cmp.multiplatform")
+            apply("cmpsrc.kmp.library")
         }
 
         extensions.configure<KotlinMultiplatformExtension> {
-            val androidLibrary = (this as ExtensionAware).extensions
-                .getByName("androidLibrary") as KotlinMultiplatformAndroidLibraryTarget
+            androidLibraryTarget().androidResources { enable = true }
 
-            androidLibrary.apply {
-                compileSdk = target.compileSdkVersion
-                minSdk = target.minSdkVersion
-                compilerOptions { jvmTarget = JvmTarget.JVM_11 }
+            sourceSets.getByName("commonMain").dependencies {
+                COMPOSE_LIBRARIES.forEach { implementation(libs.findLibrary(it).get()) }
             }
+        }
+
+        extensions.configure<ComposeExtension> {
+            (this as ExtensionAware).extensions.configure<ResourcesExtension> {
+                packageOfResClass = "cmpsrc.$pathSegments.generated.resources"
+            }
+        }
+
+        // Android Studio renders previews through ui-tooling, which only the runtime needs.
+        dependencies {
+            add("androidRuntimeClasspath", libs.findLibrary("compose-uiTooling").get())
         }
     }
 }
