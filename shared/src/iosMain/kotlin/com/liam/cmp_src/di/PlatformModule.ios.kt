@@ -9,5 +9,5 @@ import org.koin.dsl.module
 
 @Composable
 actual fun rememberPlatformModule(): Module = remember {
-    module { roomTokenStore(builder = { getDatabaseBuilder() }, cipher = { KeychainTokenCipher() }) }
+    module { roomPersistence(builder = { getDatabaseBuilder() }, cipher = { KeychainTokenCipher() }) }
 }

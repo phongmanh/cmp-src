@@ -13,6 +13,6 @@ actual fun rememberPlatformModule(): Module {
     // The application context, not the Activity's: the database outlives every screen.
     val context = LocalContext.current.applicationContext
     return remember(context) {
-        module { roomTokenStore(builder = { getDatabaseBuilder(context) }, cipher = { KeystoreTokenCipher() }) }
+        module { roomPersistence(builder = { getDatabaseBuilder(context) }, cipher = { KeystoreTokenCipher() }) }
     }
 }

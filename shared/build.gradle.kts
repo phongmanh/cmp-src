@@ -98,3 +98,25 @@ dependencies {
         add(configuration, libs.androidx.room3.compiler)
     }
 }
+
+// AGP's lint tasks read the Android compilations' KSP output directories without declaring the KSP
+// tasks that write them, which Gradle rejects as an undeclared dependency — `./gradlew build` fails
+// on the validation before lint runs at all. Lint is meant to see generated sources, so declaring
+// the dependency is the fix rather than switching the validation off. Drop this once AGP's
+// `com.android.kotlin.multiplatform.library` plugin wires it itself.
+mapOf(
+    "AndroidMain" to "kspAndroidMain",
+    "AndroidHostTest" to "kspAndroidHostTest",
+).forEach { (compilation, kspTask) ->
+    tasks.matching { it.name == "generate${compilation}LintModel" || it.name == "lintAnalyze$compilation" }
+        .configureEach { dependsOn(kspTask) }
+}
+
+// Both release frameworks link through the one Kotlin/Native compiler JVM, so linking them at the
+// same time puts two whole-program LTO passes in the single heap `kotlin.native.jvmArgs` sizes and
+// `./gradlew build` dies with an OutOfMemoryError — see gradle.properties, and note that 16 GB
+// leaves no headroom to simply raise the cap again. Ordering them costs nothing: the two are
+// independent, `build` is the only thing that asks for both, and each still links at full speed.
+tasks.matching { it.name == "linkReleaseFrameworkIosSimulatorArm64" }.configureEach {
+    mustRunAfter("linkReleaseFrameworkIosArm64")
+}
