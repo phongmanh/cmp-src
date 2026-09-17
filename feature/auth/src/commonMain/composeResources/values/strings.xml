@@ -1,0 +1,23 @@
+<resources>
+    <!-- Login screen -->
+    <string name="login_title">Welcome back</string>
+    <string name="login_subtitle">Sign in to continue to CMPsrc</string>
+    <string name="login_password_label">Password</string>
+    <string name="login_password_placeholder">Enter your password</string>
+    <string name="login_forgot_password">Forgot password?</string>
+    <string name="login_divider">or continue with</string>
+    <string name="login_no_account">New here?</string>
+    <string name="login_sign_up">Create an account</string>
+    <string name="login_not_implemented">Not wired up in this build yet.</string>
+
+    <!-- Field validation -->
+    <string name="validation_email_blank">Enter your email address</string>
+    <string name="validation_email_malformed">That doesn't look like an email address</string>
+
+    <!-- Content descriptions -->
+    <string name="cd_app_logo">CMPsrc logo</string>
+    <string name="signup_has_account">Already has a account?</string>
+    <string name="signup_submit">Sign up</string>
+    <string name="signup_title">Welcome</string>
+    <string name="signup_subtitle">Create an account with your email</string>
+</resources>

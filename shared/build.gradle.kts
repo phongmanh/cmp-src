@@ -22,6 +22,9 @@ kotlin {
             implementation(projects.core.security)
             implementation(projects.core.database)
             implementation(projects.core.ui)
+            implementation(projects.feature.auth)
+            implementation(projects.feature.home)
+            implementation(projects.feature.profile)
 
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)

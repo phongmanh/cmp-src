@@ -1,84 +1,15 @@
 <resources>
     <string name="app_name">CMPsrc</string>
 
-    <!-- Login screen -->
-    <string name="login_title">Welcome back</string>
-    <string name="login_subtitle">Sign in to continue to CMPsrc</string>
-    <string name="login_password_label">Password</string>
-    <string name="login_password_placeholder">Enter your password</string>
-    <string name="login_forgot_password">Forgot password?</string>
-    <string name="login_divider">or continue with</string>
-    <string name="login_no_account">New here?</string>
-    <string name="login_sign_up">Create an account</string>
-    <string name="login_not_implemented">Not wired up in this build yet.</string>
-
-    <!-- Field validation -->
-    <string name="validation_email_blank">Enter your email address</string>
-    <string name="validation_email_malformed">That doesn't look like an email address</string>
-    <string name="validation_display_name_too_long">Use at most %1$d characters</string>
-
     <!-- Home screen -->
-    <string name="home_greeting">Hi, %1$s</string>
     <string name="home_signed_in_as">Signed in as %1$s</string>
     <string name="home_signed_in_with">via %1$s</string>
-    <string name="home_running_on">Running on %1$s</string>
-    <string name="home_welcome_back">Welcome back</string>
-    <string name="home_placeholder_body">Nothing here yet. This tab isn't wired up in this build.</string>
-    <string name="home_notifications_unavailable">Notifications aren't wired up in this build yet.</string>
-
-    <!-- Home bottom navigation -->
-    <string name="home_tab_home">Home</string>
-    <string name="home_tab_search">Search</string>
-    <string name="home_tab_activity">Activity</string>
-    <string name="home_tab_profile">Profile</string>
-
-    <!-- Profile screen -->
-    <string name="profile_email_verified">Verified</string>
-    <string name="profile_email_unverified">Unverified</string>
-    <string name="profile_member_since">Member since %1$s</string>
-    <string name="profile_linked_accounts">Linked accounts</string>
-    <string name="profile_no_linked_accounts">No linked accounts yet</string>
-    <string name="profile_edit">Edit profile</string>
-    <string name="profile_change_password">Change password</string>
-    <string name="profile_error_title">Couldn't load your profile</string>
-    <string name="profile_try_again">Try again</string>
-    <string name="profile_loading">Loading your profile</string>
-
-    <!-- Change password dialog -->
-    <string name="change_password_title">Change password</string>
-    <string name="change_password_subtitle">You'll stay signed in here. Your other devices will be signed out.</string>
-    <string name="change_password_current_label">Current password</string>
-    <string name="change_password_current_placeholder">The one you use now</string>
-    <string name="change_password_new_label">New password</string>
-    <string name="change_password_new_placeholder">At least %1$d characters</string>
-    <string name="change_password_confirm_label">Confirm new password</string>
-    <string name="change_password_confirm_placeholder">Type it once more</string>
-    <string name="change_password_submit">Update password</string>
-    <string name="change_password_cancel">Cancel</string>
-    <string name="change_password_success">Your password has been changed</string>
 
     <!-- Edit profile dialog -->
-    <string name="edit_profile_title">Edit profile</string>
-    <string name="edit_profile_subtitle">Your name and your picture are saved separately.</string>
-    <string name="edit_profile_name_label">Display name</string>
-    <string name="edit_profile_name_placeholder">What people should call you</string>
-    <string name="edit_profile_save_name">Save name</string>
-    <string name="edit_profile_change_photo">Change photo</string>
-    <string name="edit_profile_remove_photo">Remove photo</string>
-    <string name="edit_profile_photo_warning">Saving a new name will also clear the photo you uploaded.</string>
-    <string name="edit_profile_done">Done</string>
     <string name="edit_profile_name_saved">Your name has been updated</string>
     <string name="edit_profile_photo_saved">Your photo has been updated</string>
     <string name="edit_profile_photo_removed">Your photo has been removed</string>
 
     <!-- Content descriptions -->
-    <string name="cd_app_logo">CMPsrc logo</string>
-    <string name="cd_notifications">Notifications</string>
     <string name="cd_edit_icon">Edit</string>
-    <string name="cd_verified">Email verified</string>
-    <string name="cd_name_icon">Name</string>
-    <string name="signup_has_account">Already has a account?</string>
-    <string name="signup_submit">Sign up</string>
-    <string name="signup_title">Welcome</string>
-    <string name="signup_subtitle">Create an account with your email</string>
 </resources>

@@ -27,6 +27,10 @@ gradlePlugin {
             id = "cmpsrc.cmp.library"
             implementationClass = "cmp.CmpLibraryConventionPlugin"
         }
+        register("cmpFeature") {
+            id = "cmpsrc.cmp.feature"
+            implementationClass = "cmp.CmpFeatureConventionPlugin"
+        }
         register("cmpMultiplatform") {
             id = "cmpsrc.cmp.multiplatform"
             implementationClass = "multipplatform.CmpMultConventionPlugin"

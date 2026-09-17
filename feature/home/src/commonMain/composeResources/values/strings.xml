@@ -1,0 +1,17 @@
+<resources>
+    <!-- Home screen -->
+    <string name="home_greeting">Hi, %1$s</string>
+    <string name="home_running_on">Running on %1$s</string>
+    <string name="home_welcome_back">Welcome back</string>
+    <string name="home_placeholder_body">Nothing here yet. This tab isn't wired up in this build.</string>
+    <string name="home_notifications_unavailable">Notifications aren't wired up in this build yet.</string>
+
+    <!-- Home bottom navigation -->
+    <string name="home_tab_home">Home</string>
+    <string name="home_tab_search">Search</string>
+    <string name="home_tab_activity">Activity</string>
+    <string name="home_tab_profile">Profile</string>
+
+    <!-- Content descriptions -->
+    <string name="cd_notifications">Notifications</string>
+</resources>
