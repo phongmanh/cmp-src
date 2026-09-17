@@ -15,6 +15,9 @@ kotlin {
         }
     }
 
+    // The app shell: navigation, the Koin graph and the avatar image loader. Every feature and core
+    // module it assembles is a dependency; what those modules expose (Ktor, coroutines, Room,
+    // api-contract) comes with them.
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.domain)
@@ -26,27 +29,13 @@ kotlin {
             implementation(projects.feature.home)
             implementation(projects.feature.profile)
 
-            implementation(libs.androidx.lifecycle.viewmodelCompose)
-            implementation(libs.androidx.lifecycle.runtimeCompose)
-            implementation(libs.androidx.lifecycle.viewmodelNavigation3)
-            implementation(libs.androidx.savedstate)
             implementation(libs.navigation3.runtime)
             implementation(libs.navigation3.ui)
-            implementation(libs.kotlinx.coroutinesCore)
+            implementation(libs.androidx.lifecycle.viewmodelNavigation3)
+            implementation(libs.androidx.savedstate)
             implementation(libs.kotlinx.serializationCore)
-            implementation(libs.api.contract)
-            implementation(libs.ktor.client.core)
-            implementation(libs.ktor.client.content.negotiation)
-            implementation(libs.ktor.serialization.json)
-            implementation(libs.ktor.client.logging)
-            implementation(libs.ktor.client.auth)
             implementation(libs.coil.compose)
             implementation(libs.coil.network.ktor3)
-            implementation(libs.filekit.dialogs.compose)
-        }
-        commonTest.dependencies {
-            implementation(projects.core.testing)
-            implementation(libs.ktor.client.mock)
         }
     }
 }
