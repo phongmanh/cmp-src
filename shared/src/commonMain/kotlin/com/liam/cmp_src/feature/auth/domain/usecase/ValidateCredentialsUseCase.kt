@@ -2,7 +2,7 @@ package com.liam.cmp_src.feature.auth.domain.usecase
 
 import com.liam.cmp_src.feature.auth.domain.model.CredentialErrors
 import com.liam.cmp_src.feature.auth.domain.model.EmailError
-import com.liam.cmp_src.feature.auth.domain.model.PasswordError
+import com.liam.cmp_src.core.domain.model.PasswordError
 
 /**
  * Checks an email/password pair against the app's own input rules, before anything is sent

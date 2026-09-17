@@ -17,7 +17,7 @@ import com.example.api.ApiRoutes
  * uploaded avatar whatever it is sent, so echoing one back would leave a stored address pointing
  * at an image that had just been deleted. A provider's address is unaffected and must be echoed.
  */
-internal fun isStoredImageUrl(url: String): Boolean =
+fun isStoredImageUrl(url: String): Boolean =
     url.absolutePath()?.startsWith(ApiRoutes.Images.PATH) == true
 
 /**
@@ -33,7 +33,7 @@ internal fun isStoredImageUrl(url: String): Boolean =
  * Returning `null` for "nothing to change" is also what Coil's `Mapper` contract asks for; see
  * `avatarImageLoaderFactory`.
  */
-internal fun sameOriginImageUrl(url: String, baseUrl: String): String? {
+fun sameOriginImageUrl(url: String, baseUrl: String): String? {
     if (!isStoredImageUrl(url)) return null
     val path = url.absolutePath() ?: return null
     return (baseUrl.trimEnd('/') + path).takeIf { it != url }

@@ -7,9 +7,9 @@ import com.liam.cmp_src.core.network.getOrNull
 import com.liam.cmp_src.feature.auth.data.remote.AuthApi
 import com.liam.cmp_src.feature.auth.data.social.SocialAuthClient
 import com.liam.cmp_src.feature.auth.data.social.SocialCredential
-import com.liam.cmp_src.feature.auth.domain.model.AuthResult
-import com.liam.cmp_src.feature.auth.domain.model.SocialProvider
-import com.liam.cmp_src.feature.auth.domain.repository.AuthRepository
+import com.liam.cmp_src.core.domain.model.AuthResult
+import com.liam.cmp_src.core.domain.model.SocialProvider
+import com.liam.cmp_src.core.domain.repository.AuthRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
@@ -23,7 +23,7 @@ import kotlinx.coroutines.withContext
  * both sign-in paths end at the same place and the server is the only issuer of tokens.
  *
  * Nothing here throws: [AuthApi] returns `ApiResult`, and each failure is mapped to the domain's
- * [com.liam.cmp_src.feature.auth.domain.model.AuthError] by [toAuthError].
+ * [com.liam.cmp_src.core.domain.model.AuthError] by [toAuthError].
  *
  * The [dispatcher] is injected rather than named here so tests can run the flow on their own
  * scheduler.

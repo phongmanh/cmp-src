@@ -28,22 +28,23 @@ import com.example.api.user.UserResponse
 import com.liam.cmp_src.core.ui.modifier.handCursor
 import com.liam.cmp_src.core.ui.theme.Dimens
 import com.liam.cmp_src.core.ui.theme.auroraColors
-import com.liam.cmp_src.feature.auth.presentation.component.ActionButtonState
-import com.liam.cmp_src.feature.auth.presentation.component.AnimatedAuthBackground
-import com.liam.cmp_src.feature.auth.presentation.component.AuthTextField
-import com.liam.cmp_src.feature.auth.presentation.component.ErrorBanner
-import com.liam.cmp_src.feature.auth.presentation.component.PrimaryActionButton
-import com.liam.cmp_src.feature.auth.presentation.login.asMessage
+import com.liam.cmp_src.core.ui.component.ActionButtonState
+import com.liam.cmp_src.core.ui.component.AnimatedAuthBackground
+import com.liam.cmp_src.core.ui.component.AuthTextField
+import com.liam.cmp_src.core.ui.component.ErrorBanner
+import com.liam.cmp_src.core.ui.component.PrimaryActionButton
+import com.liam.cmp_src.core.ui.message.asMessage
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import cmpsrc.shared.generated.resources.signup_title
 import cmpsrc.shared.generated.resources.signup_subtitle
 import com.liam.cmp_src.core.ui.theme.AppTheme
-import com.liam.cmp_src.feature.auth.domain.model.AuthError
+import com.liam.cmp_src.core.domain.model.AuthError
 import com.liam.cmp_src.feature.auth.domain.model.CredentialErrors
 import com.liam.cmp_src.feature.auth.domain.model.EmailError
 import com.liam.cmp_src.feature.auth.presentation.component.BrandMark
 import com.liam.cmp_src.feature.auth.presentation.login.LoginUiState
+import com.liam.cmp_src.feature.auth.presentation.login.asMessage
 
 @Composable
 fun SignUpRoute(

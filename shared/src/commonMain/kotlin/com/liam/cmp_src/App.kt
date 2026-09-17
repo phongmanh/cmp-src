@@ -19,16 +19,17 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.liam.cmp_src.core.image.setAvatarImageLoaderFactory
-import com.liam.cmp_src.core.navigation.AppRoute
-import com.liam.cmp_src.core.navigation.appNavConfiguration
-import com.liam.cmp_src.core.navigation.resetTo
+import com.liam.cmp_src.image.setAvatarImageLoaderFactory
+import com.liam.cmp_src.navigation.AppRoute
+import com.liam.cmp_src.navigation.appNavConfiguration
+import com.liam.cmp_src.navigation.resetTo
 import com.liam.cmp_src.core.ui.theme.AppTheme
 import com.liam.cmp_src.di.appModule
 import com.liam.cmp_src.di.rememberPlatformModule
 import com.liam.cmp_src.feature.auth.presentation.login.LoginRoute
 import com.liam.cmp_src.feature.auth.presentation.signup.SignUpRoute
 import com.liam.cmp_src.feature.home.HomeRoute
+import com.liam.cmp_src.feature.profile.ProfileRoute
 import io.ktor.client.HttpClient
 import org.koin.compose.KoinApplication
 import org.koin.compose.koinInject
@@ -107,9 +108,14 @@ private fun AppRoot() {
             }
 
             entry<AppRoute.Home> { route ->
+                // Signing out from the header or from the profile tab ends in the same place.
+                val onSignedOut = { backStack.resetTo(AppRoute.Login) }
                 HomeRoute(
                     user = route.user,
-                    onSignedOut = { backStack.resetTo(AppRoute.Login) },
+                    onSignedOut = onSignedOut,
+                    profileTab = { onProfileUpdated ->
+                        ProfileRoute(onLogout = onSignedOut, onProfileUpdated = onProfileUpdated)
+                    },
                 )
             }
         },

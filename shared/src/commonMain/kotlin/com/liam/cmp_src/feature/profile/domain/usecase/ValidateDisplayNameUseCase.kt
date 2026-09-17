@@ -1,7 +1,7 @@
 package com.liam.cmp_src.feature.profile.domain.usecase
 
 import com.example.api.common.FieldLimits
-import com.liam.cmp_src.feature.auth.domain.model.DisplayNameError
+import com.liam.cmp_src.feature.profile.domain.model.DisplayNameError
 
 /**
  * Checks a display name against the bound the server enforces, before anything is sent.

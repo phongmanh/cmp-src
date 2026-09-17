@@ -1,11 +1,11 @@
 package com.liam.cmp_src.feature.auth
 
-import com.liam.cmp_src.feature.auth.domain.model.AuthError
-import com.liam.cmp_src.feature.auth.domain.model.AuthResult
+import com.liam.cmp_src.core.domain.model.AuthError
+import com.liam.cmp_src.core.domain.model.AuthResult
 import com.liam.cmp_src.feature.auth.domain.model.EmailError
-import com.liam.cmp_src.feature.auth.domain.model.PasswordError
-import com.liam.cmp_src.feature.auth.domain.model.SocialProvider
-import com.liam.cmp_src.feature.auth.domain.repository.AuthRepository
+import com.liam.cmp_src.core.domain.model.PasswordError
+import com.liam.cmp_src.core.domain.model.SocialProvider
+import com.liam.cmp_src.core.domain.repository.AuthRepository
 import com.liam.cmp_src.feature.auth.domain.usecase.SignInWithEmailUseCase
 import com.liam.cmp_src.feature.auth.domain.usecase.SignInWithSocialUseCase
 import com.liam.cmp_src.feature.auth.domain.usecase.ValidateCredentialsUseCase
@@ -13,6 +13,7 @@ import com.liam.cmp_src.feature.auth.presentation.login.LoginAction
 import com.liam.cmp_src.feature.auth.presentation.login.LoginEvent
 import com.liam.cmp_src.feature.auth.presentation.login.LoginStatus
 import com.liam.cmp_src.feature.auth.presentation.login.LoginViewModel
+import com.liam.cmp_src.core.testing.FakeAuthRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi

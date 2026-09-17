@@ -1,6 +1,6 @@
 package com.liam.cmp_src.feature.auth.data.social
 
-import com.liam.cmp_src.feature.auth.domain.model.SocialProvider
+import com.liam.cmp_src.core.domain.model.SocialProvider
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
 

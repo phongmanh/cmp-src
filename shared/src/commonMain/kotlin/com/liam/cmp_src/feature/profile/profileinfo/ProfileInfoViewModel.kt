@@ -3,8 +3,8 @@ package com.liam.cmp_src.feature.profile.profileinfo
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.api.user.UserResponse
-import com.liam.cmp_src.core.SUCCESS_HOLD_MILLIS
-import com.liam.cmp_src.feature.auth.domain.model.AuthResult
+import com.liam.cmp_src.core.ui.SUCCESS_HOLD_MILLIS
+import com.liam.cmp_src.core.domain.model.AuthResult
 import com.liam.cmp_src.feature.profile.domain.usecase.RemoveAvatarUseCase
 import com.liam.cmp_src.feature.profile.domain.usecase.UpdateDisplayNameUseCase
 import com.liam.cmp_src.feature.profile.domain.usecase.UploadAvatarUseCase

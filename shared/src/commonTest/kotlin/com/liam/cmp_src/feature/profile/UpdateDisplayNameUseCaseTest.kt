@@ -1,6 +1,6 @@
 package com.liam.cmp_src.feature.profile
 
-import com.liam.cmp_src.feature.auth.FakeAuthRepository
+import com.liam.cmp_src.core.testing.FakeAuthRepository
 import com.liam.cmp_src.feature.profile.domain.usecase.UpdateDisplayNameUseCase
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test

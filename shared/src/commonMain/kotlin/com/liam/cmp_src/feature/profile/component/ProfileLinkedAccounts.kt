@@ -23,9 +23,9 @@ import com.example.api.user.UserResponse
 import com.liam.cmp_src.core.ui.theme.AppTheme
 import com.liam.cmp_src.core.ui.theme.Dimens
 import com.liam.cmp_src.core.ui.theme.auroraColors
-import com.liam.cmp_src.feature.auth.domain.model.SocialProvider
-import com.liam.cmp_src.feature.auth.presentation.login.asLabel
-import com.liam.cmp_src.feature.home.component.sampleUser
+import com.liam.cmp_src.core.domain.model.SocialProvider
+import com.liam.cmp_src.core.ui.message.asLabel
+import com.liam.cmp_src.core.ui.component.sampleUser
 import cmpsrc.shared.generated.resources.Res
 import cmpsrc.shared.generated.resources.cd_facebook_logo
 import cmpsrc.shared.generated.resources.cd_google_logo

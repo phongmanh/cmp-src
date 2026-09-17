@@ -3,7 +3,7 @@ package com.liam.cmp_src.feature.profile.data
 import com.example.api.common.ErrorCode
 import com.example.api.common.FieldLimits
 import com.liam.cmp_src.core.network.ApiError
-import com.liam.cmp_src.feature.auth.domain.model.AuthError
+import com.liam.cmp_src.core.domain.model.AuthError
 import io.ktor.http.HttpStatusCode
 
 /**

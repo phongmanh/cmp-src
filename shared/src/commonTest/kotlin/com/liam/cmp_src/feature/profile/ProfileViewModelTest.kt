@@ -1,10 +1,10 @@
 package com.liam.cmp_src.feature.profile
 
-import com.liam.cmp_src.feature.auth.FakeAuthRepository
-import com.liam.cmp_src.feature.auth.domain.model.AuthError
-import com.liam.cmp_src.feature.auth.domain.model.AuthResult
-import com.liam.cmp_src.feature.auth.domain.usecase.GetCurrentUserUseCase
-import com.liam.cmp_src.feature.auth.domain.usecase.SignOutUseCase
+import com.liam.cmp_src.core.testing.FakeAuthRepository
+import com.liam.cmp_src.core.domain.model.AuthError
+import com.liam.cmp_src.core.domain.model.AuthResult
+import com.liam.cmp_src.feature.profile.domain.usecase.GetCurrentUserUseCase
+import com.liam.cmp_src.core.domain.usecase.SignOutUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi

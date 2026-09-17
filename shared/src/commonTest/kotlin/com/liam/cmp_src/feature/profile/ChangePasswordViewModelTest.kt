@@ -1,12 +1,12 @@
 package com.liam.cmp_src.feature.profile
 
 import com.example.api.common.FieldLimits
-import com.liam.cmp_src.feature.auth.FakeAuthRepository
-import com.liam.cmp_src.feature.auth.domain.model.AuthError
-import com.liam.cmp_src.feature.auth.domain.model.AuthResult
-import com.liam.cmp_src.feature.auth.domain.model.PasswordError
-import com.liam.cmp_src.feature.auth.domain.usecase.ChangePasswordUseCase
-import com.liam.cmp_src.feature.auth.domain.usecase.ValidateChangePasswordUseCase
+import com.liam.cmp_src.core.testing.FakeAuthRepository
+import com.liam.cmp_src.core.domain.model.AuthError
+import com.liam.cmp_src.core.domain.model.AuthResult
+import com.liam.cmp_src.core.domain.model.PasswordError
+import com.liam.cmp_src.feature.profile.domain.usecase.ChangePasswordUseCase
+import com.liam.cmp_src.feature.profile.domain.usecase.ValidateChangePasswordUseCase
 import com.liam.cmp_src.feature.profile.changepassword.ChangePasswordAction
 import com.liam.cmp_src.feature.profile.changepassword.ChangePasswordEvent
 import com.liam.cmp_src.feature.profile.changepassword.ChangePasswordStatus

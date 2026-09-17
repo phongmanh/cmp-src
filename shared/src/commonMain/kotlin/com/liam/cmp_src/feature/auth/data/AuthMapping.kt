@@ -2,8 +2,8 @@ package com.liam.cmp_src.feature.auth.data
 
 import com.example.api.common.ErrorCode
 import com.liam.cmp_src.core.network.ApiError
-import com.liam.cmp_src.feature.auth.domain.model.AuthError
-import com.liam.cmp_src.feature.auth.domain.model.SocialProvider
+import com.liam.cmp_src.core.domain.model.AuthError
+import com.liam.cmp_src.core.domain.model.SocialProvider
 import io.ktor.http.HttpStatusCode
 import com.example.api.auth.SocialProvider as ContractSocialProvider
 

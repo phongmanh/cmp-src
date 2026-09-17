@@ -1,7 +1,7 @@
 package com.liam.cmp_src.feature.profile
 
 import com.example.api.common.FieldLimits
-import com.liam.cmp_src.feature.auth.domain.model.DisplayNameError
+import com.liam.cmp_src.feature.profile.domain.model.DisplayNameError
 import com.liam.cmp_src.feature.profile.domain.usecase.ValidateDisplayNameUseCase
 import kotlin.test.Test
 import kotlin.test.assertEquals

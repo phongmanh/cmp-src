@@ -1,6 +1,6 @@
 package com.liam.cmp_src.feature.auth.presentation.signup
 
-import com.liam.cmp_src.feature.auth.domain.model.AuthError
+import com.liam.cmp_src.core.domain.model.AuthError
 import com.liam.cmp_src.feature.auth.domain.model.CredentialErrors
 
 sealed interface SignUpUiStatus {

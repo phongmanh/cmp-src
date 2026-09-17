@@ -1,8 +1,8 @@
 package com.liam.cmp_src.feature.auth.presentation.login
 
-import com.liam.cmp_src.feature.auth.domain.model.AuthError
+import com.liam.cmp_src.core.domain.model.AuthError
 import com.liam.cmp_src.feature.auth.domain.model.CredentialErrors
-import com.liam.cmp_src.feature.auth.domain.model.SocialProvider
+import com.liam.cmp_src.core.domain.model.SocialProvider
 
 /**
  * Where the sign-in attempt currently stands.

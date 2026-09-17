@@ -1,7 +1,7 @@
 package com.liam.cmp_src.feature.auth
 
 import com.liam.cmp_src.feature.auth.domain.model.EmailError
-import com.liam.cmp_src.feature.auth.domain.model.PasswordError
+import com.liam.cmp_src.core.domain.model.PasswordError
 import com.liam.cmp_src.feature.auth.domain.usecase.ValidateCredentialsUseCase
 import kotlin.test.Test
 import kotlin.test.assertEquals

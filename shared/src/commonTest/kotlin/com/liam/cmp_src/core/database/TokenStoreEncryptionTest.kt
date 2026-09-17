@@ -2,7 +2,6 @@ package com.liam.cmp_src.core.database
 
 import com.liam.cmp_src.core.database.entities.EncryptedAuthTokens
 import com.liam.cmp_src.core.network.AuthTokens
-import com.liam.cmp_src.core.security.FakeTokenCipher
 import com.liam.cmp_src.core.security.TokenCipherException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest

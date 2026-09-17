@@ -2,9 +2,9 @@ package com.liam.cmp_src.feature.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.liam.cmp_src.feature.auth.domain.model.AuthResult
-import com.liam.cmp_src.feature.auth.domain.usecase.GetCurrentUserUseCase
-import com.liam.cmp_src.feature.auth.domain.usecase.SignOutUseCase
+import com.liam.cmp_src.core.domain.model.AuthResult
+import com.liam.cmp_src.feature.profile.domain.usecase.GetCurrentUserUseCase
+import com.liam.cmp_src.core.domain.usecase.SignOutUseCase
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow

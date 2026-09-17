@@ -1,7 +1,7 @@
 package com.liam.cmp_src.feature.profile.changepassword
 
-import com.liam.cmp_src.feature.auth.domain.model.AuthError
-import com.liam.cmp_src.feature.auth.domain.model.ChangePasswordErrors
+import com.liam.cmp_src.core.domain.model.AuthError
+import com.liam.cmp_src.feature.profile.domain.model.ChangePasswordErrors
 
 /**
  * Where the change-password attempt currently stands.

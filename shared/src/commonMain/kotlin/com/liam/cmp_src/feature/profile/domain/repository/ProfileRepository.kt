@@ -1,10 +1,10 @@
 package com.liam.cmp_src.feature.profile.domain.repository
 
-import com.liam.cmp_src.feature.auth.domain.model.AuthResult
+import com.liam.cmp_src.core.domain.model.AuthResult
 
 /**
  * The profile boundary the domain layer depends on. The implementation lives in the data layer
- * (`feature.profile.data.ProfileRepositoryImpl`) and is bound in the DI module.
+ * (`feature.profile.data.ProfileRepositoryImpl`) and is bound in `profileModule`.
  *
  * Every function answers with the whole account as the server now holds it, so a caller never has
  * to reason about which fields its request happened to touch.

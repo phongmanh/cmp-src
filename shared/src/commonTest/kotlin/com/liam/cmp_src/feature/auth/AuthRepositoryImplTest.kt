@@ -15,9 +15,9 @@ import com.liam.cmp_src.feature.auth.data.AuthRepositoryImpl
 import com.liam.cmp_src.feature.auth.data.remote.AuthApi
 import com.liam.cmp_src.feature.auth.data.social.SocialAuthClient
 import com.liam.cmp_src.feature.auth.data.social.SocialCredential
-import com.liam.cmp_src.feature.auth.domain.model.AuthError
-import com.liam.cmp_src.feature.auth.domain.model.AuthResult
-import com.liam.cmp_src.feature.auth.domain.model.SocialProvider
+import com.liam.cmp_src.core.domain.model.AuthError
+import com.liam.cmp_src.core.domain.model.AuthResult
+import com.liam.cmp_src.core.domain.model.SocialProvider
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.MockRequestHandleScope
 import io.ktor.client.engine.mock.respond

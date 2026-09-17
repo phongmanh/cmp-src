@@ -1,8 +1,9 @@
 package com.liam.cmp_src.feature.auth
 
-import com.liam.cmp_src.feature.auth.domain.model.AuthError
-import com.liam.cmp_src.feature.auth.domain.model.AuthResult
+import com.liam.cmp_src.core.domain.model.AuthError
+import com.liam.cmp_src.core.domain.model.AuthResult
 import com.liam.cmp_src.feature.auth.domain.usecase.SignInWithEmailUseCase
+import com.liam.cmp_src.core.testing.FakeAuthRepository
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals

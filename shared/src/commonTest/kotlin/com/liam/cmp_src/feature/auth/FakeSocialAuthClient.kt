@@ -2,7 +2,7 @@ package com.liam.cmp_src.feature.auth
 
 import com.liam.cmp_src.feature.auth.data.social.SocialAuthClient
 import com.liam.cmp_src.feature.auth.data.social.SocialCredential
-import com.liam.cmp_src.feature.auth.domain.model.SocialProvider
+import com.liam.cmp_src.core.domain.model.SocialProvider
 
 /**
  * Stands in for a provider SDK. Returns whatever [result] is set to and records which provider

@@ -24,9 +24,9 @@ import com.liam.cmp_src.core.ui.component.GlassCard
 import com.liam.cmp_src.core.ui.theme.AppTheme
 import com.liam.cmp_src.core.ui.theme.Dimens
 import com.liam.cmp_src.core.ui.theme.auroraColors
-import com.liam.cmp_src.feature.home.component.UserAvatar
-import com.liam.cmp_src.feature.home.component.displayLabel
-import com.liam.cmp_src.feature.home.component.sampleUser
+import com.liam.cmp_src.core.ui.component.UserAvatar
+import com.liam.cmp_src.core.ui.component.displayLabel
+import com.liam.cmp_src.core.ui.component.sampleUser
 import cmpsrc.shared.generated.resources.Res
 import cmpsrc.shared.generated.resources.cd_verified
 import cmpsrc.shared.generated.resources.ic_check

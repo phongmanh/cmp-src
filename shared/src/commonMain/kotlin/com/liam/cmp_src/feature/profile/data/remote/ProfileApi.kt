@@ -11,6 +11,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.delete
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
+import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
@@ -20,7 +21,8 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 
 /**
- * The three calls that change a profile, spoken entirely in `api-contract` types.
+ * The calls that change a profile, and the read that confirms one, spoken entirely in
+ * `api-contract` types.
  *
  * Kept apart from `AuthApi` because none of this is the session: no call here issues, refreshes or
  * drops a token, so this class needs no `TokenStore` and the client's `Auth` plugin is the only
@@ -93,4 +95,15 @@ class ProfileApi(
      */
     suspend fun removeAvatar(): ApiResult<Unit> =
         apiCallForStatus { client.delete(ApiRoutes.Users.ME_AVATAR) }
+
+    /**
+     * The account as the server now holds it — what a call that answers without a body (see
+     * [removeAvatar]) is followed by.
+     *
+     * The same `GET /users/me` that `AuthApi` makes to hydrate a sign-in. Repeated here rather than
+     * shared because the two features read it for different reasons, and profile must not depend
+     * on auth's data layer to ask.
+     */
+    suspend fun currentUser(): ApiResult<UserResponse> =
+        apiCall { client.get(ApiRoutes.Users.ME) }
 }

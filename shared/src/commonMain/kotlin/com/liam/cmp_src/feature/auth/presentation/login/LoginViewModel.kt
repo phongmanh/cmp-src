@@ -2,10 +2,10 @@ package com.liam.cmp_src.feature.auth.presentation.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.liam.cmp_src.core.SUCCESS_HOLD_MILLIS
-import com.liam.cmp_src.feature.auth.domain.model.AuthResult
+import com.liam.cmp_src.core.ui.SUCCESS_HOLD_MILLIS
+import com.liam.cmp_src.core.domain.model.AuthResult
 import com.liam.cmp_src.feature.auth.domain.model.CredentialErrors
-import com.liam.cmp_src.feature.auth.domain.model.SocialProvider
+import com.liam.cmp_src.core.domain.model.SocialProvider
 import com.liam.cmp_src.feature.auth.domain.usecase.SignInWithEmailUseCase
 import com.liam.cmp_src.feature.auth.domain.usecase.SignInWithSocialUseCase
 import com.liam.cmp_src.feature.auth.domain.usecase.ValidateCredentialsUseCase

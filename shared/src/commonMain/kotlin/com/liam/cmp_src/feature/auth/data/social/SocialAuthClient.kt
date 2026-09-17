@@ -1,7 +1,7 @@
 package com.liam.cmp_src.feature.auth.data.social
 
-import com.liam.cmp_src.feature.auth.domain.model.AuthError
-import com.liam.cmp_src.feature.auth.domain.model.SocialProvider
+import com.liam.cmp_src.core.domain.model.AuthError
+import com.liam.cmp_src.core.domain.model.SocialProvider
 
 /**
  * What a provider's sign-in sheet handed back.

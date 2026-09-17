@@ -19,7 +19,7 @@ import org.jetbrains.compose.resources.StringResource
  * Each constant carries its own label and icon so the bar can be built by iterating [entries] —
  * adding a section is one constant here plus a branch in `HomeTabContent`, with no bar changes.
  *
- * These are not [com.liam.cmp_src.core.navigation.AppRoute] destinations on purpose: switching
+ * These are not `AppRoute` destinations on purpose: switching
  * tabs is a change of content *within* the home screen, not a push onto the app's back stack,
  * which the back stack models as handovers that clear what came before.
  */

@@ -2,8 +2,8 @@ package com.liam.cmp_src.feature.profile.profileinfo
 
 import com.example.api.user.UserResponse
 import com.liam.cmp_src.core.network.isStoredImageUrl
-import com.liam.cmp_src.feature.auth.domain.model.AuthError
-import com.liam.cmp_src.feature.auth.domain.model.DisplayNameError
+import com.liam.cmp_src.core.domain.model.AuthError
+import com.liam.cmp_src.feature.profile.domain.model.DisplayNameError
 
 /**
  * Where the edit-profile dialog's work currently stands.

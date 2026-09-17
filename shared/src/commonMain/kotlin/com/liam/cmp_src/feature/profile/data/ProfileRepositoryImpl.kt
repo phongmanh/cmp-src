@@ -2,8 +2,7 @@ package com.liam.cmp_src.feature.profile.data
 
 import com.example.api.user.UserResponse
 import com.liam.cmp_src.core.network.ApiResult
-import com.liam.cmp_src.feature.auth.data.remote.AuthApi
-import com.liam.cmp_src.feature.auth.domain.model.AuthResult
+import com.liam.cmp_src.core.domain.model.AuthResult
 import com.liam.cmp_src.feature.profile.data.remote.ProfileApi
 import com.liam.cmp_src.feature.profile.domain.repository.ProfileRepository
 import kotlinx.coroutines.CoroutineDispatcher
@@ -12,10 +11,10 @@ import kotlinx.coroutines.withContext
 /**
  * Profile edits, backed by the API.
  *
- * [authApi] is here for one call and one only: `DELETE /users/me/avatar` answers `204`, so
- * removing a picture is followed by a read of `GET /users/me` to say what the account looks like
- * afterwards. Copying the old user with a blanked avatar would usually be right and would
- * occasionally be a lie, and this repository's contract is that every answer is the server's.
+ * `DELETE /users/me/avatar` answers `204`, so removing a picture is followed by a read of
+ * `GET /users/me` to say what the account looks like afterwards. Copying the old user with a
+ * blanked avatar would usually be right and would occasionally be a lie, and this repository's
+ * contract is that every answer is the server's.
  *
  * Nothing here throws: [ProfileApi] returns `ApiResult`, and each failure is mapped to the domain
  * by [toProfileError]. The [dispatcher] is injected rather than named here so tests can run the
@@ -23,7 +22,6 @@ import kotlinx.coroutines.withContext
  */
 class ProfileRepositoryImpl(
     private val profileApi: ProfileApi,
-    private val authApi: AuthApi,
     private val dispatcher: CoroutineDispatcher,
 ) : ProfileRepository {
 
@@ -45,7 +43,7 @@ class ProfileRepositoryImpl(
 
     override suspend fun removeAvatar(): AuthResult = withContext(dispatcher) {
         when (val result = profileApi.removeAvatar()) {
-            is ApiResult.Success -> authApi.currentUser().toAuthResult()
+            is ApiResult.Success -> profileApi.currentUser().toAuthResult()
             is ApiResult.Failure -> AuthResult.Failure(result.error.toProfileError())
         }
     }

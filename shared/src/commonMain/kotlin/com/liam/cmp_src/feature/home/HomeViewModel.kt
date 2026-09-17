@@ -2,7 +2,7 @@ package com.liam.cmp_src.feature.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.liam.cmp_src.feature.auth.domain.usecase.SignOutUseCase
+import com.liam.cmp_src.core.domain.usecase.SignOutUseCase
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow

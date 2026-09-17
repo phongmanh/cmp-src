@@ -35,6 +35,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.api.user.UserResponse
+import com.liam.cmp_src.core.ui.component.UserAvatar
+import com.liam.cmp_src.core.ui.component.displayLabel
+import com.liam.cmp_src.core.ui.component.sampleUser
 import com.liam.cmp_src.core.ui.modifier.handCursor
 import com.liam.cmp_src.core.ui.theme.AppTheme
 import com.liam.cmp_src.core.ui.theme.Dimens

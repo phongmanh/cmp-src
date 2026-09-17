@@ -53,16 +53,12 @@ import com.liam.cmp_src.core.ui.component.StaggeredEntrance
 import com.liam.cmp_src.core.ui.theme.AppTheme
 import com.liam.cmp_src.core.ui.theme.Dimens
 import com.liam.cmp_src.core.ui.theme.auroraColors
-import com.liam.cmp_src.feature.auth.presentation.component.AnimatedAuthBackground
+import com.liam.cmp_src.core.ui.component.AnimatedAuthBackground
 import com.liam.cmp_src.feature.home.component.HomeBottomBar
 import com.liam.cmp_src.feature.home.component.HomeTopBar
-import com.liam.cmp_src.feature.home.component.displayLabel
-import com.liam.cmp_src.feature.home.component.sampleUser
-import com.liam.cmp_src.feature.profile.ProfileRoute
+import com.liam.cmp_src.core.ui.component.displayLabel
+import com.liam.cmp_src.core.ui.component.sampleUser
 import kotlinx.serialization.json.Json
-import com.liam.cmp_src.feature.profile.ProfileScreen
-import com.liam.cmp_src.feature.profile.ProfileUiState
-import com.liam.cmp_src.getPlatform
 import cmpsrc.shared.generated.resources.Res
 import cmpsrc.shared.generated.resources.home_greeting
 import cmpsrc.shared.generated.resources.home_notifications_unavailable
@@ -84,11 +80,16 @@ private const val TAB_SLIDE_DIVISOR = 6
  * stateless [HomeScreen] below takes a user and a callback and can be previewed without Koin.
  * [onSignedOut] fires once the session has actually been ended, so the app never returns to the
  * login screen while the old tokens are still live.
+ *
+ * [profileTab] is the profile feature, supplied by whoever hosts this route: home must not depend
+ * on another feature, so it only reserves the slot. It is handed the callback to report an edited
+ * account through, which this route uses to keep the header in step with the profile.
  */
 @Composable
 fun HomeRoute(
     user: UserResponse,
     onSignedOut: () -> Unit,
+    profileTab: @Composable (onProfileUpdated: (UserResponse) -> Unit) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = koinViewModel(),
 ) {
@@ -114,12 +115,7 @@ fun HomeRoute(
         onSignOut = viewModel::onSignOut,
         // The profile tab is a whole feature with its own ViewModel, handed in as a slot so
         // HomeScreen itself stays stateless and Koin-free (and therefore previewable).
-        profileTab = {
-            ProfileRoute(
-                onLogout = onSignedOut,
-                onProfileUpdated = { updated -> currentUser = updated },
-            )
-        },
+        profileTab = { profileTab { updated -> currentUser = updated } },
         modifier = modifier,
     )
 }
@@ -350,12 +346,8 @@ private fun HomeScreenPreview() {
         HomeScreen(
             user = sampleUser(),
             onSignOut = {},
-            profileTab = {
-                ProfileScreen(
-                    state = ProfileUiState.Success(sampleUser()),
-                    onAction = {},
-                )
-            },
+            // The real tab belongs to another feature; the preview only needs the shell around it.
+            profileTab = { Box(Modifier.fillMaxSize()) },
         )
     }
 }

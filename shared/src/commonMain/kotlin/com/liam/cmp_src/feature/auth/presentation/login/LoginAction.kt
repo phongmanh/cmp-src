@@ -1,6 +1,6 @@
 package com.liam.cmp_src.feature.auth.presentation.login
 
-import com.liam.cmp_src.feature.auth.domain.model.SocialProvider
+import com.liam.cmp_src.core.domain.model.SocialProvider
 
 /** Everything the login screen sends to its ViewModel — user input, plus screen entry. */
 sealed interface LoginAction {

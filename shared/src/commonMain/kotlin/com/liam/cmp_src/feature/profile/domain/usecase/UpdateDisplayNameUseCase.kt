@@ -2,7 +2,7 @@ package com.liam.cmp_src.feature.profile.domain.usecase
 
 import com.example.api.user.UserResponse
 import com.liam.cmp_src.core.network.isStoredImageUrl
-import com.liam.cmp_src.feature.auth.domain.model.AuthResult
+import com.liam.cmp_src.core.domain.model.AuthResult
 import com.liam.cmp_src.feature.profile.domain.repository.ProfileRepository
 
 /**

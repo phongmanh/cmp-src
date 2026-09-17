@@ -1,9 +1,9 @@
 package com.liam.cmp_src.feature.profile.domain.usecase
 
 import com.example.api.common.FieldLimits
-import com.liam.cmp_src.core.image.avatarContentType
-import com.liam.cmp_src.feature.auth.domain.model.AuthError
-import com.liam.cmp_src.feature.auth.domain.model.AuthResult
+import com.liam.cmp_src.feature.profile.domain.avatarContentType
+import com.liam.cmp_src.core.domain.model.AuthError
+import com.liam.cmp_src.core.domain.model.AuthResult
 import com.liam.cmp_src.feature.profile.domain.repository.ProfileRepository
 
 /**

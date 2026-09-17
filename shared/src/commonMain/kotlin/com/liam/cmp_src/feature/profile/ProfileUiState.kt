@@ -1,7 +1,7 @@
 package com.liam.cmp_src.feature.profile
 
 import com.example.api.user.UserResponse
-import com.liam.cmp_src.feature.auth.domain.model.AuthError
+import com.liam.cmp_src.core.domain.model.AuthError
 
 /**
  * What the profile screen is showing.
