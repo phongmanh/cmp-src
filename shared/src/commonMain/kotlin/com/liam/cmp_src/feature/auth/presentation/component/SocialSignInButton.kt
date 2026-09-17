@@ -37,13 +37,13 @@ import com.liam.cmp_src.core.ui.theme.AppTheme
 import com.liam.cmp_src.core.ui.theme.Dimens
 import com.liam.cmp_src.core.ui.theme.auroraColors
 import com.liam.cmp_src.core.domain.model.SocialProvider
-import cmpsrc.shared.generated.resources.Res
-import cmpsrc.shared.generated.resources.cd_facebook_logo
-import cmpsrc.shared.generated.resources.cd_google_logo
-import cmpsrc.shared.generated.resources.ic_facebook
-import cmpsrc.shared.generated.resources.ic_google
-import cmpsrc.shared.generated.resources.login_facebook
-import cmpsrc.shared.generated.resources.login_google
+import cmpsrc.core.ui.generated.resources.Res
+import cmpsrc.core.ui.generated.resources.cd_facebook_logo
+import cmpsrc.core.ui.generated.resources.cd_google_logo
+import cmpsrc.core.ui.generated.resources.ic_facebook
+import cmpsrc.core.ui.generated.resources.ic_google
+import cmpsrc.core.ui.generated.resources.login_facebook
+import cmpsrc.core.ui.generated.resources.login_google
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 

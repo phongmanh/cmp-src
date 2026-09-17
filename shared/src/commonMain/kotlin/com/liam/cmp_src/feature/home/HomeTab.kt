@@ -1,6 +1,8 @@
 package com.liam.cmp_src.feature.home
 
 import androidx.compose.runtime.saveable.Saver
+import cmpsrc.core.ui.generated.resources.Res as UiRes
+import cmpsrc.core.ui.generated.resources.ic_person
 import cmpsrc.shared.generated.resources.Res
 import cmpsrc.shared.generated.resources.home_tab_activity
 import cmpsrc.shared.generated.resources.home_tab_home
@@ -8,7 +10,6 @@ import cmpsrc.shared.generated.resources.home_tab_profile
 import cmpsrc.shared.generated.resources.home_tab_search
 import cmpsrc.shared.generated.resources.ic_bolt
 import cmpsrc.shared.generated.resources.ic_home
-import cmpsrc.shared.generated.resources.ic_person
 import cmpsrc.shared.generated.resources.ic_search
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
@@ -30,7 +31,7 @@ enum class HomeTab(
     HOME(label = Res.string.home_tab_home, icon = Res.drawable.ic_home),
     SEARCH(label = Res.string.home_tab_search, icon = Res.drawable.ic_search),
     ACTIVITY(label = Res.string.home_tab_activity, icon = Res.drawable.ic_bolt),
-    PROFILE(label = Res.string.home_tab_profile, icon = Res.drawable.ic_person),
+    PROFILE(label = Res.string.home_tab_profile, icon = UiRes.drawable.ic_person),
     ;
 
     companion object {

@@ -46,6 +46,8 @@ import com.liam.cmp_src.core.ui.component.PrimaryActionButton
 import com.liam.cmp_src.core.ui.message.asMessage
 import com.liam.cmp_src.core.ui.component.UserAvatar
 import com.liam.cmp_src.core.ui.component.sampleUser
+import cmpsrc.core.ui.generated.resources.Res as UiRes
+import cmpsrc.core.ui.generated.resources.ic_person
 import cmpsrc.shared.generated.resources.Res
 import cmpsrc.shared.generated.resources.cd_name_icon
 import cmpsrc.shared.generated.resources.edit_profile_change_photo
@@ -57,7 +59,6 @@ import cmpsrc.shared.generated.resources.edit_profile_remove_photo
 import cmpsrc.shared.generated.resources.edit_profile_save_name
 import cmpsrc.shared.generated.resources.edit_profile_subtitle
 import cmpsrc.shared.generated.resources.edit_profile_title
-import cmpsrc.shared.generated.resources.ic_person
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -170,7 +171,7 @@ fun ProfileInfoDialogContent(
                 onValueChange = { onAction(ProfileInfoAction.NameChanged(it)) },
                 label = stringResource(Res.string.edit_profile_name_label),
                 placeholder = stringResource(Res.string.edit_profile_name_placeholder),
-                leadingIcon = Res.drawable.ic_person,
+                leadingIcon = UiRes.drawable.ic_person,
                 leadingIconDescription = stringResource(Res.string.cd_name_icon),
                 enabled = !state.isBusy,
                 errorMessage = state.nameError?.asMessage(),

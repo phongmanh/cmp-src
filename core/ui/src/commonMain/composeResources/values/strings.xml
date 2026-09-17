@@ -1,0 +1,41 @@
+<resources>
+    <!-- Form controls (AuthTextField, PrimaryActionButton) and social provider names -->
+    <string name="login_email_label">Email</string>
+    <string name="login_email_placeholder">you@example.com</string>
+    <string name="login_show_password">Show password</string>
+    <string name="login_hide_password">Hide password</string>
+    <string name="login_submit">Sign in</string>
+    <string name="login_submit_in_progress">Signing in</string>
+    <string name="login_submit_success">Signed in</string>
+    <string name="login_google">Google</string>
+    <string name="login_facebook">Facebook</string>
+
+    <!-- Password validation (PasswordError) -->
+    <string name="validation_password_blank">Enter your password</string>
+    <string name="validation_password_too_short">Use at least %1$d characters</string>
+    <string name="validation_password_too_long">Use at most %1$d characters</string>
+    <string name="validation_password_same_as_current">Pick something different from your current password</string>
+    <string name="validation_password_mismatch">These two don't match</string>
+
+    <!-- Account failures (AuthError) -->
+    <string name="error_invalid_credentials">That email and password don't match an account</string>
+    <string name="error_network">Can't reach the server. Check your connection and try again</string>
+    <string name="error_cancelled">Sign-in was cancelled</string>
+    <string name="error_provider_unavailable">%1$s sign-in isn't available right now</string>
+    <string name="error_unknown">Something went wrong. Please try again</string>
+    <string name="error_wrong_current_password">That isn't your current password</string>
+    <string name="error_password_not_set">This account signs in through a provider, so there's no password to change</string>
+    <string name="error_unsupported_image">That file isn't a JPEG or PNG we can use. Pick another one</string>
+    <string name="error_image_too_large">That picture is too big. Pick one under %1$d MB</string>
+    <string name="error_too_many_uploads">That's a lot of pictures at once. Try again in a minute</string>
+
+    <!-- User identity and account actions -->
+    <string name="home_user_unnamed">Signed-in user</string>
+    <string name="home_sign_out">Sign out</string>
+
+    <!-- Content descriptions -->
+    <string name="cd_email_icon">Email</string>
+    <string name="cd_password_icon">Password</string>
+    <string name="cd_google_logo">Google logo</string>
+    <string name="cd_facebook_logo">Facebook logo</string>
+</resources>

@@ -3,8 +3,8 @@ package com.liam.cmp_src.core.ui.component
 import androidx.compose.runtime.Composable
 import com.example.api.user.UserResponse
 import com.liam.cmp_src.core.domain.model.SocialProvider
-import cmpsrc.shared.generated.resources.Res
-import cmpsrc.shared.generated.resources.home_user_unnamed
+import cmpsrc.core.ui.generated.resources.Res
+import cmpsrc.core.ui.generated.resources.home_user_unnamed
 import org.jetbrains.compose.resources.stringResource
 
 /** Stands in for the account's creation time wherever a `@Preview` or a test needs one. */

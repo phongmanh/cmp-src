@@ -46,4 +46,5 @@ include(":core:network")
 include(":core:security")
 include(":core:database")
 include(":core:testing")
+include(":core:ui")
 

@@ -41,11 +41,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.liam.cmp_src.core.ui.modifier.handCursor
 import com.liam.cmp_src.core.ui.theme.AppTheme
 import com.liam.cmp_src.core.ui.theme.Dimens
-import cmpsrc.shared.generated.resources.Res
-import cmpsrc.shared.generated.resources.ic_check
-import cmpsrc.shared.generated.resources.login_submit
-import cmpsrc.shared.generated.resources.login_submit_in_progress
-import cmpsrc.shared.generated.resources.login_submit_success
+import cmpsrc.core.ui.generated.resources.Res
+import cmpsrc.core.ui.generated.resources.ic_check
+import cmpsrc.core.ui.generated.resources.login_submit
+import cmpsrc.core.ui.generated.resources.login_submit_in_progress
+import cmpsrc.core.ui.generated.resources.login_submit_success
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 

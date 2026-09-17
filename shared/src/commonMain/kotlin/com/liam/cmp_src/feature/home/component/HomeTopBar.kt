@@ -42,9 +42,10 @@ import com.liam.cmp_src.core.ui.modifier.handCursor
 import com.liam.cmp_src.core.ui.theme.AppTheme
 import com.liam.cmp_src.core.ui.theme.Dimens
 import com.liam.cmp_src.core.ui.theme.auroraColors
+import cmpsrc.core.ui.generated.resources.Res as UiRes
+import cmpsrc.core.ui.generated.resources.home_sign_out
 import cmpsrc.shared.generated.resources.Res
 import cmpsrc.shared.generated.resources.cd_notifications
-import cmpsrc.shared.generated.resources.home_sign_out
 import cmpsrc.shared.generated.resources.home_welcome_back
 import cmpsrc.shared.generated.resources.ic_bell
 import cmpsrc.shared.generated.resources.ic_sign_out
@@ -119,7 +120,7 @@ fun HomeTopBar(
             )
             GlassIconButton(
                 icon = Res.drawable.ic_sign_out,
-                contentDescription = stringResource(Res.string.home_sign_out),
+                contentDescription = stringResource(UiRes.string.home_sign_out),
                 onClick = onSignOutClick,
             )
         }

@@ -60,11 +60,12 @@ import com.liam.cmp_src.feature.profile.component.ProfileSkeleton
 import com.liam.cmp_src.feature.profile.profileinfo.ProfileInfoAction
 import com.liam.cmp_src.feature.profile.profileinfo.ProfileInfoDialog
 import com.liam.cmp_src.feature.profile.profileinfo.ProfileInfoViewModel
+import cmpsrc.core.ui.generated.resources.Res as UiRes
+import cmpsrc.core.ui.generated.resources.home_sign_out
+import cmpsrc.core.ui.generated.resources.ic_lock
 import cmpsrc.shared.generated.resources.Res
 import cmpsrc.shared.generated.resources.change_password_success
-import cmpsrc.shared.generated.resources.home_sign_out
 import cmpsrc.shared.generated.resources.ic_edit
-import cmpsrc.shared.generated.resources.ic_lock
 import cmpsrc.shared.generated.resources.profile_change_password
 import cmpsrc.shared.generated.resources.profile_edit
 import cmpsrc.shared.generated.resources.profile_error_title
@@ -264,7 +265,7 @@ private fun ProfileContent(
                 )
                 ProfileActionDivider()
                 ProfileActionRow(
-                    icon = Res.drawable.ic_lock,
+                    icon = UiRes.drawable.ic_lock,
                     label = stringResource(Res.string.profile_change_password),
                     onClick = { onAction(ProfileAction.ChangePassword) },
                 )
@@ -289,7 +290,7 @@ private fun ProfileContent(
                     contentColor = MaterialTheme.colorScheme.onBackground,
                 ),
             ) {
-                Text(stringResource(Res.string.home_sign_out))
+                Text(stringResource(UiRes.string.home_sign_out))
             }
         }
     }

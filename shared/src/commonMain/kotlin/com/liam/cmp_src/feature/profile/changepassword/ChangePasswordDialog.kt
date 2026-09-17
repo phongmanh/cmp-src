@@ -45,8 +45,10 @@ import com.liam.cmp_src.core.ui.component.AuthTextField
 import com.liam.cmp_src.core.ui.component.ErrorBanner
 import com.liam.cmp_src.core.ui.component.PrimaryActionButton
 import com.liam.cmp_src.core.ui.message.asMessage
+import cmpsrc.core.ui.generated.resources.Res as UiRes
+import cmpsrc.core.ui.generated.resources.cd_password_icon
+import cmpsrc.core.ui.generated.resources.ic_lock
 import cmpsrc.shared.generated.resources.Res
-import cmpsrc.shared.generated.resources.cd_password_icon
 import cmpsrc.shared.generated.resources.change_password_cancel
 import cmpsrc.shared.generated.resources.change_password_confirm_label
 import cmpsrc.shared.generated.resources.change_password_confirm_placeholder
@@ -57,7 +59,6 @@ import cmpsrc.shared.generated.resources.change_password_new_placeholder
 import cmpsrc.shared.generated.resources.change_password_submit
 import cmpsrc.shared.generated.resources.change_password_subtitle
 import cmpsrc.shared.generated.resources.change_password_title
-import cmpsrc.shared.generated.resources.ic_lock
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -160,8 +161,8 @@ fun ChangePasswordDialogContent(
                 onValueChange = { onAction(ChangePasswordAction.CurrentPasswordChanged(it)) },
                 label = stringResource(Res.string.change_password_current_label),
                 placeholder = stringResource(Res.string.change_password_current_placeholder),
-                leadingIcon = Res.drawable.ic_lock,
-                leadingIconDescription = stringResource(Res.string.cd_password_icon),
+                leadingIcon = UiRes.drawable.ic_lock,
+                leadingIconDescription = stringResource(UiRes.string.cd_password_icon),
                 enabled = !state.isBusy,
                 errorMessage = state.fieldErrors.currentPassword?.asMessage(),
                 isPassword = true,
@@ -186,8 +187,8 @@ fun ChangePasswordDialogContent(
                     Res.string.change_password_new_placeholder,
                     FieldLimits.MIN_PASSWORD_LENGTH,
                 ),
-                leadingIcon = Res.drawable.ic_lock,
-                leadingIconDescription = stringResource(Res.string.cd_password_icon),
+                leadingIcon = UiRes.drawable.ic_lock,
+                leadingIconDescription = stringResource(UiRes.string.cd_password_icon),
                 enabled = !state.isBusy,
                 errorMessage = state.fieldErrors.newPassword?.asMessage(),
                 isPassword = true,
@@ -207,8 +208,8 @@ fun ChangePasswordDialogContent(
                 onValueChange = { onAction(ChangePasswordAction.ConfirmPasswordChanged(it)) },
                 label = stringResource(Res.string.change_password_confirm_label),
                 placeholder = stringResource(Res.string.change_password_confirm_placeholder),
-                leadingIcon = Res.drawable.ic_lock,
-                leadingIconDescription = stringResource(Res.string.cd_password_icon),
+                leadingIcon = UiRes.drawable.ic_lock,
+                leadingIconDescription = stringResource(UiRes.string.cd_password_icon),
                 enabled = !state.isBusy,
                 errorMessage = state.fieldErrors.confirmPassword?.asMessage(),
                 isPassword = true,

@@ -22,10 +22,11 @@ import com.liam.cmp_src.core.ui.modifier.handCursor
 import com.liam.cmp_src.core.ui.theme.AppTheme
 import com.liam.cmp_src.core.ui.theme.Dimens
 import com.liam.cmp_src.core.ui.theme.auroraColors
+import cmpsrc.core.ui.generated.resources.Res as UiRes
+import cmpsrc.core.ui.generated.resources.ic_lock
 import cmpsrc.shared.generated.resources.Res
 import cmpsrc.shared.generated.resources.ic_chevron_right
 import cmpsrc.shared.generated.resources.ic_edit
-import cmpsrc.shared.generated.resources.ic_lock
 import cmpsrc.shared.generated.resources.profile_change_password
 import cmpsrc.shared.generated.resources.profile_edit
 import org.jetbrains.compose.resources.DrawableResource
@@ -103,7 +104,7 @@ private fun ProfileActionRowPreview() {
             )
             ProfileActionDivider()
             ProfileActionRow(
-                icon = Res.drawable.ic_lock,
+                icon = UiRes.drawable.ic_lock,
                 label = stringResource(Res.string.profile_change_password),
                 onClick = {},
             )

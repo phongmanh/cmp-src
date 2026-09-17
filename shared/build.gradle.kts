@@ -21,6 +21,7 @@ kotlin {
             implementation(projects.core.network)
             implementation(projects.core.security)
             implementation(projects.core.database)
+            implementation(projects.core.ui)
 
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)

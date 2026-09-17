@@ -27,9 +27,10 @@ import com.liam.cmp_src.core.ui.theme.auroraColors
 import com.liam.cmp_src.core.ui.component.UserAvatar
 import com.liam.cmp_src.core.ui.component.displayLabel
 import com.liam.cmp_src.core.ui.component.sampleUser
+import cmpsrc.core.ui.generated.resources.Res as UiRes
+import cmpsrc.core.ui.generated.resources.ic_check
 import cmpsrc.shared.generated.resources.Res
 import cmpsrc.shared.generated.resources.cd_verified
-import cmpsrc.shared.generated.resources.ic_check
 import cmpsrc.shared.generated.resources.profile_email_unverified
 import cmpsrc.shared.generated.resources.profile_email_verified
 import cmpsrc.shared.generated.resources.profile_member_since
@@ -125,7 +126,7 @@ private fun VerificationBadge(
         ) {
             if (isVerified) {
                 Icon(
-                    painter = painterResource(Res.drawable.ic_check),
+                    painter = painterResource(UiRes.drawable.ic_check),
                     contentDescription = stringResource(Res.string.cd_verified),
                     modifier = Modifier.size(Dimens.iconSm),
                     tint = contentColor,

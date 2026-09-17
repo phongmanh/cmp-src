@@ -19,6 +19,14 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import cmpsrc.core.ui.generated.resources.Res as UiRes
+import cmpsrc.core.ui.generated.resources.cd_email_icon
+import cmpsrc.core.ui.generated.resources.cd_password_icon
+import cmpsrc.core.ui.generated.resources.ic_email
+import cmpsrc.core.ui.generated.resources.ic_lock
+import cmpsrc.core.ui.generated.resources.login_email_label
+import cmpsrc.core.ui.generated.resources.login_email_placeholder
+import cmpsrc.core.ui.generated.resources.login_submit
 import cmpsrc.shared.generated.resources.*
 import com.example.api.user.UserResponse
 import com.liam.cmp_src.core.ui.component.ActionButtonState
@@ -202,10 +210,10 @@ private fun LoginCard(
             AuthTextField(
                 value = state.email,
                 onValueChange = { onAction(LoginAction.EmailChanged(it)) },
-                label = stringResource(Res.string.login_email_label),
-                placeholder = stringResource(Res.string.login_email_placeholder),
-                leadingIcon = Res.drawable.ic_email,
-                leadingIconDescription = stringResource(Res.string.cd_email_icon),
+                label = stringResource(UiRes.string.login_email_label),
+                placeholder = stringResource(UiRes.string.login_email_placeholder),
+                leadingIcon = UiRes.drawable.ic_email,
+                leadingIconDescription = stringResource(UiRes.string.cd_email_icon),
                 enabled = !state.isBusy,
                 errorMessage = state.fieldErrors.email?.asMessage(),
                 keyboardOptions = KeyboardOptions(
@@ -222,8 +230,8 @@ private fun LoginCard(
                 onValueChange = { onAction(LoginAction.PasswordChanged(it)) },
                 label = stringResource(Res.string.login_password_label),
                 placeholder = stringResource(Res.string.login_password_placeholder),
-                leadingIcon = Res.drawable.ic_lock,
-                leadingIconDescription = stringResource(Res.string.cd_password_icon),
+                leadingIcon = UiRes.drawable.ic_lock,
+                leadingIconDescription = stringResource(UiRes.string.cd_password_icon),
                 enabled = !state.isBusy,
                 errorMessage = state.fieldErrors.password?.asMessage(),
                 isPassword = true,
@@ -251,7 +259,7 @@ private fun LoginCard(
             Spacer(Modifier.size(Dimens.spaceMd))
 
             PrimaryActionButton(
-                label = stringResource(Res.string.login_submit),
+                label = stringResource(UiRes.string.login_submit),
                 state = when {
                     state.status is LoginStatus.Succeeded -> ActionButtonState.Success
                     state.isSubmittingEmail -> ActionButtonState.Loading

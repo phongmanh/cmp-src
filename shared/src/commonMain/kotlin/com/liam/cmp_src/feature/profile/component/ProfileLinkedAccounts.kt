@@ -26,11 +26,12 @@ import com.liam.cmp_src.core.ui.theme.auroraColors
 import com.liam.cmp_src.core.domain.model.SocialProvider
 import com.liam.cmp_src.core.ui.message.asLabel
 import com.liam.cmp_src.core.ui.component.sampleUser
+import cmpsrc.core.ui.generated.resources.Res as UiRes
+import cmpsrc.core.ui.generated.resources.cd_facebook_logo
+import cmpsrc.core.ui.generated.resources.cd_google_logo
+import cmpsrc.core.ui.generated.resources.ic_facebook
+import cmpsrc.core.ui.generated.resources.ic_google
 import cmpsrc.shared.generated.resources.Res
-import cmpsrc.shared.generated.resources.cd_facebook_logo
-import cmpsrc.shared.generated.resources.cd_google_logo
-import cmpsrc.shared.generated.resources.ic_facebook
-import cmpsrc.shared.generated.resources.ic_google
 import cmpsrc.shared.generated.resources.profile_linked_accounts
 import cmpsrc.shared.generated.resources.profile_no_linked_accounts
 import org.jetbrains.compose.resources.DrawableResource
@@ -115,13 +116,13 @@ private fun LinkedAccountChip(
 }
 
 private fun SocialProvider.icon(): DrawableResource = when (this) {
-    SocialProvider.GOOGLE -> Res.drawable.ic_google
-    SocialProvider.FACEBOOK -> Res.drawable.ic_facebook
+    SocialProvider.GOOGLE -> UiRes.drawable.ic_google
+    SocialProvider.FACEBOOK -> UiRes.drawable.ic_facebook
 }
 
 private fun SocialProvider.iconDescription(): StringResource = when (this) {
-    SocialProvider.GOOGLE -> Res.string.cd_google_logo
-    SocialProvider.FACEBOOK -> Res.string.cd_facebook_logo
+    SocialProvider.GOOGLE -> UiRes.string.cd_google_logo
+    SocialProvider.FACEBOOK -> UiRes.string.cd_facebook_logo
 }
 
 @Preview
