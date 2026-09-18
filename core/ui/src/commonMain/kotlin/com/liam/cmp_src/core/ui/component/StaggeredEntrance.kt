@@ -7,11 +7,32 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 
 private const val ENTRANCE_DURATION_MILLIS = 460
 private const val ENTRANCE_STEP_MILLIS = 70
 private const val ENTRANCE_SLIDE_DIVISOR = 3
+
+/**
+ * False on the first composition and true from the next one, which is what drives a screen's
+ * entrance cascade.
+ *
+ * [StaggeredEntrance] animates on a change of `visible`, so something has to hand it a value that
+ * starts out false — a screen that composes straight to `true` has nothing to animate from. The
+ * flip happens in a `LaunchedEffect`, so it runs once per entry into the composition and not
+ * again on recomposition.
+ */
+@Composable
+fun rememberEntranceVisible(): Boolean {
+    var visible by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { visible = true }
+    return visible
+}
 
 /**
  * Fades and lifts [content] into place, delayed by [index] steps.

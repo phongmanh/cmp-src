@@ -1,9 +1,6 @@
 package com.liam.cmp_src.core.ui.component
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -13,7 +10,6 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,7 +23,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,6 +34,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import com.liam.cmp_src.core.ui.modifier.handCursor
+import com.liam.cmp_src.core.ui.modifier.pressScale
 import com.liam.cmp_src.core.ui.theme.AppTheme
 import com.liam.cmp_src.core.ui.theme.Dimens
 import cmpsrc.core.ui.generated.resources.Res
@@ -79,12 +75,6 @@ fun PrimaryActionButton(
     enabled: Boolean = true,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed) PRESSED_SCALE else 1f,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-        label = "primaryButtonScale",
-    )
 
     val colors = MaterialTheme.colorScheme
     val isInteractive = enabled && state == ActionButtonState.Idle
@@ -95,9 +85,8 @@ fun PrimaryActionButton(
         modifier = modifier
             .fillMaxWidth()
             .height(Dimens.buttonHeight)
+            .pressScale(interactionSource, PRESSED_SCALE)
             .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
                 // Dim only a genuinely dormant button — a spinning or confirming one
                 // stays at full strength even though it is not clickable.
                 alpha = if (enabled || state != ActionButtonState.Idle) 1f else DISABLED_ALPHA

@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -39,8 +38,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.api.user.UserResponse
+import com.liam.cmp_src.core.ui.component.ContentColumn
 import com.liam.cmp_src.core.ui.component.GlassCard
 import com.liam.cmp_src.core.ui.component.StaggeredEntrance
+import com.liam.cmp_src.core.ui.component.rememberEntranceVisible
 import com.liam.cmp_src.core.ui.modifier.handCursor
 import com.liam.cmp_src.core.ui.theme.AppTheme
 import com.liam.cmp_src.core.ui.theme.Dimens
@@ -198,10 +199,7 @@ fun ProfileScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Column(
-                    modifier = Modifier.widthIn(max = Dimens.cardMaxWidth),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
+                ContentColumn {
                     when (targetState) {
                         ProfileUiState.Loading -> ProfileSkeleton()
 
@@ -234,8 +232,7 @@ private fun ProfileContent(
     modifier: Modifier = Modifier,
 ) {
     val glass = auroraColors
-    var isVisible by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { isVisible = true }
+    val isVisible = rememberEntranceVisible()
 
     Column(
         modifier = modifier.fillMaxWidth(),

@@ -11,7 +11,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,14 +21,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -48,11 +45,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.api.user.UserResponse
+import com.liam.cmp_src.core.ui.component.ContentColumn
 import com.liam.cmp_src.core.ui.component.GlassCard
+import com.liam.cmp_src.core.ui.component.GlassSurface
 import com.liam.cmp_src.core.ui.component.StaggeredEntrance
+import com.liam.cmp_src.core.ui.component.rememberEntranceVisible
 import com.liam.cmp_src.core.ui.theme.AppTheme
 import com.liam.cmp_src.core.ui.theme.Dimens
-import com.liam.cmp_src.core.ui.theme.auroraColors
 import com.liam.cmp_src.core.ui.component.AnimatedAuthBackground
 import com.liam.cmp_src.feature.home.component.HomeBottomBar
 import com.liam.cmp_src.feature.home.component.HomeTopBar
@@ -141,8 +140,7 @@ fun HomeScreen(
     profileTab: @Composable () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var isVisible by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { isVisible = true }
+    val isVisible = rememberEntranceVisible()
 
     var selectedTab by rememberSaveable(stateSaver = HomeTab.Saver) {
         mutableStateOf(HomeTab.HOME)
@@ -240,10 +238,7 @@ private fun HomeTabContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Column(
-            modifier = Modifier.widthIn(max = Dimens.cardMaxWidth),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
+        ContentColumn {
             when (tab) {
                 HomeTab.HOME -> HomeOverview(user = user, isVisible = isVisible)
                 HomeTab.PROFILE -> profileTab()
@@ -293,15 +288,11 @@ private fun TabPlaceholder(
     isVisible: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val glass = auroraColors
-
     StaggeredEntrance(visible = isVisible, index = 1, modifier = modifier) {
         GlassCard {
-            Surface(
+            GlassSurface(
                 modifier = Modifier.size(Dimens.avatarLg),
                 shape = CircleShape,
-                color = glass.glassFill,
-                border = BorderStroke(Dimens.hairline, glass.glassBorder),
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(

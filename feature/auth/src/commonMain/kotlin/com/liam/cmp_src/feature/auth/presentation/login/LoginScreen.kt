@@ -1,22 +1,16 @@
 package com.liam.cmp_src.feature.auth.presentation.login
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cmpsrc.core.ui.generated.resources.Res as UiRes
@@ -30,16 +24,17 @@ import cmpsrc.core.ui.generated.resources.login_submit
 import cmpsrc.feature.auth.generated.resources.*
 import com.example.api.user.UserResponse
 import com.liam.cmp_src.core.ui.component.ActionButtonState
-import com.liam.cmp_src.core.ui.component.AnimatedAuthBackground
 import com.liam.cmp_src.core.ui.component.AuthTextField
 import com.liam.cmp_src.core.ui.component.ErrorBanner
+import com.liam.cmp_src.core.ui.component.GlassCard
 import com.liam.cmp_src.core.ui.component.PrimaryActionButton
+import com.liam.cmp_src.core.ui.component.SectionHeader
 import com.liam.cmp_src.core.ui.component.StaggeredEntrance
+import com.liam.cmp_src.core.ui.component.rememberEntranceVisible
 import com.liam.cmp_src.core.ui.message.asMessage
 import com.liam.cmp_src.core.ui.modifier.handCursor
 import com.liam.cmp_src.core.ui.theme.AppTheme
 import com.liam.cmp_src.core.ui.theme.Dimens
-import com.liam.cmp_src.core.ui.theme.auroraColors
 import com.liam.cmp_src.core.domain.model.AuthError
 import com.liam.cmp_src.core.domain.model.SocialProvider
 import com.liam.cmp_src.feature.auth.presentation.component.*
@@ -96,97 +91,44 @@ fun LoginScreen(
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
 ) {
     val focusManager = LocalFocusManager.current
-    var isVisible by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { isVisible = true }
+    val isVisible = rememberEntranceVisible()
 
     val submit = {
         focusManager.clearFocus()
         onAction(LoginAction.Submit)
     }
 
-    Box(modifier.fillMaxSize()) {
-        AnimatedAuthBackground(Modifier.matchParentSize())
-
-        BoxWithConstraints(
-            modifier = Modifier
-                .fillMaxSize()
-                .safeContentPadding(),
-        ) {
-            // Fill the viewport so the card sits centred, but keep scrolling available once
-            // a soft keyboard or a short window makes the content taller than the screen.
-            val viewportHeight = maxHeight
-            val isCompact = maxWidth < Dimens.compactWidthThreshold
-
-            Column(
-                modifier = Modifier
-                    .verticalScroll(rememberScrollState())
-                    .fillMaxWidth()
-                    .heightIn(min = viewportHeight)
-                    .padding(Dimens.screenPadding),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-            ) {
-                Column(
-                    modifier = Modifier.widthIn(max = Dimens.cardMaxWidth),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    StaggeredEntrance(visible = isVisible, index = 0) {
-                        BrandMark()
-                    }
-
-                    Spacer(Modifier.size(Dimens.spaceLg))
-
-                    StaggeredEntrance(visible = isVisible, index = 1) {
-                        HeaderText()
-                    }
-
-                    Spacer(Modifier.size(Dimens.spaceXl))
-
-                    StaggeredEntrance(visible = isVisible, index = 2) {
-                        LoginCard(
-                            state = state,
-                            onAction = onAction,
-                            onSubmit = submit,
-                            onMoveFocusDown = { focusManager.moveFocus(FocusDirection.Down) },
-                            isCompact = isCompact,
-                        )
-                    }
-
-                    Spacer(Modifier.size(Dimens.spaceLg))
-
-                    StaggeredEntrance(visible = isVisible, index = 3) {
-                        SignUpPrompt(onClick = { onAction(LoginAction.SignUpClicked) })
-                    }
-                }
-            }
+    AuthScreenScaffold(modifier = modifier, snackbarHostState = snackbarHostState) { isCompact ->
+        StaggeredEntrance(visible = isVisible, index = 0) {
+            BrandMark()
         }
 
-        SnackbarHost(
-            hostState = snackbarHostState,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(Dimens.spaceLg),
-        )
-    }
-}
+        Spacer(Modifier.size(Dimens.spaceLg))
 
-@Composable
-private fun HeaderText() {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = stringResource(Res.string.login_title),
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground,
-            textAlign = TextAlign.Center,
-        )
-        Spacer(Modifier.size(Dimens.spaceXs))
-        Text(
-            text = stringResource(Res.string.login_subtitle),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-        )
+        StaggeredEntrance(visible = isVisible, index = 1) {
+            SectionHeader(
+                title = stringResource(Res.string.login_title),
+                subtitle = stringResource(Res.string.login_subtitle),
+            )
+        }
+
+        Spacer(Modifier.size(Dimens.spaceXl))
+
+        StaggeredEntrance(visible = isVisible, index = 2) {
+            LoginCard(
+                state = state,
+                onAction = onAction,
+                onSubmit = submit,
+                onMoveFocusDown = { focusManager.moveFocus(FocusDirection.Down) },
+                isCompact = isCompact,
+            )
+        }
+
+        Spacer(Modifier.size(Dimens.spaceLg))
+
+        StaggeredEntrance(visible = isVisible, index = 3) {
+            SignUpPrompt(onClick = { onAction(LoginAction.SignUpClicked) })
+        }
     }
 }
 
@@ -198,90 +140,84 @@ private fun LoginCard(
     onMoveFocusDown: () -> Unit,
     isCompact: Boolean,
 ) {
-    val glass = auroraColors
-
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(Dimens.radiusXl),
-        color = glass.glassFill,
-        border = BorderStroke(Dimens.hairline, glass.glassBorder),
+    GlassCard(
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Top,
     ) {
-        Column(Modifier.padding(Dimens.spaceXl)) {
-            AuthTextField(
-                value = state.email,
-                onValueChange = { onAction(LoginAction.EmailChanged(it)) },
-                label = stringResource(UiRes.string.login_email_label),
-                placeholder = stringResource(UiRes.string.login_email_placeholder),
-                leadingIcon = UiRes.drawable.ic_email,
-                leadingIconDescription = stringResource(UiRes.string.cd_email_icon),
+        AuthTextField(
+            value = state.email,
+            onValueChange = { onAction(LoginAction.EmailChanged(it)) },
+            label = stringResource(UiRes.string.login_email_label),
+            placeholder = stringResource(UiRes.string.login_email_placeholder),
+            leadingIcon = UiRes.drawable.ic_email,
+            leadingIconDescription = stringResource(UiRes.string.cd_email_icon),
+            enabled = !state.isBusy,
+            errorMessage = state.fieldErrors.email?.asMessage(),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Email,
+                imeAction = ImeAction.Next,
+            ),
+            keyboardActions = KeyboardActions(onNext = { onMoveFocusDown() }),
+        )
+
+        Spacer(Modifier.size(Dimens.spaceMd))
+
+        AuthTextField(
+            value = state.password,
+            onValueChange = { onAction(LoginAction.PasswordChanged(it)) },
+            label = stringResource(Res.string.login_password_label),
+            placeholder = stringResource(Res.string.login_password_placeholder),
+            leadingIcon = UiRes.drawable.ic_lock,
+            leadingIconDescription = stringResource(UiRes.string.cd_password_icon),
+            enabled = !state.isBusy,
+            errorMessage = state.fieldErrors.password?.asMessage(),
+            isPassword = true,
+            isPasswordVisible = state.isPasswordVisible,
+            onTogglePasswordVisibility = { onAction(LoginAction.TogglePasswordVisibility) },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done,
+            ),
+            keyboardActions = KeyboardActions(onDone = { onSubmit() }),
+        )
+
+        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
+            TextButton(
+                onClick = { onAction(LoginAction.ForgotPasswordClicked) },
+                modifier = Modifier.handCursor(!state.isBusy),
                 enabled = !state.isBusy,
-                errorMessage = state.fieldErrors.email?.asMessage(),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Email,
-                    imeAction = ImeAction.Next,
-                ),
-                keyboardActions = KeyboardActions(onNext = { onMoveFocusDown() }),
-            )
-
-            Spacer(Modifier.size(Dimens.spaceMd))
-
-            AuthTextField(
-                value = state.password,
-                onValueChange = { onAction(LoginAction.PasswordChanged(it)) },
-                label = stringResource(Res.string.login_password_label),
-                placeholder = stringResource(Res.string.login_password_placeholder),
-                leadingIcon = UiRes.drawable.ic_lock,
-                leadingIconDescription = stringResource(UiRes.string.cd_password_icon),
-                enabled = !state.isBusy,
-                errorMessage = state.fieldErrors.password?.asMessage(),
-                isPassword = true,
-                isPasswordVisible = state.isPasswordVisible,
-                onTogglePasswordVisibility = { onAction(LoginAction.TogglePasswordVisibility) },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Password,
-                    imeAction = ImeAction.Done,
-                ),
-                keyboardActions = KeyboardActions(onDone = { onSubmit() }),
-            )
-
-            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
-                TextButton(
-                    onClick = { onAction(LoginAction.ForgotPasswordClicked) },
-                    modifier = Modifier.handCursor(!state.isBusy),
-                    enabled = !state.isBusy,
-                ) {
-                    Text(stringResource(Res.string.login_forgot_password))
-                }
+            ) {
+                Text(stringResource(Res.string.login_forgot_password))
             }
-
-            ErrorBanner(error = state.error)
-
-            Spacer(Modifier.size(Dimens.spaceMd))
-
-            PrimaryActionButton(
-                label = stringResource(UiRes.string.login_submit),
-                state = when {
-                    state.status is LoginStatus.Succeeded -> ActionButtonState.Success
-                    state.isSubmittingEmail -> ActionButtonState.Loading
-                    else -> ActionButtonState.Idle
-                },
-                onClick = onSubmit,
-                enabled = !state.isBusy,
-            )
-
-            Spacer(Modifier.size(Dimens.spaceXl))
-
-            DividerWithLabel(stringResource(Res.string.login_divider))
-
-            Spacer(Modifier.size(Dimens.spaceLg))
-
-            SocialSignInRow(
-                submittingProvider = state.submittingProvider,
-                enabled = !state.isBusy,
-                isCompact = isCompact,
-                onProviderClick = { onAction(LoginAction.SocialSignInClicked(it)) },
-            )
         }
+
+        ErrorBanner(error = state.error)
+
+        Spacer(Modifier.size(Dimens.spaceMd))
+
+        PrimaryActionButton(
+            label = stringResource(UiRes.string.login_submit),
+            state = when {
+                state.status is LoginStatus.Succeeded -> ActionButtonState.Success
+                state.isSubmittingEmail -> ActionButtonState.Loading
+                else -> ActionButtonState.Idle
+            },
+            onClick = onSubmit,
+            enabled = !state.isBusy,
+        )
+
+        Spacer(Modifier.size(Dimens.spaceXl))
+
+        DividerWithLabel(stringResource(Res.string.login_divider))
+
+        Spacer(Modifier.size(Dimens.spaceLg))
+
+        SocialSignInRow(
+            submittingProvider = state.submittingProvider,
+            enabled = !state.isBusy,
+            isCompact = isCompact,
+            onProviderClick = { onAction(LoginAction.SocialSignInClicked(it)) },
+        )
     }
 }
 

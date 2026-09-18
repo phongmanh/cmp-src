@@ -1,9 +1,6 @@
 package com.liam.cmp_src.feature.auth.presentation.component
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -11,7 +8,6 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,7 +20,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import com.liam.cmp_src.core.ui.modifier.handCursor
+import com.liam.cmp_src.core.ui.modifier.pressScale
 import com.liam.cmp_src.core.ui.theme.AppTheme
 import com.liam.cmp_src.core.ui.theme.Dimens
 import com.liam.cmp_src.core.ui.theme.auroraColors
@@ -66,12 +62,6 @@ fun SocialSignInButton(
     enabled: Boolean = true,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed) PRESSED_SCALE else 1f,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-        label = "socialButtonScale",
-    )
 
     val glass = auroraColors
     val isInteractive = enabled && !isLoading
@@ -105,9 +95,8 @@ fun SocialSignInButton(
         modifier = modifier
             .fillMaxWidth()
             .height(Dimens.socialButtonHeight)
+            .pressScale(interactionSource, PRESSED_SCALE)
             .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
                 // The provider being signed into keeps full contrast; only the other one dims.
                 alpha = if (enabled || isLoading) 1f else DISABLED_ALPHA
             }

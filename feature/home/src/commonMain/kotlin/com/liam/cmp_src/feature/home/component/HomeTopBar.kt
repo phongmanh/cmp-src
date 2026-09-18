@@ -1,11 +1,6 @@
 package com.liam.cmp_src.feature.home.component
 
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,32 +18,27 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.api.user.UserResponse
+import com.liam.cmp_src.core.ui.component.GlassSurface
 import com.liam.cmp_src.core.ui.component.UserAvatar
 import com.liam.cmp_src.core.ui.component.displayLabel
 import com.liam.cmp_src.core.ui.component.sampleUser
 import com.liam.cmp_src.core.ui.modifier.handCursor
+import com.liam.cmp_src.core.ui.modifier.pressScale
 import com.liam.cmp_src.core.ui.theme.AppTheme
 import com.liam.cmp_src.core.ui.theme.Dimens
-import com.liam.cmp_src.core.ui.theme.auroraColors
-import cmpsrc.core.ui.generated.resources.Res as UiRes
-import cmpsrc.core.ui.generated.resources.home_sign_out
 import cmpsrc.feature.home.generated.resources.Res
 import cmpsrc.feature.home.generated.resources.cd_notifications
 import cmpsrc.feature.home.generated.resources.home_welcome_back
 import cmpsrc.feature.home.generated.resources.ic_bell
-import cmpsrc.feature.home.generated.resources.ic_sign_out
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -69,16 +59,12 @@ fun HomeTopBar(
     onNotificationsClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val glass = auroraColors
-
-    Surface(
+    GlassSurface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(
             bottomStart = Dimens.radiusXl,
             bottomEnd = Dimens.radiusXl,
         ),
-        color = glass.glassFill,
-        border = BorderStroke(Dimens.hairline, glass.glassBorder),
     ) {
         Row(
             modifier = Modifier
@@ -132,28 +118,16 @@ private fun GlassIconButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val glass = auroraColors
     val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed) PRESSED_SCALE else 1f,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-        label = "iconButtonScale",
-    )
 
-    Surface(
-        onClick = onClick,
+    GlassSurface(
         modifier = modifier
             .size(Dimens.iconButtonSize)
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            }
+            .pressScale(interactionSource, PRESSED_SCALE)
             .handCursor(),
         shape = CircleShape,
-        color = glass.glassFill,
         contentColor = MaterialTheme.colorScheme.onBackground,
-        border = BorderStroke(Dimens.hairline, glass.glassBorder),
+        onClick = onClick,
         interactionSource = interactionSource,
     ) {
         Box(contentAlignment = Alignment.Center) {

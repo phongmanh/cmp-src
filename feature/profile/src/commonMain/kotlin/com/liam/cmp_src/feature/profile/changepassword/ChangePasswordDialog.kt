@@ -25,7 +25,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -44,6 +43,8 @@ import com.liam.cmp_src.core.ui.component.ActionButtonState
 import com.liam.cmp_src.core.ui.component.AuthTextField
 import com.liam.cmp_src.core.ui.component.ErrorBanner
 import com.liam.cmp_src.core.ui.component.PrimaryActionButton
+import com.liam.cmp_src.core.ui.component.SectionHeader
+import com.liam.cmp_src.core.ui.component.SectionHeaderStyle
 import com.liam.cmp_src.core.ui.message.asMessage
 import cmpsrc.core.ui.generated.resources.Res as UiRes
 import cmpsrc.core.ui.generated.resources.cd_password_icon
@@ -141,17 +142,10 @@ fun ChangePasswordDialogContent(
                 .verticalScroll(rememberScrollState())
                 .padding(Dimens.spaceXl),
         ) {
-            Text(
-                text = stringResource(Res.string.change_password_title),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            Spacer(Modifier.size(Dimens.spaceXs))
-            Text(
-                text = stringResource(Res.string.change_password_subtitle),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            SectionHeader(
+                title = stringResource(Res.string.change_password_title),
+                subtitle = stringResource(Res.string.change_password_subtitle),
+                style = SectionHeaderStyle.Dialog,
             )
 
             Spacer(Modifier.size(Dimens.spaceLg))
