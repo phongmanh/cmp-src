@@ -112,7 +112,6 @@ private fun AppRoot() {
                 val onSignedOut = { backStack.resetTo(AppRoute.Login) }
                 HomeRoute(
                     user = route.user,
-                    onSignedOut = onSignedOut,
                     profileTab = { onProfileUpdated ->
                         ProfileRoute(onLogout = onSignedOut, onProfileUpdated = onProfileUpdated)
                     },

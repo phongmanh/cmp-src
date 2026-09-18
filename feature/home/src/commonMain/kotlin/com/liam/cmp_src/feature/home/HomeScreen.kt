@@ -88,7 +88,6 @@ private const val TAB_SLIDE_DIVISOR = 6
 @Composable
 fun HomeRoute(
     user: UserResponse,
-    onSignedOut: () -> Unit,
     profileTab: @Composable (onProfileUpdated: (UserResponse) -> Unit) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = koinViewModel(),
@@ -104,15 +103,12 @@ fun HomeRoute(
 
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
-            when (event) {
-                HomeEvent.SignedOut -> onSignedOut()
-            }
+            // TODO:
         }
     }
 
     HomeScreen(
         user = currentUser,
-        onSignOut = viewModel::onSignOut,
         // The profile tab is a whole feature with its own ViewModel, handed in as a slot so
         // HomeScreen itself stays stateless and Koin-free (and therefore previewable).
         profileTab = { profileTab { updated -> currentUser = updated } },
@@ -142,7 +138,6 @@ private val UserResponseSaver = Saver<UserResponse, String>(
 @Composable
 fun HomeScreen(
     user: UserResponse,
-    onSignOut: () -> Unit,
     profileTab: @Composable () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -183,7 +178,6 @@ fun HomeScreen(
                     onNotificationsClick = {
                         scope.launch { snackbarHostState.showSnackbar(notificationsMessage) }
                     },
-                    onSignOutClick = onSignOut,
                     modifier = Modifier.graphicsLayer {
                         translationY = -size.height * barOffset
                         alpha = 1f - barOffset
@@ -242,10 +236,7 @@ private fun HomeTabContent(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(contentPadding)
-            .padding(horizontal = Dimens.screenPadding),
+        modifier = modifier.fillMaxSize().padding(contentPadding).padding(horizontal = Dimens.screenPadding),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
@@ -345,7 +336,6 @@ private fun HomeScreenPreview() {
     AppTheme {
         HomeScreen(
             user = sampleUser(),
-            onSignOut = {},
             // The real tab belongs to another feature; the preview only needs the shell around it.
             profileTab = { Box(Modifier.fillMaxSize()) },
         )

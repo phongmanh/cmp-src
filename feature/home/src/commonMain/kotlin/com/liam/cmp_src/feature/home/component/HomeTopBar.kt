@@ -67,7 +67,6 @@ private const val PRESSED_SCALE = 0.92f
 fun HomeTopBar(
     user: UserResponse,
     onNotificationsClick: () -> Unit,
-    onSignOutClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val glass = auroraColors
@@ -117,11 +116,6 @@ fun HomeTopBar(
                 icon = Res.drawable.ic_bell,
                 contentDescription = stringResource(Res.string.cd_notifications),
                 onClick = onNotificationsClick,
-            )
-            GlassIconButton(
-                icon = Res.drawable.ic_sign_out,
-                contentDescription = stringResource(UiRes.string.home_sign_out),
-                onClick = onSignOutClick,
             )
         }
     }
@@ -179,7 +173,6 @@ private fun HomeTopBarPreview() {
         HomeTopBar(
             user = sampleUser(),
             onNotificationsClick = {},
-            onSignOutClick = {},
         )
     }
 }

@@ -10,8 +10,6 @@ import kotlinx.coroutines.launch
 
 /** One-shot effects the home screen reports upwards. */
 sealed interface HomeEvent {
-    /** The session has ended; the app should go back to sign-in. */
-    data object SignedOut : HomeEvent
 }
 
 /**
@@ -21,22 +19,9 @@ sealed interface HomeEvent {
  * point of view (see `AuthRepository.signOut`), so there is nothing to render while it runs and
  * nothing to report when it finishes but "you are signed out".
  */
-class HomeViewModel(
-    private val signOut: SignOutUseCase,
-) : ViewModel() {
+class HomeViewModel : ViewModel() {
 
     private val _events = MutableSharedFlow<HomeEvent>(extraBufferCapacity = 1)
     val events: SharedFlow<HomeEvent> = _events.asSharedFlow()
 
-    /** Guards the second tap: the button stays on screen until the call comes back. */
-    private var isSigningOut = false
-
-    fun onSignOut() {
-        if (isSigningOut) return
-        isSigningOut = true
-        viewModelScope.launch {
-            signOut()
-            _events.emit(HomeEvent.SignedOut)
-        }
-    }
 }
