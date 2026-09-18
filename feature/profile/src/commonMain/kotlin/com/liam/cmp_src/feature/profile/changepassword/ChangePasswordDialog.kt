@@ -1,27 +1,12 @@
 package com.liam.cmp_src.feature.profile.changepassword
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
@@ -32,19 +17,15 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.api.common.FieldLimits
-import com.liam.cmp_src.core.ui.modifier.handCursor
 import com.liam.cmp_src.core.ui.theme.AppTheme
 import com.liam.cmp_src.core.ui.theme.Dimens
-import com.liam.cmp_src.core.ui.theme.auroraColors
 import com.liam.cmp_src.core.domain.model.AuthError
 import com.liam.cmp_src.feature.profile.domain.model.ChangePasswordErrors
 import com.liam.cmp_src.core.domain.model.PasswordError
 import com.liam.cmp_src.core.ui.component.ActionButtonState
+import com.liam.cmp_src.feature.profile.component.ProfileDialogCard
 import com.liam.cmp_src.core.ui.component.AuthTextField
 import com.liam.cmp_src.core.ui.component.ErrorBanner
-import com.liam.cmp_src.core.ui.component.PrimaryActionButton
-import com.liam.cmp_src.core.ui.component.SectionHeader
-import com.liam.cmp_src.core.ui.component.SectionHeaderStyle
 import com.liam.cmp_src.core.ui.message.asMessage
 import cmpsrc.core.ui.generated.resources.Res as UiRes
 import cmpsrc.core.ui.generated.resources.cd_password_icon
@@ -110,9 +91,8 @@ fun ChangePasswordDialog(
 /**
  * What the dialog window holds: three password fields, whatever went wrong, and the two ways out.
  *
- * Painted on an opaque [MaterialTheme.colorScheme.surface] rather than the `GlassCard` treatment
- * the signed-in screens use — a translucent fill over the dialog scrim reads as muddy rather than
- * as glass, because there is no aurora backdrop behind it to catch.
+ * The card around them, and the buttons under them, are
+ * [com.liam.cmp_src.feature.profile.component.ProfileDialogCard]'s.
  */
 @Composable
 fun ChangePasswordDialogContent(
@@ -121,7 +101,6 @@ fun ChangePasswordDialogContent(
     modifier: Modifier = Modifier,
 ) {
     val focusManager = LocalFocusManager.current
-    val glass = auroraColors
 
     val submit = {
         focusManager.clearFocus()
@@ -129,126 +108,90 @@ fun ChangePasswordDialogContent(
     }
     val moveFocusDown = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) })
 
-    Surface(
-        modifier = modifier
-            .widthIn(max = Dimens.cardMaxWidth)
-            .fillMaxWidth(),
-        shape = RoundedCornerShape(Dimens.radiusXl),
-        color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(Dimens.hairline, glass.glassBorder),
+    ProfileDialogCard(
+        modifier = modifier,
+        title = stringResource(Res.string.change_password_title),
+        subtitle = stringResource(Res.string.change_password_subtitle),
+        dismissLabel = stringResource(Res.string.change_password_cancel),
+        onDismiss = { onAction(ChangePasswordAction.Cancel) },
+        confirmLabel = stringResource(Res.string.change_password_submit),
+        confirmState = when (state.status) {
+            ChangePasswordStatus.Succeeded -> ActionButtonState.Success
+            ChangePasswordStatus.Submitting -> ActionButtonState.Loading
+            else -> ActionButtonState.Idle
+        },
+        onConfirm = submit,
+        isBusy = state.isBusy,
     ) {
-        Column(
-            modifier = Modifier
-                .verticalScroll(rememberScrollState())
-                .padding(Dimens.spaceXl),
-        ) {
-            SectionHeader(
-                title = stringResource(Res.string.change_password_title),
-                subtitle = stringResource(Res.string.change_password_subtitle),
-                style = SectionHeaderStyle.Dialog,
-            )
+        AuthTextField(
+            value = state.currentPassword,
+            onValueChange = { onAction(ChangePasswordAction.CurrentPasswordChanged(it)) },
+            label = stringResource(Res.string.change_password_current_label),
+            placeholder = stringResource(Res.string.change_password_current_placeholder),
+            leadingIcon = UiRes.drawable.ic_lock,
+            leadingIconDescription = stringResource(UiRes.string.cd_password_icon),
+            enabled = !state.isBusy,
+            errorMessage = state.fieldErrors.currentPassword?.asMessage(),
+            isPassword = true,
+            isPasswordVisible = state.isCurrentVisible,
+            onTogglePasswordVisibility = {
+                onAction(ChangePasswordAction.ToggleCurrentVisibility)
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Next,
+            ),
+            keyboardActions = moveFocusDown,
+        )
 
-            Spacer(Modifier.size(Dimens.spaceLg))
+        Spacer(Modifier.size(Dimens.spaceMd))
 
-            AuthTextField(
-                value = state.currentPassword,
-                onValueChange = { onAction(ChangePasswordAction.CurrentPasswordChanged(it)) },
-                label = stringResource(Res.string.change_password_current_label),
-                placeholder = stringResource(Res.string.change_password_current_placeholder),
-                leadingIcon = UiRes.drawable.ic_lock,
-                leadingIconDescription = stringResource(UiRes.string.cd_password_icon),
-                enabled = !state.isBusy,
-                errorMessage = state.fieldErrors.currentPassword?.asMessage(),
-                isPassword = true,
-                isPasswordVisible = state.isCurrentVisible,
-                onTogglePasswordVisibility = {
-                    onAction(ChangePasswordAction.ToggleCurrentVisibility)
-                },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Password,
-                    imeAction = ImeAction.Next,
-                ),
-                keyboardActions = moveFocusDown,
-            )
+        AuthTextField(
+            value = state.newPassword,
+            onValueChange = { onAction(ChangePasswordAction.NewPasswordChanged(it)) },
+            label = stringResource(Res.string.change_password_new_label),
+            placeholder = stringResource(
+                Res.string.change_password_new_placeholder,
+                FieldLimits.MIN_PASSWORD_LENGTH,
+            ),
+            leadingIcon = UiRes.drawable.ic_lock,
+            leadingIconDescription = stringResource(UiRes.string.cd_password_icon),
+            enabled = !state.isBusy,
+            errorMessage = state.fieldErrors.newPassword?.asMessage(),
+            isPassword = true,
+            isPasswordVisible = state.isNewVisible,
+            onTogglePasswordVisibility = { onAction(ChangePasswordAction.ToggleNewVisibility) },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Next,
+            ),
+            keyboardActions = moveFocusDown,
+        )
 
-            Spacer(Modifier.size(Dimens.spaceMd))
+        Spacer(Modifier.size(Dimens.spaceMd))
 
-            AuthTextField(
-                value = state.newPassword,
-                onValueChange = { onAction(ChangePasswordAction.NewPasswordChanged(it)) },
-                label = stringResource(Res.string.change_password_new_label),
-                placeholder = stringResource(
-                    Res.string.change_password_new_placeholder,
-                    FieldLimits.MIN_PASSWORD_LENGTH,
-                ),
-                leadingIcon = UiRes.drawable.ic_lock,
-                leadingIconDescription = stringResource(UiRes.string.cd_password_icon),
-                enabled = !state.isBusy,
-                errorMessage = state.fieldErrors.newPassword?.asMessage(),
-                isPassword = true,
-                isPasswordVisible = state.isNewVisible,
-                onTogglePasswordVisibility = { onAction(ChangePasswordAction.ToggleNewVisibility) },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Password,
-                    imeAction = ImeAction.Next,
-                ),
-                keyboardActions = moveFocusDown,
-            )
+        AuthTextField(
+            value = state.confirmPassword,
+            onValueChange = { onAction(ChangePasswordAction.ConfirmPasswordChanged(it)) },
+            label = stringResource(Res.string.change_password_confirm_label),
+            placeholder = stringResource(Res.string.change_password_confirm_placeholder),
+            leadingIcon = UiRes.drawable.ic_lock,
+            leadingIconDescription = stringResource(UiRes.string.cd_password_icon),
+            enabled = !state.isBusy,
+            errorMessage = state.fieldErrors.confirmPassword?.asMessage(),
+            isPassword = true,
+            // Follows the field above it: revealing one half of a pair the user is being
+            // asked to match, and not the other, helps nobody.
+            isPasswordVisible = state.isNewVisible,
+            onTogglePasswordVisibility = { onAction(ChangePasswordAction.ToggleNewVisibility) },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done,
+            ),
+            keyboardActions = KeyboardActions(onDone = { submit() }),
+        )
 
-            Spacer(Modifier.size(Dimens.spaceMd))
-
-            AuthTextField(
-                value = state.confirmPassword,
-                onValueChange = { onAction(ChangePasswordAction.ConfirmPasswordChanged(it)) },
-                label = stringResource(Res.string.change_password_confirm_label),
-                placeholder = stringResource(Res.string.change_password_confirm_placeholder),
-                leadingIcon = UiRes.drawable.ic_lock,
-                leadingIconDescription = stringResource(UiRes.string.cd_password_icon),
-                enabled = !state.isBusy,
-                errorMessage = state.fieldErrors.confirmPassword?.asMessage(),
-                isPassword = true,
-                // Follows the field above it: revealing one half of a pair the user is being
-                // asked to match, and not the other, helps nobody.
-                isPasswordVisible = state.isNewVisible,
-                onTogglePasswordVisibility = { onAction(ChangePasswordAction.ToggleNewVisibility) },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Password,
-                    imeAction = ImeAction.Done,
-                ),
-                keyboardActions = KeyboardActions(onDone = { submit() }),
-            )
-
-            ErrorBanner(error = state.error)
-
-            Spacer(Modifier.size(Dimens.spaceLg))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(Dimens.spaceSm),
-                // The two buttons are different heights by design — the text one is a way out,
-                // not a peer of the primary action — so centre them rather than top-aligning.
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                TextButton(
-                    onClick = { onAction(ChangePasswordAction.Cancel) },
-                    modifier = Modifier.handCursor(!state.isBusy),
-                    enabled = !state.isBusy,
-                ) {
-                    Text(stringResource(Res.string.change_password_cancel))
-                }
-
-                PrimaryActionButton(
-                    label = stringResource(Res.string.change_password_submit),
-                    state = when (state.status) {
-                        ChangePasswordStatus.Succeeded -> ActionButtonState.Success
-                        ChangePasswordStatus.Submitting -> ActionButtonState.Loading
-                        else -> ActionButtonState.Idle
-                    },
-                    onClick = submit,
-                    modifier = Modifier.weight(1f),
-                )
-            }
-        }
+        ErrorBanner(error = state.error)
     }
 }
 

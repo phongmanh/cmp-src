@@ -1,23 +1,16 @@
 package com.liam.cmp_src.feature.profile.profileinfo
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -35,15 +28,12 @@ import com.example.api.user.UserResponse
 import com.liam.cmp_src.core.ui.modifier.handCursor
 import com.liam.cmp_src.core.ui.theme.AppTheme
 import com.liam.cmp_src.core.ui.theme.Dimens
-import com.liam.cmp_src.core.ui.theme.auroraColors
 import com.liam.cmp_src.core.domain.model.AuthError
 import com.liam.cmp_src.feature.profile.domain.model.DisplayNameError
 import com.liam.cmp_src.core.ui.component.ActionButtonState
+import com.liam.cmp_src.feature.profile.component.ProfileDialogCard
 import com.liam.cmp_src.core.ui.component.AuthTextField
 import com.liam.cmp_src.core.ui.component.ErrorBanner
-import com.liam.cmp_src.core.ui.component.PrimaryActionButton
-import com.liam.cmp_src.core.ui.component.SectionHeader
-import com.liam.cmp_src.core.ui.component.SectionHeaderStyle
 import com.liam.cmp_src.core.ui.message.asMessage
 import com.liam.cmp_src.core.ui.component.UserAvatar
 import com.liam.cmp_src.core.ui.component.sampleUser
@@ -122,9 +112,8 @@ fun ProfileInfoDialog(
  * What the dialog window holds: the picture and its two buttons, the name and its own save, and
  * whatever went wrong.
  *
- * Painted on an opaque [MaterialTheme.colorScheme.surface] rather than the `GlassCard` treatment
- * the signed-in screens use, for the same reason `ChangePasswordDialogContent` is — a translucent
- * fill over the dialog scrim reads as muddy, with no aurora backdrop behind it to catch.
+ * The card around them, and the buttons under them, are
+ * [com.liam.cmp_src.feature.profile.component.ProfileDialogCard]'s.
  */
 @Composable
 fun ProfileInfoDialogContent(
@@ -133,93 +122,57 @@ fun ProfileInfoDialogContent(
     onPickPhoto: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val glass = auroraColors
-
-    Surface(
-        modifier = modifier
-            .widthIn(max = Dimens.cardMaxWidth)
-            .fillMaxWidth(),
-        shape = RoundedCornerShape(Dimens.radiusXl),
-        color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(Dimens.hairline, glass.glassBorder),
+    ProfileDialogCard(
+        modifier = modifier,
+        title = stringResource(Res.string.edit_profile_title),
+        subtitle = stringResource(Res.string.edit_profile_subtitle),
+        dismissLabel = stringResource(Res.string.edit_profile_done),
+        onDismiss = { onAction(ProfileInfoAction.Close) },
+        confirmLabel = stringResource(Res.string.edit_profile_save_name),
+        confirmState = when (state.status) {
+            ProfileInfoStatus.SavingName -> ActionButtonState.Loading
+            ProfileInfoStatus.Succeeded -> ActionButtonState.Success
+            else -> ActionButtonState.Idle
+        },
+        onConfirm = { onAction(ProfileInfoAction.SaveName) },
+        isBusy = state.isBusy,
+        // Nothing to write while the field still holds what the server has.
+        confirmEnabled = state.isNameDirty && !state.isBusy,
     ) {
-        Column(
-            modifier = Modifier
-                .verticalScroll(rememberScrollState())
-                .padding(Dimens.spaceXl),
-        ) {
-            SectionHeader(
-                title = stringResource(Res.string.edit_profile_title),
-                subtitle = stringResource(Res.string.edit_profile_subtitle),
-                style = SectionHeaderStyle.Dialog,
+        PhotoSection(state = state, onAction = onAction, onPickPhoto = onPickPhoto)
+
+        Spacer(Modifier.size(Dimens.spaceLg))
+
+        AuthTextField(
+            value = state.displayName,
+            onValueChange = { onAction(ProfileInfoAction.NameChanged(it)) },
+            label = stringResource(Res.string.edit_profile_name_label),
+            placeholder = stringResource(Res.string.edit_profile_name_placeholder),
+            leadingIcon = UiRes.drawable.ic_person,
+            leadingIconDescription = stringResource(Res.string.cd_name_icon),
+            enabled = !state.isBusy,
+            errorMessage = state.nameError?.asMessage(),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Text,
+                imeAction = ImeAction.Done,
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = { onAction(ProfileInfoAction.SaveName) },
+            ),
+        )
+
+        // Shown only once it is actually true: an unsaved name and a picture this backend
+        // stores, which the write is going to retire whatever we send with it.
+        if (state.willClearPhoto && state.isNameDirty) {
+            Spacer(Modifier.size(Dimens.spaceSm))
+            Text(
+                text = stringResource(Res.string.edit_profile_photo_warning),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-
-            Spacer(Modifier.size(Dimens.spaceLg))
-
-            PhotoSection(state = state, onAction = onAction, onPickPhoto = onPickPhoto)
-
-            Spacer(Modifier.size(Dimens.spaceLg))
-
-            AuthTextField(
-                value = state.displayName,
-                onValueChange = { onAction(ProfileInfoAction.NameChanged(it)) },
-                label = stringResource(Res.string.edit_profile_name_label),
-                placeholder = stringResource(Res.string.edit_profile_name_placeholder),
-                leadingIcon = UiRes.drawable.ic_person,
-                leadingIconDescription = stringResource(Res.string.cd_name_icon),
-                enabled = !state.isBusy,
-                errorMessage = state.nameError?.asMessage(),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Text,
-                    imeAction = ImeAction.Done,
-                ),
-                keyboardActions = KeyboardActions(
-                    onDone = { onAction(ProfileInfoAction.SaveName) },
-                ),
-            )
-
-            // Shown only once it is actually true: an unsaved name and a picture this backend
-            // stores, which the write is going to retire whatever we send with it.
-            if (state.willClearPhoto && state.isNameDirty) {
-                Spacer(Modifier.size(Dimens.spaceSm))
-                Text(
-                    text = stringResource(Res.string.edit_profile_photo_warning),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-
-            ErrorBanner(error = state.error)
-
-            Spacer(Modifier.size(Dimens.spaceLg))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(Dimens.spaceSm),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                TextButton(
-                    onClick = { onAction(ProfileInfoAction.Close) },
-                    modifier = Modifier.handCursor(!state.isBusy),
-                    enabled = !state.isBusy,
-                ) {
-                    Text(stringResource(Res.string.edit_profile_done))
-                }
-
-                PrimaryActionButton(
-                    label = stringResource(Res.string.edit_profile_save_name),
-                    state = when (state.status) {
-                        ProfileInfoStatus.SavingName -> ActionButtonState.Loading
-                        ProfileInfoStatus.Succeeded -> ActionButtonState.Success
-                        else -> ActionButtonState.Idle
-                    },
-                    onClick = { onAction(ProfileInfoAction.SaveName) },
-                    // Nothing to write while the field still holds what the server has.
-                    enabled = state.isNameDirty && !state.isBusy,
-                    modifier = Modifier.weight(1f),
-                )
-            }
         }
+
+        ErrorBanner(error = state.error)
     }
 }
 
