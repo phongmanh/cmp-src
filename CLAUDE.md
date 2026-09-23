@@ -16,6 +16,7 @@ iosApp ─────┴─> :shared ──> :feature:auth ────┐
                         ──> :feature:home ────┼─> :core:ui ──> :core:domain ──> api-contract
                         ──> :feature:profile ─┘    (auth and profile also ─> :core:network)
                         ──> :core:database ──> :core:network, :core:security
+feature:*, core:ui ──> :core:utils
 tests only: feature:*, core:domain ──> :core:testing
 ```
 
@@ -23,6 +24,7 @@ tests only: feature:*, core:domain ──> :core:testing
 - `feature:auth`, `feature:home`, `feature:profile` — one module per feature, each with its own `data`/`domain`/presentation packages, Compose resources, tests and Koin module (`authModule`, `homeModule`, `profileModule`).
 - `core:domain` — the account types every feature shares (`AuthResult`, `AuthError`, `SocialProvider`, `PasswordError`), the `AuthRepository` interface and `SignOutUseCase`. Pure Kotlin.
 - `core:ui` — theme, modifiers, the shared components (`GlassCard`, `PrimaryActionButton`, `AuthTextField`, `ErrorBanner`, `UserAvatar`, …), the `asMessage()`/`asLabel()` mappers for the domain types, and the resources those use.
+- `core:utils` — platform helpers with no domain meaning: `format` (`formatDecimal`, `formatDate`/`formatDateTime`, `formatByteSize` — always in the device's locale and time zone) and `permission` (`rememberPermissionController()` for camera, microphone, location and notifications). A permission still has to be declared by the app — the manifest entry on Android, the `NS…UsageDescription` key in `iosApp/iosApp/Info.plist` on iOS (see `Permission`'s KDoc) — and none are declared yet.
 - `core:network`, `core:database`, `core:security` — Ktor plumbing, Room, and the platform token ciphers (see "Networking").
 - `core:testing` — fakes that more than one module's tests use (`FakeAuthRepository`). Only ever a `commonTest` dependency.
 - `androidApp` — Android application shell. `MainActivity` just calls `setContent { App() }`.
@@ -143,7 +145,7 @@ Failures are mapped once per feature: `AuthMapping.kt` in `feature:auth`, `Profi
 - Build configuration lives in convention plugins in the `build-logic` included build. A module applies one or two ids and lists only its own extra dependencies:
   - `cmpsrc.kmp.library` — non-UI module: Kotlin Multiplatform, the KMP Android library target, both iOS targets, host tests, `kotlin-test` + coroutines-test.
   - `cmpsrc.cmp.library` — the above plus Compose, the Compose artifacts and per-module Compose resources.
-  - `cmpsrc.cmp.feature` — a feature module: `cmpsrc.cmp.library` + `cmpsrc.cmp.koin`, `core:domain`, `core:ui`, the lifecycle Compose APIs, and `core:testing` for tests.
+  - `cmpsrc.cmp.feature` — a feature module: `cmpsrc.cmp.library` + `cmpsrc.cmp.koin`, `core:domain`, `core:ui`, `core:utils`, the lifecycle Compose APIs, and `core:testing` for tests.
   - `cmpsrc.room` — Room 3 in a module with a `@Database`: KSP, the runtime and bundled driver, the compiler on every target, the schema in `<module>/schemas` (checked in).
   - `cmpsrc.cmp.koin` — Koin core + Compose; `cmpsrc.cmp.application.android` / `cmpsrc.cmp.android.compose` — the `androidApp` shell.
 - Use `api(...)` only for what a module's public signatures (or inline function bodies) expose — e.g. `core:network` exposes Ktor core and coroutines, `core:database` exposes `core:network`/`core:security` and the Room runtime.

@@ -13,6 +13,7 @@ kotlin {
         commonMain.dependencies {
             // The message mappers and `ErrorBanner` take domain types.
             api(projects.core.domain)
+            implementation(projects.core.utils)
             implementation(libs.coil.compose)
         }
     }

@@ -47,6 +47,7 @@ include(":core:security")
 include(":core:database")
 include(":core:testing")
 include(":core:ui")
+include(":core:utils")
 
 include(":feature:auth")
 include(":feature:home")

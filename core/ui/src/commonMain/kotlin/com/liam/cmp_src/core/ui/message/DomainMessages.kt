@@ -22,10 +22,8 @@ import cmpsrc.core.ui.generated.resources.validation_password_mismatch
 import cmpsrc.core.ui.generated.resources.validation_password_same_as_current
 import cmpsrc.core.ui.generated.resources.validation_password_too_long
 import cmpsrc.core.ui.generated.resources.validation_password_too_short
+import com.liam.cmp_src.core.utils.format.formatByteSize
 import org.jetbrains.compose.resources.stringResource
-
-/** The cap on an upload is published in bytes; nobody reads a size in bytes. */
-private const val BYTES_PER_MEGABYTE = 1024 * 1024
 
 /**
  * Turns the shared domain types into display text, for every feature that shows them.
@@ -41,8 +39,7 @@ fun AuthError.asMessage(): String = when (this) {
     AuthError.WrongPassword -> stringResource(Res.string.error_wrong_current_password)
     AuthError.PasswordNotSet -> stringResource(Res.string.error_password_not_set)
     AuthError.UnsupportedImage -> stringResource(Res.string.error_unsupported_image)
-    is AuthError.ImageTooLarge ->
-        stringResource(Res.string.error_image_too_large, (maxBytes / BYTES_PER_MEGABYTE).toInt())
+    is AuthError.ImageTooLarge -> stringResource(Res.string.error_image_too_large, maxBytes.formatByteSize())
 
     AuthError.TooManyUploads -> stringResource(Res.string.error_too_many_uploads)
     AuthError.Network -> stringResource(Res.string.error_network)

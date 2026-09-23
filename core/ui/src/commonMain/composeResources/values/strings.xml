@@ -26,7 +26,7 @@
     <string name="error_wrong_current_password">That isn't your current password</string>
     <string name="error_password_not_set">This account signs in through a provider, so there's no password to change</string>
     <string name="error_unsupported_image">That file isn't a JPEG or PNG we can use. Pick another one</string>
-    <string name="error_image_too_large">That picture is too big. Pick one under %1$d MB</string>
+    <string name="error_image_too_large">That picture is too big. Pick one under %1$s</string>
     <string name="error_too_many_uploads">That's a lot of pictures at once. Try again in a minute</string>
 
     <!-- User identity and account actions -->
