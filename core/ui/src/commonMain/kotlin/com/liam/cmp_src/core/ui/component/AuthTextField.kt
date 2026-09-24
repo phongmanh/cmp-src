@@ -1,33 +1,17 @@
 package com.liam.cmp_src.core.ui.component
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -36,7 +20,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.liam.cmp_src.core.ui.modifier.handCursor
 import com.liam.cmp_src.core.ui.theme.AppTheme
 import com.liam.cmp_src.core.ui.theme.Dimens
-import com.liam.cmp_src.core.ui.theme.auroraColors
 import cmpsrc.core.ui.generated.resources.Res
 import cmpsrc.core.ui.generated.resources.cd_email_icon
 import cmpsrc.core.ui.generated.resources.ic_email
@@ -50,16 +33,9 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
-private const val FOCUS_TRANSITION_MILLIS = 220
-private const val ERROR_REVEAL_MILLIS = 180
-
 /**
- * A single credential input: leading icon, floating label, optional password reveal toggle,
- * and an inline error that expands in beneath the field.
- *
- * Focus is animated on two channels at once — the border colour brightens to the accent and
- * the leading icon picks up the same tint — so the active field reads clearly even against
- * the moving background.
+ * A single credential input: an [AppOutlinedTextField] that always has a leading icon and, for a
+ * password, a reveal toggle at the end that masks and unmasks the value.
  */
 @Composable
 fun AuthTextField(
@@ -78,85 +54,29 @@ fun AuthTextField(
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isFocused by interactionSource.collectIsFocusedAsState()
-    val isError = errorMessage != null
-    val colors = MaterialTheme.colorScheme
-    val glass = auroraColors
-
-    val iconTint by animateColorAsState(
-        targetValue = when {
-            isError -> colors.error
-            isFocused -> colors.primary
-            else -> colors.onSurfaceVariant
+    AppOutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = modifier,
+        label = label,
+        placeholder = placeholder,
+        leadingIcon = leadingIcon,
+        leadingIconDescription = leadingIconDescription,
+        trailingIcon = if (isPassword) {
+            { tint -> PasswordVisibilityToggle(isPasswordVisible, onTogglePasswordVisibility, tint) }
+        } else {
+            null
         },
-        animationSpec = tween(FOCUS_TRANSITION_MILLIS),
-        label = "authFieldIconTint",
+        enabled = enabled,
+        errorMessage = errorMessage,
+        visualTransformation = if (isPassword && !isPasswordVisible) {
+            PasswordVisualTransformation()
+        } else {
+            VisualTransformation.None
+        },
+        keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions,
     )
-
-    Column(modifier) {
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            modifier = Modifier.fillMaxWidth(),
-            enabled = enabled,
-            isError = isError,
-            singleLine = true,
-            shape = RoundedCornerShape(Dimens.radiusMd),
-            label = { Text(label) },
-            placeholder = { Text(placeholder) },
-            leadingIcon = {
-                Icon(
-                    painter = painterResource(leadingIcon),
-                    contentDescription = leadingIconDescription,
-                    tint = iconTint,
-                    modifier = Modifier.size(Dimens.iconMd),
-                )
-            },
-            trailingIcon = if (isPassword) {
-                { PasswordVisibilityToggle(isPasswordVisible, onTogglePasswordVisibility, iconTint) }
-            } else {
-                null
-            },
-            visualTransformation = if (isPassword && !isPasswordVisible) {
-                PasswordVisualTransformation()
-            } else {
-                VisualTransformation.None
-            },
-            keyboardOptions = keyboardOptions,
-            keyboardActions = keyboardActions,
-            interactionSource = interactionSource,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = glass.glassFill,
-                unfocusedContainerColor = glass.glassFill,
-                disabledContainerColor = glass.glassFill,
-                errorContainerColor = glass.glassFill,
-                focusedBorderColor = colors.primary,
-                unfocusedBorderColor = glass.glassBorder,
-                disabledBorderColor = glass.glassBorder,
-                focusedTextColor = colors.onSurface,
-                unfocusedTextColor = colors.onSurface,
-                cursorColor = colors.primary,
-            ),
-        )
-
-        AnimatedVisibility(
-            visible = isError,
-            enter = fadeIn(tween(ERROR_REVEAL_MILLIS)) + expandVertically(tween(ERROR_REVEAL_MILLIS)),
-            exit = fadeOut(tween(ERROR_REVEAL_MILLIS)) + shrinkVertically(tween(ERROR_REVEAL_MILLIS)),
-        ) {
-            Text(
-                text = errorMessage.orEmpty(),
-                style = MaterialTheme.typography.bodySmall,
-                color = colors.error,
-                modifier = Modifier.padding(
-                    start = Dimens.spaceLg,
-                    top = Dimens.spaceXs,
-                    end = Dimens.spaceLg,
-                ),
-            )
-        }
-    }
 }
 
 @Composable

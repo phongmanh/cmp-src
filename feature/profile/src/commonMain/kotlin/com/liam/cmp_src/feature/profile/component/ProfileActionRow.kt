@@ -1,27 +1,20 @@
 package com.liam.cmp_src.feature.profile.component
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.liam.cmp_src.core.ui.component.AppListDefaults
+import com.liam.cmp_src.core.ui.component.AppListDivider
+import com.liam.cmp_src.core.ui.component.AppListItem
 import com.liam.cmp_src.core.ui.component.GlassCard
-import com.liam.cmp_src.core.ui.modifier.handCursor
 import com.liam.cmp_src.core.ui.theme.AppTheme
 import com.liam.cmp_src.core.ui.theme.Dimens
-import com.liam.cmp_src.core.ui.theme.auroraColors
 import cmpsrc.core.ui.generated.resources.Res as UiRes
 import cmpsrc.core.ui.generated.resources.ic_lock
 import cmpsrc.feature.profile.generated.resources.Res
@@ -36,9 +29,6 @@ import org.jetbrains.compose.resources.stringResource
 /**
  * One tappable line in the profile's settings list: an icon, what it does, and a chevron saying
  * there is somewhere to go.
- *
- * The row carries its own padding rather than inheriting the card's, so the press highlight spans
- * the full width of the card instead of stopping short of its edges.
  */
 @Composable
 fun ProfileActionRow(
@@ -47,46 +37,26 @@ fun ProfileActionRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .handCursor()
-            .defaultMinSize(minHeight = Dimens.navItemHeight)
-            .padding(horizontal = Dimens.spaceXl, vertical = Dimens.spaceLg),
-        horizontalArrangement = Arrangement.spacedBy(Dimens.spaceLg),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(
-            painter = painterResource(icon),
-            contentDescription = null,
-            modifier = Modifier.size(Dimens.iconMd),
-            tint = MaterialTheme.colorScheme.primary,
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.weight(1f),
-        )
-        Icon(
-            painter = painterResource(Res.drawable.ic_chevron_right),
-            contentDescription = null,
-            modifier = Modifier.size(Dimens.iconSm),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
+    AppListItem(
+        headline = label,
+        modifier = modifier,
+        leadingIcon = icon,
+        trailing = {
+            Icon(
+                painter = painterResource(Res.drawable.ic_chevron_right),
+                contentDescription = null,
+                modifier = Modifier.size(Dimens.iconSm),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        },
+        onClick = onClick,
+    )
 }
 
 /** The hairline between two rows, indented to line up with the labels above and below it. */
 @Composable
 fun ProfileActionDivider(modifier: Modifier = Modifier) {
-    HorizontalDivider(
-        // Starts where the label does — past the row's padding, the icon, and the gap after it.
-        modifier = modifier.padding(start = Dimens.spaceXl + Dimens.iconMd + Dimens.spaceLg),
-        thickness = Dimens.hairline,
-        color = auroraColors.glassBorder,
-    )
+    AppListDivider(modifier = modifier, startInset = AppListDefaults.IconTextInset)
 }
 
 @Preview
