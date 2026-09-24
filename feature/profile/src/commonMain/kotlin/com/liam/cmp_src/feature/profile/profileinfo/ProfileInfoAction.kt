@@ -2,7 +2,10 @@ package com.liam.cmp_src.feature.profile.profileinfo
 
 import com.example.api.user.UserResponse
 
-/** Everything the edit-profile dialog sends to its ViewModel — user input, plus being opened. */
+/**
+ * Everything the edit-profile dialog sends to its ViewModel, other than typing — the name field's
+ * text lives in [ProfileInfoViewModel.displayName], which the field edits directly.
+ */
 sealed interface ProfileInfoAction {
 
     /**
@@ -13,8 +16,6 @@ sealed interface ProfileInfoAction {
      * reopened form would come back holding whatever the last one was left in.
      */
     data class Opened(val user: UserResponse) : ProfileInfoAction
-
-    data class NameChanged(val value: String) : ProfileInfoAction
 
     /** Write the typed name. This is the action that also clears an uploaded picture. */
     data object SaveName : ProfileInfoAction

@@ -14,6 +14,7 @@ import com.liam.cmp_src.feature.auth.presentation.login.LoginEvent
 import com.liam.cmp_src.feature.auth.presentation.login.LoginStatus
 import com.liam.cmp_src.feature.auth.presentation.login.LoginViewModel
 import com.liam.cmp_src.core.testing.FakeAuthRepository
+import com.liam.cmp_src.core.testing.type
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -68,28 +69,17 @@ class LoginViewModelTest {
     }
 
     private fun LoginViewModel.enterValidCredentials() {
-        onAction(LoginAction.EmailChanged(VALID_EMAIL))
-        onAction(LoginAction.PasswordChanged(VALID_PASSWORD))
+        email.state.type(VALID_EMAIL)
+        password.state.type(VALID_PASSWORD)
     }
 
     @Test
     fun startsIdleWithEmptyFields() {
         val viewModel = viewModelWith(FakeAuthRepository())
 
-        val state = viewModel.uiState.value
-        assertEquals("", state.email)
-        assertEquals("", state.password)
-        assertEquals(LoginStatus.Idle, state.status)
-    }
-
-    @Test
-    fun typingUpdatesTheFields() {
-        val viewModel = viewModelWith(FakeAuthRepository())
-
-        viewModel.enterValidCredentials()
-
-        assertEquals(VALID_EMAIL, viewModel.uiState.value.email)
-        assertEquals(VALID_PASSWORD, viewModel.uiState.value.password)
+        assertEquals("", viewModel.email.state.text.toString())
+        assertEquals("", viewModel.password.state.text.toString())
+        assertEquals(LoginStatus.Idle, viewModel.uiState.value.status)
     }
 
     @Test
@@ -158,7 +148,8 @@ class LoginViewModelTest {
         viewModel.onAction(LoginAction.Submit)
         advanceUntilIdle()
 
-        viewModel.onAction(LoginAction.PasswordChanged("password1234"))
+        viewModel.password.state.type("password1234")
+        advanceUntilIdle()
 
         assertEquals(LoginStatus.Idle, viewModel.uiState.value.status)
     }
@@ -175,8 +166,8 @@ class LoginViewModelTest {
         viewModel.onAction(LoginAction.ScreenEntered)
 
         val state = viewModel.uiState.value
-        assertEquals("", state.email)
-        assertEquals("", state.password)
+        assertEquals("", viewModel.email.state.text.toString())
+        assertEquals("", viewModel.password.state.text.toString())
         assertEquals(LoginStatus.Idle, state.status)
         assertTrue(!state.isBusy)
     }
@@ -188,10 +179,9 @@ class LoginViewModelTest {
 
         viewModel.onAction(LoginAction.ScreenEntered)
 
-        val state = viewModel.uiState.value
-        assertEquals(VALID_EMAIL, state.email)
-        assertEquals(VALID_PASSWORD, state.password)
-        assertEquals(LoginStatus.Idle, state.status)
+        assertEquals(VALID_EMAIL, viewModel.email.state.text.toString())
+        assertEquals(VALID_PASSWORD, viewModel.password.state.text.toString())
+        assertEquals(LoginStatus.Idle, viewModel.uiState.value.status)
     }
 
     @Test
@@ -228,8 +218,8 @@ class LoginViewModelTest {
     fun shortPasswordBlocksSubmission() = runTest(testDispatcher) {
         val repository = FakeAuthRepository()
         val viewModel = viewModelWith(repository)
-        viewModel.onAction(LoginAction.EmailChanged(VALID_EMAIL))
-        viewModel.onAction(LoginAction.PasswordChanged("short"))
+        viewModel.email.state.type(VALID_EMAIL)
+        viewModel.password.state.type("short")
 
         viewModel.onAction(LoginAction.Submit)
         advanceUntilIdle()
@@ -244,7 +234,8 @@ class LoginViewModelTest {
         viewModel.onAction(LoginAction.Submit)
         advanceUntilIdle()
 
-        viewModel.onAction(LoginAction.EmailChanged(VALID_EMAIL))
+        viewModel.email.state.type(VALID_EMAIL)
+        advanceUntilIdle()
 
         val errors = viewModel.uiState.value.fieldErrors
         assertEquals(null, errors.email)

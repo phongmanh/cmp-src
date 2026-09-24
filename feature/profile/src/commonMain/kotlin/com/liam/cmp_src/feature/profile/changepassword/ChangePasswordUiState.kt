@@ -18,15 +18,14 @@ sealed interface ChangePasswordStatus {
 }
 
 /**
- * Everything the change-password dialog renders.
+ * Everything the change-password dialog renders apart from the typed passwords, which are in
+ * [ChangePasswordViewModel.currentPassword], [ChangePasswordViewModel.newPassword] and
+ * [ChangePasswordViewModel.confirmPassword].
  *
  * The confirmation field has no visibility flag of its own — it follows [isNewVisible], because
  * revealing one half of a pair the user is asked to match and not the other helps nobody.
  */
 data class ChangePasswordUiState(
-    val currentPassword: String = "",
-    val newPassword: String = "",
-    val confirmPassword: String = "",
     val isCurrentVisible: Boolean = false,
     val isNewVisible: Boolean = false,
     val fieldErrors: ChangePasswordErrors = ChangePasswordErrors.NONE,

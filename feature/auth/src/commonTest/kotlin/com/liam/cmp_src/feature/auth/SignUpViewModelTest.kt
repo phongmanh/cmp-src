@@ -1,6 +1,8 @@
 package com.liam.cmp_src.feature.auth
 
+import com.liam.cmp_src.core.domain.model.PasswordError
 import com.liam.cmp_src.core.testing.FakeAuthRepository
+import com.liam.cmp_src.core.testing.type
 import com.liam.cmp_src.core.ui.SUCCESS_HOLD_MILLIS
 import com.liam.cmp_src.feature.auth.domain.usecase.SignUpUseCase
 import com.liam.cmp_src.feature.auth.domain.usecase.ValidateCredentialsUseCase
@@ -17,6 +19,7 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -25,6 +28,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 private const val VALID_EMAIL = "new@cmpsrc.dev"
@@ -67,10 +71,10 @@ class SignUpViewModelTest {
             validateCredentials = ValidateCredentialsUseCase(),
         )
         val events = collectEvents(viewModel)
-        viewModel.onAction(SignUpAction.EmailChanged(VALID_EMAIL))
-        viewModel.onAction(SignUpAction.PasswordChanged(VALID_PASSWORD))
+        viewModel.email.state.type(VALID_EMAIL)
+        viewModel.password.state.type(VALID_PASSWORD)
 
-        viewModel.onAction(SignUpAction.Submit(VALID_EMAIL, VALID_PASSWORD))
+        viewModel.onAction(SignUpAction.Submit)
         runCurrent()
 
         assertEquals(SignUpUiStatus.Succeeded, viewModel.state.value.status)
@@ -82,5 +86,33 @@ class SignUpViewModelTest {
         advanceTimeBy(1)
         runCurrent()
         assertEquals(listOf<SignUpEvent>(SignUpEvent.NavigateToHome(FakeAuthRepository.TEST_USER)), events)
+    }
+
+    private fun viewModel() = SignUpViewModel(
+        signUpUseCase = SignUpUseCase(FakeAuthRepository()),
+        validateCredentials = ValidateCredentialsUseCase(),
+    )
+
+    @Test
+    fun `editing a field clears that field's validation error`() = runTest(testDispatcher) {
+        val viewModel = viewModel()
+        viewModel.onAction(SignUpAction.Submit)
+        advanceUntilIdle()
+
+        viewModel.email.state.type(VALID_EMAIL)
+        advanceUntilIdle()
+
+        val errors = viewModel.state.value.fieldErrors
+        assertNull(errors.email)
+        assertEquals(PasswordError.Blank, errors.password)
+    }
+
+    @Test
+    fun `toggling password visibility flips the flag`() {
+        val viewModel = viewModel()
+
+        viewModel.onAction(SignUpAction.TogglePasswordVisibility)
+
+        assertTrue(viewModel.state.value.isPasswordVisible)
     }
 }

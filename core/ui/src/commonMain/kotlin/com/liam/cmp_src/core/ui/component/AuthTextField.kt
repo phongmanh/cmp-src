@@ -6,16 +6,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.InputTransformation
+import androidx.compose.foundation.text.input.KeyboardActionHandler
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import com.liam.cmp_src.core.ui.modifier.handCursor
 import com.liam.cmp_src.core.ui.theme.AppTheme
@@ -34,13 +35,12 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * A single credential input: an [AppOutlinedTextField] that always has a leading icon and, for a
- * password, a reveal toggle at the end that masks and unmasks the value.
+ * A single credential input: an [AppOutlinedTextField] that always has a leading icon, or — for a
+ * password — an [AppOutlinedSecureTextField] with a reveal toggle at the end.
  */
 @Composable
 fun AuthTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
+    state: TextFieldState,
     label: String,
     placeholder: String,
     leadingIcon: DrawableResource,
@@ -51,32 +51,43 @@ fun AuthTextField(
     isPassword: Boolean = false,
     isPasswordVisible: Boolean = false,
     onTogglePasswordVisibility: () -> Unit = {},
+    inputTransformation: InputTransformation? = null,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    onKeyboardAction: KeyboardActionHandler? = null,
 ) {
-    AppOutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        modifier = modifier,
-        label = label,
-        placeholder = placeholder,
-        leadingIcon = leadingIcon,
-        leadingIconDescription = leadingIconDescription,
-        trailingIcon = if (isPassword) {
-            { tint -> PasswordVisibilityToggle(isPasswordVisible, onTogglePasswordVisibility, tint) }
-        } else {
-            null
-        },
-        enabled = enabled,
-        errorMessage = errorMessage,
-        visualTransformation = if (isPassword && !isPasswordVisible) {
-            PasswordVisualTransformation()
-        } else {
-            VisualTransformation.None
-        },
-        keyboardOptions = keyboardOptions,
-        keyboardActions = keyboardActions,
-    )
+    if (isPassword) {
+        AppOutlinedSecureTextField(
+            state = state,
+            modifier = modifier,
+            label = label,
+            placeholder = placeholder,
+            leadingIcon = leadingIcon,
+            leadingIconDescription = leadingIconDescription,
+            trailingIcon = { tint ->
+                PasswordVisibilityToggle(isPasswordVisible, onTogglePasswordVisibility, tint)
+            },
+            enabled = enabled,
+            isRevealed = isPasswordVisible,
+            errorMessage = errorMessage,
+            inputTransformation = inputTransformation,
+            keyboardOptions = keyboardOptions,
+            onKeyboardAction = onKeyboardAction,
+        )
+    } else {
+        AppOutlinedTextField(
+            state = state,
+            modifier = modifier,
+            label = label,
+            placeholder = placeholder,
+            leadingIcon = leadingIcon,
+            leadingIconDescription = leadingIconDescription,
+            enabled = enabled,
+            errorMessage = errorMessage,
+            inputTransformation = inputTransformation,
+            keyboardOptions = keyboardOptions,
+            onKeyboardAction = onKeyboardAction,
+        )
+    }
 }
 
 @Composable
@@ -109,8 +120,7 @@ private fun AuthTextFieldPreview() {
                 .padding(PaddingValues(Dimens.spaceLg)),
         ) {
             AuthTextField(
-                value = "",
-                onValueChange = {},
+                state = rememberTextFieldState(),
                 label = stringResource(Res.string.login_email_label),
                 placeholder = stringResource(Res.string.login_email_placeholder),
                 leadingIcon = Res.drawable.ic_email,

@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
@@ -17,6 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -73,14 +76,22 @@ fun <T> AppDropdownField(
         label = "dropdownArrowRotation",
     )
 
+    // The field only ever shows the selection, so its state follows [selected] rather than input.
+    val selectedLabel = selected?.let { optionLabel(it) }.orEmpty()
+    val fieldState = rememberTextFieldState(selectedLabel)
+    LaunchedEffect(selectedLabel) {
+        if (fieldState.text.toString() != selectedLabel) {
+            fieldState.setTextAndPlaceCursorAtEnd(selectedLabel)
+        }
+    }
+
     ExposedDropdownMenuBox(
         expanded = expanded && enabled,
         onExpandedChange = { if (enabled) expanded = it },
         modifier = modifier,
     ) {
         AppOutlinedTextField(
-            value = selected?.let { optionLabel(it) }.orEmpty(),
-            onValueChange = {},
+            state = fieldState,
             modifier = Modifier
                 .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled)
                 .handCursor(enabled),

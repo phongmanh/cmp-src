@@ -2,6 +2,7 @@ package com.liam.cmp_src.feature.profile
 
 import com.example.api.common.FieldLimits
 import com.liam.cmp_src.core.testing.FakeAuthRepository
+import com.liam.cmp_src.core.testing.type
 import com.liam.cmp_src.core.domain.model.AuthError
 import com.liam.cmp_src.core.domain.model.AuthResult
 import com.liam.cmp_src.core.domain.model.PasswordError
@@ -67,19 +68,19 @@ class ChangePasswordViewModelTest {
     }
 
     private fun ChangePasswordViewModel.enterValidForm() {
-        onAction(ChangePasswordAction.CurrentPasswordChanged(CURRENT_PASSWORD))
-        onAction(ChangePasswordAction.NewPasswordChanged(NEW_PASSWORD))
-        onAction(ChangePasswordAction.ConfirmPasswordChanged(NEW_PASSWORD))
+        currentPassword.state.type(CURRENT_PASSWORD)
+        newPassword.state.type(NEW_PASSWORD)
+        confirmPassword.state.type(NEW_PASSWORD)
     }
 
     @Test
     fun startsIdleWithEmptyFields() {
-        val state = viewModelWith(FakeAuthRepository()).uiState.value
+        val viewModel = viewModelWith(FakeAuthRepository())
 
-        assertEquals("", state.currentPassword)
-        assertEquals("", state.newPassword)
-        assertEquals("", state.confirmPassword)
-        assertEquals(ChangePasswordStatus.Idle, state.status)
+        assertEquals("", viewModel.currentPassword.state.text.toString())
+        assertEquals("", viewModel.newPassword.state.text.toString())
+        assertEquals("", viewModel.confirmPassword.state.text.toString())
+        assertEquals(ChangePasswordStatus.Idle, viewModel.uiState.value.status)
     }
 
     @Test
@@ -87,7 +88,7 @@ class ChangePasswordViewModelTest {
         val repository = FakeAuthRepository()
         val viewModel = viewModelWith(repository)
 
-        viewModel.onAction(ChangePasswordAction.NewPasswordChanged("short"))
+        viewModel.newPassword.state.type("short")
         viewModel.onAction(ChangePasswordAction.Submit)
         advanceUntilIdle()
 
@@ -109,7 +110,8 @@ class ChangePasswordViewModelTest {
         advanceUntilIdle()
         assertEquals(PasswordError.Blank, viewModel.uiState.value.fieldErrors.currentPassword)
 
-        viewModel.onAction(ChangePasswordAction.CurrentPasswordChanged(CURRENT_PASSWORD))
+        viewModel.currentPassword.state.type(CURRENT_PASSWORD)
+        advanceUntilIdle()
 
         val errors = viewModel.uiState.value.fieldErrors
         assertNull(errors.currentPassword)
@@ -165,8 +167,8 @@ class ChangePasswordViewModelTest {
         val state = viewModel.uiState.value
         assertEquals(AuthError.WrongPassword, state.error)
         // Nothing is cleared: the user retypes one field, not the whole form.
-        assertEquals(CURRENT_PASSWORD, state.currentPassword)
-        assertEquals(NEW_PASSWORD, state.newPassword)
+        assertEquals(CURRENT_PASSWORD, viewModel.currentPassword.state.text.toString())
+        assertEquals(NEW_PASSWORD, viewModel.newPassword.state.text.toString())
         assertTrue(events.isEmpty())
     }
 
@@ -180,7 +182,8 @@ class ChangePasswordViewModelTest {
         viewModel.onAction(ChangePasswordAction.Submit)
         advanceUntilIdle()
 
-        viewModel.onAction(ChangePasswordAction.CurrentPasswordChanged("something-else-entirely"))
+        viewModel.currentPassword.state.type("something-else-entirely")
+        advanceUntilIdle()
 
         assertEquals(ChangePasswordStatus.Idle, viewModel.uiState.value.status)
         assertNull(viewModel.uiState.value.error)
@@ -228,11 +231,10 @@ class ChangePasswordViewModelTest {
 
         viewModel.onAction(ChangePasswordAction.Opened)
 
-        val state = viewModel.uiState.value
-        assertEquals("", state.currentPassword)
-        assertEquals("", state.newPassword)
-        assertEquals("", state.confirmPassword)
-        assertEquals(ChangePasswordStatus.Idle, state.status)
+        assertEquals("", viewModel.currentPassword.state.text.toString())
+        assertEquals("", viewModel.newPassword.state.text.toString())
+        assertEquals("", viewModel.confirmPassword.state.text.toString())
+        assertEquals(ChangePasswordStatus.Idle, viewModel.uiState.value.status)
     }
 
     @Test

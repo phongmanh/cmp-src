@@ -3,6 +3,7 @@ package com.liam.cmp_src.feature.auth.presentation.signup
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.liam.cmp_src.core.ui.SUCCESS_HOLD_MILLIS
+import com.liam.cmp_src.core.ui.input.FormField
 import com.liam.cmp_src.core.domain.model.AuthResult
 import com.liam.cmp_src.feature.auth.domain.model.CredentialErrors
 import com.liam.cmp_src.feature.auth.domain.usecase.SignUpUseCase
@@ -28,25 +29,29 @@ class SignUpViewModel(
     private val _effect = Channel<SignUpEvent>()
     val effect = _effect.receiveAsFlow()
 
+    val email = FormField(viewModelScope) {
+        _state.update { it.copy(fieldErrors = it.fieldErrors.copy(email = null)) }
+    }
+
+    val password = FormField(viewModelScope) {
+        _state.update { it.copy(fieldErrors = it.fieldErrors.copy(password = null)) }
+    }
+
     fun onAction(action: SignUpAction) {
         when (action) {
             SignUpAction.NavigateBack -> viewModelScope.launch { _effect.send(SignUpEvent.NavigateBackToLogin) }
-            is SignUpAction.Submit -> onSubmit()
-            is SignUpAction.EmailChanged -> {
-                _state.update { it.copy(email = action.value, fieldErrors = it.fieldErrors.copy(email = null)) }
-            }
-
-            is SignUpAction.PasswordChanged -> {
-                _state.update { it.copy(password = action.value, fieldErrors = it.fieldErrors.copy(password = null)) }
-            }
+            SignUpAction.Submit -> onSubmit()
+            SignUpAction.TogglePasswordVisibility ->
+                _state.update { it.copy(isPasswordVisible = !it.isPasswordVisible) }
         }
     }
 
     private fun onSubmit() {
-        val current = _state.value
-        if (current.isBusy) return
+        if (_state.value.isBusy) return
+        val typedEmail = email.submit()
+        val typedPassword = password.submit()
 
-        val credentialErrors = validateCredentials(current.email, current.password)
+        val credentialErrors = validateCredentials(typedEmail, typedPassword)
         if (credentialErrors.hasErrors) {
             _state.update { it.copy(status = SignUpUiStatus.Idle, fieldErrors = credentialErrors) }
             return
@@ -56,7 +61,7 @@ class SignUpViewModel(
         }
 
         viewModelScope.launch {
-            when (val result = signUpUseCase(current.email, current.password)) {
+            when (val result = signUpUseCase(typedEmail, typedPassword)) {
                 is AuthResult.Failure -> _state.update { it.copy(status = SignUpUiStatus.Failed(result.error)) }
                 is AuthResult.Success -> {
                     _state.update { it.copy(status = SignUpUiStatus.Succeeded) }

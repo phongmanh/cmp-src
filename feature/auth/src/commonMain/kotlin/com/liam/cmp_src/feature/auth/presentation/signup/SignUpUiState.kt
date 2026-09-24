@@ -10,10 +10,12 @@ sealed interface SignUpUiStatus {
     data class Failed(val authError: AuthError) : SignUpUiStatus
 }
 
+/**
+ * Everything the sign-up screen renders apart from the typed text, which is in
+ * [SignUpViewModel.email] and [SignUpViewModel.password].
+ */
 data class SignUpUiState(
     val status: SignUpUiStatus = SignUpUiStatus.Idle,
-    val email: String = "",
-    val password: String = "",
     val isPasswordVisible: Boolean = false,
     val fieldErrors: CredentialErrors = CredentialErrors.NONE,
 ) {

@@ -1,9 +1,11 @@
 package com.liam.cmp_src.feature.profile.profileinfo
 
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.api.user.UserResponse
 import com.liam.cmp_src.core.ui.SUCCESS_HOLD_MILLIS
+import com.liam.cmp_src.core.ui.input.FormField
 import com.liam.cmp_src.core.domain.model.AuthResult
 import com.liam.cmp_src.feature.profile.domain.usecase.RemoveAvatarUseCase
 import com.liam.cmp_src.feature.profile.domain.usecase.UpdateDisplayNameUseCase
@@ -32,7 +34,8 @@ import kotlin.time.Duration.Companion.milliseconds
  * and is reported upward with [ProfileInfoEvent.Updated] so the screen behind can refresh; the
  * user closes when they are finished.
  *
- * Depends only on use cases, and touches no Compose or platform type, so it runs on every target.
+ * Depends only on use cases. Its one Compose type is the `TextFieldState` inside the name's
+ * [FormField] — plain state with no UI behind it — so it still runs on every target.
  */
 class ProfileInfoViewModel(
     private val updateDisplayName: UpdateDisplayNameUseCase,
@@ -47,20 +50,19 @@ class ProfileInfoViewModel(
     private val _events = MutableSharedFlow<ProfileInfoEvent>(extraBufferCapacity = 1)
     val events: SharedFlow<ProfileInfoEvent> = _events.asSharedFlow()
 
+    val displayName = FormField(viewModelScope) { name ->
+        _uiState.update {
+            it.copy(typedName = name, nameError = null, status = it.status.clearedOnEdit())
+        }
+    }
+
     fun onAction(action: ProfileInfoAction) {
         when (action) {
             // A reopened dialog starts from the account as it is now, not from the last attempt.
-            is ProfileInfoAction.Opened -> _uiState.value = ProfileInfoUiState(
-                user = action.user,
-                displayName = action.user.displayName.orEmpty(),
-            )
-
-            is ProfileInfoAction.NameChanged -> _uiState.update {
-                it.copy(
-                    displayName = action.value,
-                    nameError = null,
-                    status = it.status.clearedOnEdit(),
-                )
+            is ProfileInfoAction.Opened -> {
+                val name = action.user.displayName.orEmpty()
+                displayName.state.setTextAndPlaceCursorAtEnd(name)
+                _uiState.value = ProfileInfoUiState(user = action.user, typedName = name)
             }
 
             ProfileInfoAction.SaveName -> saveName()
@@ -81,10 +83,10 @@ class ProfileInfoViewModel(
      * no round trip and lands under the field instead of in the banner.
      */
     private fun saveName() {
-        val current = _uiState.value
-        val user = current.user ?: return
+        val user = _uiState.value.user ?: return
+        val typedName = displayName.submit()
 
-        val nameError = validateDisplayName(current.displayName)
+        val nameError = validateDisplayName(typedName)
         if (nameError != null) {
             _uiState.update { it.copy(nameError = nameError, status = ProfileInfoStatus.Idle) }
             return
@@ -92,7 +94,7 @@ class ProfileInfoViewModel(
 
         _uiState.update { it.copy(nameError = null) }
         write(ProfileInfoStatus.SavingName) {
-            updateDisplayName(displayName = current.displayName, current = user)
+            updateDisplayName(displayName = typedName, current = user)
         }
     }
 
@@ -129,10 +131,11 @@ class ProfileInfoViewModel(
      * change while the tick is still on screen rather than a beat after it.
      */
     private suspend fun onSaved(user: UserResponse, wroteTheName: Boolean) {
+        if (wroteTheName) displayName.state.setTextAndPlaceCursorAtEnd(user.displayName.orEmpty())
         _uiState.update {
             it.copy(
                 user = user,
-                displayName = if (wroteTheName) user.displayName.orEmpty() else it.displayName,
+                typedName = displayName.state.text.toString(),
                 status = ProfileInfoStatus.Succeeded,
             )
         }

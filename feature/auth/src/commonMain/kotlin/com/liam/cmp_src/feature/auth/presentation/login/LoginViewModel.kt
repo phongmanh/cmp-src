@@ -1,8 +1,10 @@
 package com.liam.cmp_src.feature.auth.presentation.login
 
+import androidx.compose.foundation.text.input.clearText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.liam.cmp_src.core.ui.SUCCESS_HOLD_MILLIS
+import com.liam.cmp_src.core.ui.input.FormField
 import com.liam.cmp_src.core.domain.model.AuthResult
 import com.liam.cmp_src.feature.auth.domain.model.CredentialErrors
 import com.liam.cmp_src.core.domain.model.SocialProvider
@@ -23,8 +25,9 @@ import kotlin.time.Duration.Companion.milliseconds
 /**
  * Holds the login screen's state and runs sign-in attempts.
  *
- * Depends only on use cases, never on `AuthRepository` directly, and never touches a
- * Compose or platform type — which is what makes it testable on every target.
+ * Depends only on use cases, never on `AuthRepository` directly. Its one Compose type is the
+ * `TextFieldState` inside each [FormField] — plain state with no UI behind it, so this still
+ * runs and is tested on every target.
  */
 class LoginViewModel(
     private val signInWithEmail: SignInWithEmailUseCase,
@@ -38,25 +41,17 @@ class LoginViewModel(
     private val _events = MutableSharedFlow<LoginEvent>(extraBufferCapacity = 1)
     val events: SharedFlow<LoginEvent> = _events.asSharedFlow()
 
+    val email = FormField(viewModelScope) {
+        _uiState.update { it.clearedOnEdit(it.fieldErrors.copy(email = null)) }
+    }
+
+    val password = FormField(viewModelScope) {
+        _uiState.update { it.clearedOnEdit(it.fieldErrors.copy(password = null)) }
+    }
+
     fun onAction(action: LoginAction) {
         when (action) {
-            LoginAction.ScreenEntered -> _uiState.update { it.clearedAfterSignIn() }
-
-            is LoginAction.EmailChanged -> _uiState.update {
-                it.copy(
-                    email = action.value,
-                    fieldErrors = it.fieldErrors.copy(email = null),
-                    status = it.status.clearedOnEdit(),
-                )
-            }
-
-            is LoginAction.PasswordChanged -> _uiState.update {
-                it.copy(
-                    password = action.value,
-                    fieldErrors = it.fieldErrors.copy(password = null),
-                    status = it.status.clearedOnEdit(),
-                )
-            }
+            LoginAction.ScreenEntered -> clearAfterSignIn()
 
             LoginAction.TogglePasswordVisibility -> _uiState.update {
                 it.copy(isPasswordVisible = !it.isPasswordVisible)
@@ -75,10 +70,11 @@ class LoginViewModel(
     }
 
     private fun submitEmailAndPassword() {
-        val current = _uiState.value
-        if (current.isBusy) return
+        if (_uiState.value.isBusy) return
+        val typedEmail = email.submit()
+        val typedPassword = password.submit()
 
-        val errors = validateCredentials(current.email, current.password)
+        val errors = validateCredentials(typedEmail, typedPassword)
         if (errors.hasErrors) {
             _uiState.update { it.copy(fieldErrors = errors, status = LoginStatus.Idle) }
             return
@@ -88,7 +84,7 @@ class LoginViewModel(
             it.copy(fieldErrors = CredentialErrors.NONE, status = LoginStatus.Submitting(null))
         }
         viewModelScope.launch {
-            handle(signInWithEmail(current.email, current.password))
+            handle(signInWithEmail(typedEmail, typedPassword))
         }
     }
 
@@ -120,12 +116,17 @@ class LoginViewModel(
         }
     }
 
-    /** Editing a field dismisses a previous failure, but must not interrupt one in flight. */
-    private fun LoginStatus.clearedOnEdit(): LoginStatus =
-        if (this is LoginStatus.Failed) LoginStatus.Idle else this
+    /**
+     * Editing a field clears its own error, and dismisses a previous failure — but must not
+     * interrupt one in flight.
+     */
+    private fun LoginUiState.clearedOnEdit(fieldErrors: CredentialErrors): LoginUiState = copy(
+        fieldErrors = fieldErrors,
+        status = if (status is LoginStatus.Failed) LoginStatus.Idle else status,
+    )
 
     /**
-     * A blank form for a screen that is being entered after a completed sign-in.
+     * Blanks the form for a screen that is being entered after a completed sign-in.
      *
      * This ViewModel outlives the screen — it is resolved from the app's single
      * `ViewModelStoreOwner` — so signing out and landing back on login would otherwise inherit
@@ -133,6 +134,10 @@ class LoginViewModel(
      * unusable. Only that terminal state is cleared: re-entering mid-typing or mid-submit
      * (a configuration change, say) keeps what the user had.
      */
-    private fun LoginUiState.clearedAfterSignIn(): LoginUiState =
-        if (status is LoginStatus.Succeeded) LoginUiState() else this
+    private fun clearAfterSignIn() {
+        if (_uiState.value.status !is LoginStatus.Succeeded) return
+        email.state.clearText()
+        password.state.clearText()
+        _uiState.value = LoginUiState()
+    }
 }

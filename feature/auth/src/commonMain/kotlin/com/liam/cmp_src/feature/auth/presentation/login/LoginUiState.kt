@@ -9,7 +9,7 @@ import com.liam.cmp_src.core.domain.model.SocialProvider
  *
  * A login form has to keep rendering its fields in every state, so the screen state is a
  * data class carrying this sealed status rather than being a sealed hierarchy itself — the
- * status is still a closed set, but the typed-in email and password survive across it.
+ * status is still a closed set, but the password visibility and field errors survive across it.
  */
 sealed interface LoginStatus {
 
@@ -27,9 +27,11 @@ sealed interface LoginStatus {
     data object Succeeded : LoginStatus
 }
 
+/**
+ * Everything the login screen renders apart from the typed text, which is in
+ * [LoginViewModel.email] and [LoginViewModel.password].
+ */
 data class LoginUiState(
-    val email: String = "",
-    val password: String = "",
     val isPasswordVisible: Boolean = false,
     val fieldErrors: CredentialErrors = CredentialErrors.NONE,
     val status: LoginStatus = LoginStatus.Idle,

@@ -2,6 +2,7 @@ package com.liam.cmp_src.feature.profile
 
 import com.example.api.common.FieldLimits
 import com.liam.cmp_src.core.testing.FakeAuthRepository
+import com.liam.cmp_src.core.testing.type
 import com.liam.cmp_src.core.domain.model.AuthError
 import com.liam.cmp_src.core.domain.model.AuthResult
 import com.liam.cmp_src.feature.profile.domain.model.DisplayNameError
@@ -77,7 +78,10 @@ class ProfileInfoViewModelTest {
 
         val state = viewModel.uiState.value
         assertEquals(FakeAuthRepository.TEST_USER, state.user)
-        assertEquals(FakeAuthRepository.TEST_USER.displayName, state.displayName)
+        assertEquals(
+            FakeAuthRepository.TEST_USER.displayName,
+            viewModel.displayName.state.text.toString(),
+        )
         assertFalse(state.isNameDirty, "a freshly opened form has nothing to save")
     }
 
@@ -87,10 +91,13 @@ class ProfileInfoViewModelTest {
         val viewModel = viewModelWith(FakeProfileRepository())
 
         viewModel.onAction(ProfileInfoAction.Opened(FakeAuthRepository.TEST_USER))
-        viewModel.onAction(ProfileInfoAction.NameChanged("half-typed"))
+        viewModel.displayName.state.type("half-typed")
         viewModel.onAction(ProfileInfoAction.Opened(FakeAuthRepository.TEST_USER))
 
-        assertEquals(FakeAuthRepository.TEST_USER.displayName, viewModel.uiState.value.displayName)
+        assertEquals(
+            FakeAuthRepository.TEST_USER.displayName,
+            viewModel.displayName.state.text.toString(),
+        )
     }
 
     @Test
@@ -101,7 +108,7 @@ class ProfileInfoViewModelTest {
         val events = collectEvents(viewModel)
 
         viewModel.onAction(ProfileInfoAction.Opened(FakeAuthRepository.TEST_USER))
-        viewModel.onAction(ProfileInfoAction.NameChanged("Ada Lovelace"))
+        viewModel.displayName.state.type("Ada Lovelace")
         viewModel.onAction(ProfileInfoAction.SaveName)
         advanceUntilIdle()
 
@@ -120,7 +127,7 @@ class ProfileInfoViewModelTest {
         val events = collectEvents(viewModel)
 
         viewModel.onAction(ProfileInfoAction.Opened(FakeAuthRepository.TEST_USER))
-        viewModel.onAction(ProfileInfoAction.NameChanged("Ada"))
+        viewModel.displayName.state.type("Ada")
         viewModel.onAction(ProfileInfoAction.SaveName)
         advanceUntilIdle()
 
@@ -132,7 +139,7 @@ class ProfileInfoViewModelTest {
         val viewModel = viewModelWith(FakeProfileRepository())
 
         viewModel.onAction(ProfileInfoAction.Opened(FakeAuthRepository.TEST_USER))
-        viewModel.onAction(ProfileInfoAction.NameChanged("Ada"))
+        viewModel.displayName.state.type("Ada")
         viewModel.onAction(ProfileInfoAction.SaveName)
         advanceUntilIdle()
 
@@ -146,9 +153,7 @@ class ProfileInfoViewModelTest {
         val viewModel = viewModelWith(repository)
 
         viewModel.onAction(ProfileInfoAction.Opened(FakeAuthRepository.TEST_USER))
-        viewModel.onAction(
-            ProfileInfoAction.NameChanged("a".repeat(FieldLimits.MAX_DISPLAY_NAME_LENGTH + 1)),
-        )
+        viewModel.displayName.state.type("a".repeat(FieldLimits.MAX_DISPLAY_NAME_LENGTH + 1))
         viewModel.onAction(ProfileInfoAction.SaveName)
         advanceUntilIdle()
 
@@ -167,12 +172,13 @@ class ProfileInfoViewModelTest {
         val viewModel = viewModelWith(repository)
 
         viewModel.onAction(ProfileInfoAction.Opened(FakeAuthRepository.TEST_USER))
-        viewModel.onAction(ProfileInfoAction.NameChanged("Ada"))
+        viewModel.displayName.state.type("Ada")
         viewModel.onAction(ProfileInfoAction.SaveName)
         advanceUntilIdle()
         assertIs<ProfileInfoStatus.Failed>(viewModel.uiState.value.status)
 
-        viewModel.onAction(ProfileInfoAction.NameChanged("Ada L"))
+        viewModel.displayName.state.type("Ada L")
+        advanceUntilIdle()
 
         assertEquals(ProfileInfoStatus.Idle, viewModel.uiState.value.status)
     }
@@ -206,11 +212,11 @@ class ProfileInfoViewModelTest {
             val viewModel = viewModelWith(repository)
 
             viewModel.onAction(ProfileInfoAction.Opened(FakeAuthRepository.TEST_USER))
-            viewModel.onAction(ProfileInfoAction.NameChanged("Ada Lovelace"))
+            viewModel.displayName.state.type("Ada Lovelace")
             viewModel.onAction(ProfileInfoAction.PhotoPicked(JPEG, "face.jpg"))
             advanceUntilIdle()
 
-            assertEquals("Ada Lovelace", viewModel.uiState.value.displayName)
+            assertEquals("Ada Lovelace", viewModel.displayName.state.text.toString())
             assertTrue(viewModel.uiState.value.isNameDirty, "the rename is still unsaved")
         }
 
@@ -237,7 +243,7 @@ class ProfileInfoViewModelTest {
         val viewModel = viewModelWith(repository)
 
         viewModel.onAction(ProfileInfoAction.Opened(FakeAuthRepository.TEST_USER))
-        viewModel.onAction(ProfileInfoAction.NameChanged("Ada"))
+        viewModel.displayName.state.type("Ada")
         viewModel.onAction(ProfileInfoAction.SaveName)
         viewModel.onAction(ProfileInfoAction.SaveName)
         advanceUntilIdle()

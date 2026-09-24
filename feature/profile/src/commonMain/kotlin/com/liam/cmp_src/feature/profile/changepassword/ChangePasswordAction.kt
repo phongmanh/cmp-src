@@ -1,6 +1,9 @@
 package com.liam.cmp_src.feature.profile.changepassword
 
-/** Everything the change-password dialog sends to its ViewModel — user input, plus being opened. */
+/**
+ * Everything the change-password dialog sends to its ViewModel, other than typing — the fields'
+ * text lives in the ViewModel's `TextFieldState`s, which the fields edit directly.
+ */
 sealed interface ChangePasswordAction {
 
     /**
@@ -12,9 +15,6 @@ sealed interface ChangePasswordAction {
      */
     data object Opened : ChangePasswordAction
 
-    data class CurrentPasswordChanged(val value: String) : ChangePasswordAction
-    data class NewPasswordChanged(val value: String) : ChangePasswordAction
-    data class ConfirmPasswordChanged(val value: String) : ChangePasswordAction
     data object ToggleCurrentVisibility : ChangePasswordAction
     data object ToggleNewVisibility : ChangePasswordAction
     data object Submit : ChangePasswordAction

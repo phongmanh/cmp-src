@@ -29,10 +29,13 @@ sealed interface ProfileInfoStatus {
  *
  * [user] is the account as last written, so the avatar preview and the warning below both follow
  * a save without the dialog having to be reopened.
+ *
+ * [typedName] is a read-only copy of [ProfileInfoViewModel.displayName], the field's own state, kept
+ * so that whether there is anything to save can be worked out here rather than in the dialog.
  */
 data class ProfileInfoUiState(
     val user: UserResponse? = null,
-    val displayName: String = "",
+    val typedName: String = "",
     val nameError: DisplayNameError? = null,
     val status: ProfileInfoStatus = ProfileInfoStatus.Idle,
 ) {
@@ -45,7 +48,7 @@ data class ProfileInfoUiState(
 
     /** Nothing to save while the field still holds what the server already has. */
     val isNameDirty: Boolean
-        get() = displayName.trim() != user?.displayName.orEmpty()
+        get() = typedName.trim() != user?.displayName.orEmpty()
 
     /** Whether there is a picture to take away. */
     val hasPhoto: Boolean

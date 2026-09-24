@@ -5,15 +5,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
@@ -70,22 +69,29 @@ fun SignUpRoute(
         }
     }
 
-    SignUpScreen(state, viewModel::onAction, modifier)
+    SignUpScreen(
+        state = state,
+        email = viewModel.email.state,
+        password = viewModel.password.state,
+        onAction = viewModel::onAction,
+        modifier = modifier,
+    )
 
 }
 
 @Composable
 fun SignUpScreen(
     state: SignUpUiState,
+    email: TextFieldState,
+    password: TextFieldState,
     onAction: (SignUpAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val focusManager = LocalFocusManager.current
-    val passwordVisible = remember { mutableStateOf(false) }
 
     val onSubmit = {
         focusManager.clearFocus()
-        onAction(SignUpAction.Submit(email = state.email, password = state.password))
+        onAction(SignUpAction.Submit)
     }
 
     AuthScreenScaffold(modifier = modifier) {
@@ -105,10 +111,7 @@ fun SignUpScreen(
             verticalArrangement = Arrangement.Top,
         ) {
             AuthTextField(
-                value = state.email,
-                onValueChange = {
-                    onAction(SignUpAction.EmailChanged(it))
-                },
+                state = email,
                 label = stringResource(UiRes.string.login_email_label),
                 placeholder = stringResource(UiRes.string.login_email_placeholder),
                 leadingIcon = UiRes.drawable.ic_email,
@@ -119,18 +122,13 @@ fun SignUpScreen(
                     keyboardType = KeyboardType.Email,
                     imeAction = ImeAction.Next,
                 ),
-                keyboardActions = KeyboardActions(
-                    onNext = { focusManager.moveFocus(FocusDirection.Down) },
-                ),
+                onKeyboardAction = { focusManager.moveFocus(FocusDirection.Down) },
             )
 
             Spacer(Modifier.size(Dimens.spaceMd))
 
             AuthTextField(
-                value = state.password,
-                onValueChange = {
-                    onAction(SignUpAction.PasswordChanged(it))
-                },
+                state = password,
                 label = stringResource(Res.string.login_password_label),
                 placeholder = stringResource(Res.string.login_password_placeholder),
                 leadingIcon = UiRes.drawable.ic_lock,
@@ -138,13 +136,13 @@ fun SignUpScreen(
                 enabled = !state.isBusy,
                 errorMessage = state.fieldErrors.password?.asMessage(),
                 isPassword = true,
-                isPasswordVisible = passwordVisible.value,
-                onTogglePasswordVisibility = { passwordVisible.value = !passwordVisible.value },
+                isPasswordVisible = state.isPasswordVisible,
+                onTogglePasswordVisibility = { onAction(SignUpAction.TogglePasswordVisibility) },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password,
                     imeAction = ImeAction.Done,
                 ),
-                keyboardActions = KeyboardActions(onDone = { onSubmit() }),
+                onKeyboardAction = { onSubmit() },
             )
 
             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
@@ -179,7 +177,12 @@ fun SignUpScreen(
 @Preview
 fun SignUpScreenPreview() {
     AppTheme {
-        SignUpScreen(state = SignUpUiState(), onAction = {})
+        SignUpScreen(
+            state = SignUpUiState(),
+            email = rememberTextFieldState(),
+            password = rememberTextFieldState(),
+            onAction = {},
+        )
     }
 }
 
@@ -191,6 +194,10 @@ fun SignUpScreenPreviewError() {
             state = SignUpUiState(
                 status = SignUpUiStatus.Failed(AuthError.InvalidCredentials),
                 fieldErrors = CredentialErrors(email = EmailError.Blank)
-            ), onAction = {})
+            ),
+            email = rememberTextFieldState(),
+            password = rememberTextFieldState(),
+            onAction = {},
+        )
     }
 }

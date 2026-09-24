@@ -1,8 +1,9 @@
 package com.liam.cmp_src.feature.auth.presentation.login
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -77,6 +78,8 @@ fun LoginRoute(
 
     LoginScreen(
         state = state,
+        email = viewModel.email.state,
+        password = viewModel.password.state,
         onAction = viewModel::onAction,
         snackbarHostState = snackbarHostState,
         modifier = modifier,
@@ -86,6 +89,8 @@ fun LoginRoute(
 @Composable
 fun LoginScreen(
     state: LoginUiState,
+    email: TextFieldState,
+    password: TextFieldState,
     onAction: (LoginAction) -> Unit,
     modifier: Modifier = Modifier,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
@@ -117,6 +122,8 @@ fun LoginScreen(
         StaggeredEntrance(visible = isVisible, index = 2) {
             LoginCard(
                 state = state,
+                email = email,
+                password = password,
                 onAction = onAction,
                 onSubmit = submit,
                 onMoveFocusDown = { focusManager.moveFocus(FocusDirection.Down) },
@@ -135,6 +142,8 @@ fun LoginScreen(
 @Composable
 private fun LoginCard(
     state: LoginUiState,
+    email: TextFieldState,
+    password: TextFieldState,
     onAction: (LoginAction) -> Unit,
     onSubmit: () -> Unit,
     onMoveFocusDown: () -> Unit,
@@ -145,8 +154,7 @@ private fun LoginCard(
         verticalArrangement = Arrangement.Top,
     ) {
         AuthTextField(
-            value = state.email,
-            onValueChange = { onAction(LoginAction.EmailChanged(it)) },
+            state = email,
             label = stringResource(UiRes.string.login_email_label),
             placeholder = stringResource(UiRes.string.login_email_placeholder),
             leadingIcon = UiRes.drawable.ic_email,
@@ -157,14 +165,13 @@ private fun LoginCard(
                 keyboardType = KeyboardType.Email,
                 imeAction = ImeAction.Next,
             ),
-            keyboardActions = KeyboardActions(onNext = { onMoveFocusDown() }),
+            onKeyboardAction = { onMoveFocusDown() },
         )
 
         Spacer(Modifier.size(Dimens.spaceMd))
 
         AuthTextField(
-            value = state.password,
-            onValueChange = { onAction(LoginAction.PasswordChanged(it)) },
+            state = password,
             label = stringResource(Res.string.login_password_label),
             placeholder = stringResource(Res.string.login_password_placeholder),
             leadingIcon = UiRes.drawable.ic_lock,
@@ -178,7 +185,7 @@ private fun LoginCard(
                 keyboardType = KeyboardType.Password,
                 imeAction = ImeAction.Done,
             ),
-            keyboardActions = KeyboardActions(onDone = { onSubmit() }),
+            onKeyboardAction = { onSubmit() },
         )
 
         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
@@ -274,7 +281,12 @@ private fun SignUpPrompt(onClick: () -> Unit) {
 @Composable
 private fun LoginScreenPreview() {
     AppTheme {
-        LoginScreen(state = LoginUiState(), onAction = {})
+        LoginScreen(
+            state = LoginUiState(),
+            email = rememberTextFieldState(),
+            password = rememberTextFieldState(),
+            onAction = {},
+        )
     }
 }
 
@@ -283,11 +295,9 @@ private fun LoginScreenPreview() {
 private fun LoginScreenErrorPreview() {
     AppTheme {
         LoginScreen(
-            state = LoginUiState(
-                email = "demo@cmpsrc.dev",
-                password = "wrong-password",
-                status = LoginStatus.Failed(AuthError.InvalidCredentials),
-            ),
+            state = LoginUiState(status = LoginStatus.Failed(AuthError.InvalidCredentials)),
+            email = rememberTextFieldState("demo@cmpsrc.dev"),
+            password = rememberTextFieldState("wrong-password"),
             onAction = {},
         )
     }

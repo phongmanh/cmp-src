@@ -2,8 +2,10 @@ package com.liam.cmp_src.feature.profile.changepassword
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.KeyboardActionHandler
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -48,8 +50,8 @@ import org.koin.compose.viewmodel.koinViewModel
  * The change-password dialog, wired to its [ChangePasswordViewModel].
  *
  * Same split as `LoginRoute` and `ProfileRoute`: this half owns the ViewModel and reports what
- * happened, while [ChangePasswordDialogContent] takes a state and a callback and can be previewed
- * without Koin.
+ * happened, while [ChangePasswordDialogContent] takes a state, the three fields' text states and a
+ * callback, and can be previewed without Koin.
  *
  * [onChanged] fires once the password has actually been replaced. The session is still live at
  * that point — the server keeps the device that made the change signed in — so the caller closes
@@ -84,7 +86,13 @@ fun ChangePasswordDialog(
             dismissOnClickOutside = !state.isBusy,
         ),
     ) {
-        ChangePasswordDialogContent(state = state, onAction = viewModel::onAction)
+        ChangePasswordDialogContent(
+            state = state,
+            currentPassword = viewModel.currentPassword.state,
+            newPassword = viewModel.newPassword.state,
+            confirmPassword = viewModel.confirmPassword.state,
+            onAction = viewModel::onAction,
+        )
     }
 }
 
@@ -97,6 +105,9 @@ fun ChangePasswordDialog(
 @Composable
 fun ChangePasswordDialogContent(
     state: ChangePasswordUiState,
+    currentPassword: TextFieldState,
+    newPassword: TextFieldState,
+    confirmPassword: TextFieldState,
     onAction: (ChangePasswordAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -106,7 +117,7 @@ fun ChangePasswordDialogContent(
         focusManager.clearFocus()
         onAction(ChangePasswordAction.Submit)
     }
-    val moveFocusDown = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) })
+    val moveFocusDown = KeyboardActionHandler { focusManager.moveFocus(FocusDirection.Down) }
 
     ProfileDialogCard(
         modifier = modifier,
@@ -124,8 +135,7 @@ fun ChangePasswordDialogContent(
         isBusy = state.isBusy,
     ) {
         AuthTextField(
-            value = state.currentPassword,
-            onValueChange = { onAction(ChangePasswordAction.CurrentPasswordChanged(it)) },
+            state = currentPassword,
             label = stringResource(Res.string.change_password_current_label),
             placeholder = stringResource(Res.string.change_password_current_placeholder),
             leadingIcon = UiRes.drawable.ic_lock,
@@ -141,14 +151,13 @@ fun ChangePasswordDialogContent(
                 keyboardType = KeyboardType.Password,
                 imeAction = ImeAction.Next,
             ),
-            keyboardActions = moveFocusDown,
+            onKeyboardAction = moveFocusDown,
         )
 
         Spacer(Modifier.size(Dimens.spaceMd))
 
         AuthTextField(
-            value = state.newPassword,
-            onValueChange = { onAction(ChangePasswordAction.NewPasswordChanged(it)) },
+            state = newPassword,
             label = stringResource(Res.string.change_password_new_label),
             placeholder = stringResource(
                 Res.string.change_password_new_placeholder,
@@ -165,14 +174,13 @@ fun ChangePasswordDialogContent(
                 keyboardType = KeyboardType.Password,
                 imeAction = ImeAction.Next,
             ),
-            keyboardActions = moveFocusDown,
+            onKeyboardAction = moveFocusDown,
         )
 
         Spacer(Modifier.size(Dimens.spaceMd))
 
         AuthTextField(
-            value = state.confirmPassword,
-            onValueChange = { onAction(ChangePasswordAction.ConfirmPasswordChanged(it)) },
+            state = confirmPassword,
             label = stringResource(Res.string.change_password_confirm_label),
             placeholder = stringResource(Res.string.change_password_confirm_placeholder),
             leadingIcon = UiRes.drawable.ic_lock,
@@ -188,7 +196,7 @@ fun ChangePasswordDialogContent(
                 keyboardType = KeyboardType.Password,
                 imeAction = ImeAction.Done,
             ),
-            keyboardActions = KeyboardActions(onDone = { submit() }),
+            onKeyboardAction = { submit() },
         )
 
         ErrorBanner(error = state.error)
@@ -200,7 +208,10 @@ fun ChangePasswordDialogContent(
 private fun ChangePasswordDialogPreview() {
     AppTheme {
         ChangePasswordDialogContent(
-            state = ChangePasswordUiState(currentPassword = "hunter2000"),
+            state = ChangePasswordUiState(),
+            currentPassword = rememberTextFieldState("hunter2000"),
+            newPassword = rememberTextFieldState(),
+            confirmPassword = rememberTextFieldState(),
             onAction = {},
         )
     }
@@ -212,14 +223,15 @@ private fun ChangePasswordDialogFieldErrorsPreview() {
     AppTheme {
         ChangePasswordDialogContent(
             state = ChangePasswordUiState(
-                newPassword = "short",
-                confirmPassword = "shor",
                 fieldErrors = ChangePasswordErrors(
                     currentPassword = PasswordError.Blank,
                     newPassword = PasswordError.TooShort(FieldLimits.MIN_PASSWORD_LENGTH),
                     confirmPassword = PasswordError.Mismatch,
                 ),
             ),
+            currentPassword = rememberTextFieldState(),
+            newPassword = rememberTextFieldState("short"),
+            confirmPassword = rememberTextFieldState("shor"),
             onAction = {},
         )
     }
@@ -230,12 +242,10 @@ private fun ChangePasswordDialogFieldErrorsPreview() {
 private fun ChangePasswordDialogFailedPreview() {
     AppTheme {
         ChangePasswordDialogContent(
-            state = ChangePasswordUiState(
-                currentPassword = "wrong-one",
-                newPassword = "a-long-enough-password",
-                confirmPassword = "a-long-enough-password",
-                status = ChangePasswordStatus.Failed(AuthError.WrongPassword),
-            ),
+            state = ChangePasswordUiState(status = ChangePasswordStatus.Failed(AuthError.WrongPassword)),
+            currentPassword = rememberTextFieldState("wrong-one"),
+            newPassword = rememberTextFieldState("a-long-enough-password"),
+            confirmPassword = rememberTextFieldState("a-long-enough-password"),
             onAction = {},
         )
     }

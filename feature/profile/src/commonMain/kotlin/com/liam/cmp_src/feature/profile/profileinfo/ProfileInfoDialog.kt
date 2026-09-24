@@ -7,8 +7,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.InputTransformation
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.maxLength
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -24,6 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.api.common.FieldLimits
 import com.example.api.user.UserResponse
 import com.liam.cmp_src.core.ui.modifier.handCursor
 import com.liam.cmp_src.core.ui.theme.AppTheme
@@ -57,7 +61,8 @@ import org.koin.compose.viewmodel.koinViewModel
  * The edit-profile dialog, wired to its [ProfileInfoViewModel].
  *
  * Same split as `ChangePasswordDialog`: this half owns the ViewModel and reports what happened,
- * while [ProfileInfoDialogContent] takes a state and a callback and can be previewed without Koin.
+ * while [ProfileInfoDialogContent] takes a state, the name field's text state and a callback, and
+ * can be previewed without Koin.
  *
  * Unlike that dialog, this one does not close on success — the name and the picture are saved by
  * separate calls, so closing after the first would strand the second. [onUpdated] fires after each
@@ -102,6 +107,7 @@ fun ProfileInfoDialog(
     ) {
         ProfileInfoDialogContent(
             state = state,
+            displayName = viewModel.displayName.state,
             onAction = viewModel::onAction,
             onPickPhoto = onPickPhoto,
         )
@@ -118,6 +124,7 @@ fun ProfileInfoDialog(
 @Composable
 fun ProfileInfoDialogContent(
     state: ProfileInfoUiState,
+    displayName: TextFieldState,
     onAction: (ProfileInfoAction) -> Unit,
     onPickPhoto: () -> Unit,
     modifier: Modifier = Modifier,
@@ -144,21 +151,21 @@ fun ProfileInfoDialogContent(
         Spacer(Modifier.size(Dimens.spaceLg))
 
         AuthTextField(
-            value = state.displayName,
-            onValueChange = { onAction(ProfileInfoAction.NameChanged(it)) },
+            state = displayName,
             label = stringResource(Res.string.edit_profile_name_label),
             placeholder = stringResource(Res.string.edit_profile_name_placeholder),
             leadingIcon = UiRes.drawable.ic_person,
             leadingIconDescription = stringResource(Res.string.cd_name_icon),
             enabled = !state.isBusy,
             errorMessage = state.nameError?.asMessage(),
+            // Unlike a password, a name is on screen as it is typed, so a paste cut short at the
+            // limit is seen and can be fixed rather than being saved truncated unawares.
+            inputTransformation = InputTransformation.maxLength(FieldLimits.MAX_DISPLAY_NAME_LENGTH),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Text,
                 imeAction = ImeAction.Done,
             ),
-            keyboardActions = KeyboardActions(
-                onDone = { onAction(ProfileInfoAction.SaveName) },
-            ),
+            onKeyboardAction = { onAction(ProfileInfoAction.SaveName) },
         )
 
         // Shown only once it is actually true: an unsaved name and a picture this backend
@@ -242,7 +249,8 @@ private fun PhotoSection(
 private fun ProfileInfoDialogPreview() {
     AppTheme {
         ProfileInfoDialogContent(
-            state = ProfileInfoUiState(user = sampleUser(), displayName = "Demo User"),
+            state = ProfileInfoUiState(user = sampleUser(), typedName = "Demo User"),
+            displayName = rememberTextFieldState("Demo User"),
             onAction = {},
             onPickPhoto = {},
         )
@@ -256,8 +264,9 @@ private fun ProfileInfoDialogPhotoWarningPreview() {
         ProfileInfoDialogContent(
             state = ProfileInfoUiState(
                 user = sampleUser(avatarUrl = "https://cmpsrc.dev/api/v1/images/abc"),
-                displayName = "Ada Lovelace",
+                typedName = "Ada Lovelace",
             ),
+            displayName = rememberTextFieldState("Ada Lovelace"),
             onAction = {},
             onPickPhoto = {},
         )
@@ -271,10 +280,11 @@ private fun ProfileInfoDialogFailedPreview() {
         ProfileInfoDialogContent(
             state = ProfileInfoUiState(
                 user = sampleUser(),
-                displayName = "Demo User",
+                typedName = "Demo User",
                 nameError = DisplayNameError.TooLong(maxLength = 120),
                 status = ProfileInfoStatus.Failed(AuthError.UnsupportedImage),
             ),
+            displayName = rememberTextFieldState("Demo User"),
             onAction = {},
             onPickPhoto = {},
         )
