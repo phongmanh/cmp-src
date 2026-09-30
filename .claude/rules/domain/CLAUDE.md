@@ -1,6 +1,6 @@
 # Domain Module (Business Logic Layer)
 
-Scope: everything under `domain/`. Merged with root `CLAUDE.md`.
+Scope: `core:domain` and the `domain` package of each `feature:*` module. Merged with root `CLAUDE.md`.
 
 ## Rules
 - Zero Android framework dependencies (no `Context`, no `android.*` imports). Pure Kotlin only.
@@ -11,5 +11,4 @@ Scope: everything under `domain/`. Merged with root `CLAUDE.md`.
 - Every public UseCase must have a corresponding unit test with no Android dependencies (fast, JVM-only tests).
 
 ## Testing
-- 100% of UseCases must be unit-tested — this layer has no excuse for untested logic.
 - No Robolectric, no instrumentation tests here — if a test needs Android, it's in the wrong module.

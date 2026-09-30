@@ -1,6 +1,6 @@
 # Mobile Development Guidelines
 
-Detailed conventions for all mobile projects (Java / Kotlin). Referenced from root `CLAUDE.md` via `@GUIDELINES.md` — do not duplicate this content there.
+Detailed conventions for all mobile projects (Java / Kotlin). Loaded automatically from `.claude/rules/` and linked from the root `CLAUDE.md` — do not duplicate this content there.
 
 ## 1. Core Principles
 
@@ -9,7 +9,7 @@ Detailed conventions for all mobile projects (Java / Kotlin). Referenced from ro
   - **O** — Open/Closed: extend behavior via interfaces/abstraction, don't modify existing code.
   - **L** — Liskov Substitution: subclasses must be usable wherever the parent is expected.
   - **I** — Interface Segregation: prefer small, focused interfaces over fat ones.
-  - **D** — Dependency Inversion: depend on abstractions; inject dependencies (Hilt).
+  - **D** — Dependency Inversion: depend on abstractions; inject dependencies (Koin).
 - **DRY** — Don't Repeat Yourself: extract shared logic into utils, extensions, or base classes. Avoid premature abstraction.
 - **KISS** — Keep It Simple: the simplest solution that works wins.
 - **YAGNI** — You Aren't Gonna Need It: don't build for imaginary future requirements.
@@ -33,7 +33,7 @@ Detailed conventions for all mobile projects (Java / Kotlin). Referenced from ro
 - Keep functions small (< 30 lines as a guideline); one function, one job.
 - No magic numbers/strings — extract to constants or resources.
 - Write Javadoc for all classes, methods and fields: Clear, and concise
-- Logging start/end for each call. Clear and necessary to trace and maintenance
+- Log the start and end of each network and database call, so a failure can be traced; don't log inside UI or pure domain code.
 
 ## 4. UI & Resources
 
@@ -44,7 +44,7 @@ Detailed conventions for all mobile projects (Java / Kotlin). Referenced from ro
 
 ## 5. Error Handling & State
 
-- Model UI state explicitly: `Loading / Success / Error` (sealed classes).
+- Model UI state explicitly: one `UiState` per screen (see `.claude/rules/app/CLAUDE.md`).
 - Never swallow exceptions silently; log and surface user-friendly messages.
 - Handle offline/poor network gracefully — timeouts, retries, cached fallbacks.
 
@@ -63,7 +63,7 @@ Detailed conventions for all mobile projects (Java / Kotlin). Referenced from ro
 
 ## 8. Code Quality & Process
 
-- Enforce static analysis: ktlint/detekt, Lint. Fix warnings, don't suppress blindly.
+- Enforce static analysis with Android Lint. Fix warnings, don't suppress blindly.
 - Small, focused commits and PRs; meaningful commit messages.
 - Code review required before merge; no direct pushes to main.
 - Boy Scout Rule: leave the code cleaner than you found it.
@@ -71,6 +71,6 @@ Detailed conventions for all mobile projects (Java / Kotlin). Referenced from ro
 ## 9. Security
 
 - No secrets/API keys in source code or version control.
-- Encrypted storage for sensitive data (EncryptedSharedPreferences, Keystore).
+- Encrypted storage for sensitive data: the platform key store via `core:security` (Android Keystore, iOS Keychain).
 - HTTPS only; validate all input from external sources.
 - Obfuscate release builds (R8/ProGuard).
