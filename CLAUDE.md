@@ -36,7 +36,7 @@ Packages follow modules (`com.liam.cmp_src.core.network`, `com.liam.cmp_src.feat
 
 ### Adding a module
 
-Create `<group>/<name>/build.gradle.kts`, add `include(":<group>:<name>")` to `settings.gradle.kts`, and apply one convention plugin (see "Gradle/toolchain notes"). The Android namespace (`com.liam.cmp_src.<group>.<name>`), the targets, host tests and the resources package all derive from the module path, so a module script never declares `androidLibrary { }`. Keep leaf names unique — Kotlin/Native library names are built from them.
+For a feature module, the `new-feature-module` skill covers the whole scaffold and its wiring into `shared`. Create `<group>/<name>/build.gradle.kts`, add `include(":<group>:<name>")` to `settings.gradle.kts`, and apply one convention plugin (see "Gradle/toolchain notes"). The Android namespace (`com.liam.cmp_src.<group>.<name>`), the targets, host tests and the resources package all derive from the module path, so a module script never declares `androidLibrary { }`. Keep leaf names unique — Kotlin/Native library names are built from them.
 
 ### expect/actual pattern
 
@@ -63,10 +63,10 @@ After moving a resource between modules, run `./gradlew clean`: the Android asse
 
 Navigation 3 — `androidx.navigation3:navigation3-runtime` (androidx's own multiplatform publication) plus `org.jetbrains.androidx.navigation3:navigation3-ui` for the multiplatform `NavDisplay`. The back stack is held by `AppRoot` in `shared`'s `App.kt`; destinations are the `@Serializable` keys in `shared/src/commonMain/.../navigation/AppRoute.kt`. Only `shared` knows the routes — feature modules never see `AppRoute`.
 
-Adding a destination is three edits:
+Adding a destination is three edits (the `add-destination` skill walks through them):
 
 1. a new subtype of `AppRoute`, carrying whatever arguments the destination needs;
-2. a `subclass(...)` line in `appNavConfiguration` — only Android can resolve back-stack keys reflectively, so iOS needs them registered, and `AppRouteTest` fails if this is missed;
+2. a `subclass(...)` line in `appNavConfiguration` — only Android can resolve back-stack keys reflectively, so iOS needs them registered — plus an instance in `AppRouteTest`'s `ALL_ROUTES`, which is what makes the test catch a missing registration;
 3. an `entry<...>` block in `AppRoot`'s `entryProvider`.
 
 Screens never navigate themselves. A route composable reports what happened (`onSignedIn`, `onSignedOut`) and `AppRoot` decides what that does to the back stack — see `resetTo` for handovers that must not leave the previous screen behind.
@@ -218,8 +218,18 @@ Additional coding conventions live under `.claude/rules/` and are auto-loaded by
 - Naming conventions — `.claude/rules/naming.md`
 - Git & PR process — `.claude/rules/git.md`
 
-Note: these rules describe a layered Android app (`app`/`domain`/`data` modules, Hilt, Room/Retrofit,
-ktlint/detekt) that this KMP project does not currently use — its code is split into KMP modules by
-feature rather than by layer (the layers are packages inside each `feature:*` module), with thin
-platform shells, and Hilt/ktlint/detekt are not configured. Treat them as general team conventions
-and adapt to the KMP structure; do not restructure this project to match unless explicitly asked.
+The layer rules apply to the matching packages inside each `feature:*` module (`data`, `domain`, the
+screen packages) and to the `core:*` modules named in their scope line — not to separate layer modules.
+
+## Claude Code setup (.claude/)
+
+- `settings.json` — the team's permission allow/deny lists and hook registrations. Personal additions
+  go in `settings.local.json` (git-ignored).
+- `hooks/` — `block-prod-db.sh` (stops database commands against non-local hosts),
+  `protect-generated.sh` (stops hand edits to Room schemas and build output), `scan-secrets.sh`
+  (flags hardcoded secrets in the working tree when Claude finishes).
+- `skills/` — recipes for this repo, loaded on demand: `verify`, `new-feature-module`,
+  `add-destination`, `room-migration`, `move-resource`; and `/waterfall`, `/relay`, which drive the agents.
+- `agents/` — `waterfall-engineer` (gated Requirements → Design → Implementation → Verification →
+  Handover) and the `relay-*` agents (advisor → planner → implementer → reviewer). Their working
+  documents go in `.claude/waterfall/` and `.claude/relay/` (git-ignored).
