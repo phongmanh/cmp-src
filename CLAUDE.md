@@ -36,7 +36,7 @@ Packages follow modules (`com.liam.cmp_src.core.network`, `com.liam.cmp_src.feat
 
 ### Adding a module
 
-For a feature module, the `new-feature-module` skill covers the whole scaffold and its wiring into `shared`. Create `<group>/<name>/build.gradle.kts`, add `include(":<group>:<name>")` to `settings.gradle.kts`, and apply one convention plugin (see "Gradle/toolchain notes"). The Android namespace (`com.liam.cmp_src.<group>.<name>`), the targets, host tests and the resources package all derive from the module path, so a module script never declares `androidLibrary { }`. Keep leaf names unique — Kotlin/Native library names are built from them.
+Create `<group>/<name>/build.gradle.kts`, add `include(":<group>:<name>")` to `settings.gradle.kts`, and apply one convention plugin (see "Gradle/toolchain notes"). The Android namespace (`com.liam.cmp_src.<group>.<name>`), the targets, host tests and the resources package all derive from the module path, so a module script never declares `androidLibrary { }`. Keep leaf names unique — Kotlin/Native library names are built from them.
 
 ### expect/actual pattern
 
@@ -63,7 +63,7 @@ After moving a resource between modules, run `./gradlew clean`: the Android asse
 
 Navigation 3 — `androidx.navigation3:navigation3-runtime` (androidx's own multiplatform publication) plus `org.jetbrains.androidx.navigation3:navigation3-ui` for the multiplatform `NavDisplay`. The back stack is held by `AppRoot` in `shared`'s `App.kt`; destinations are the `@Serializable` keys in `shared/src/commonMain/.../navigation/AppRoute.kt`. Only `shared` knows the routes — feature modules never see `AppRoute`.
 
-Adding a destination is three edits (the `add-destination` skill walks through them):
+Adding a destination is three edits:
 
 1. a new subtype of `AppRoute`, carrying whatever arguments the destination needs;
 2. a `subclass(...)` line in `appNavConfiguration` — only Android can resolve back-stack keys reflectively, so iOS needs them registered — plus an instance in `AppRouteTest`'s `ALL_ROUTES`, which is what makes the test catch a missing registration;
@@ -198,7 +198,7 @@ Run a single test class (works with `testAndroidHostTest`/`testDebugUnitTest`):
 - No hardcoded user-facing strings, colors, or dimensions — use Compose resources / constants (see "Compose resources" above).
 - No secrets or API keys in source or version control.
 - Shared business logic must be unit-testable by design; add tests in the appropriate per-target source set (see "Tests" above).
-- Follow SOLID, DRY, KISS, YAGNI — details in `.claude/rules/GUIDELINES.md`.
+- Follow SOLID, DRY, KISS, YAGNI — details in `.claude/rules/general.md`.
 
 ## When making changes
 
@@ -209,17 +209,22 @@ Run a single test class (works with `testAndroidHostTest`/`testDebugUnitTest`):
 
 ## Team conventions (.claude/rules)
 
-Additional coding conventions live under `.claude/rules/` and are auto-loaded by Claude Code:
+Additional coding conventions live under `.claude/rules/`. Three load in every session:
 
-- Core principles & conventions (SOLID/DRY/KISS/YAGNI, Kotlin, testing, security) — `.claude/rules/GUIDELINES.md`
-- Presentation-layer rules — `.claude/rules/app/CLAUDE.md`
-- Domain-layer rules — `.claude/rules/domain/CLAUDE.md`
-- Data-layer rules — `.claude/rules/data/CLAUDE.md`
-- Naming conventions — `.claude/rules/naming.md`
-- Git & PR process — `.claude/rules/git.md`
+- `general.md` — design principles, Kotlin, UI, errors, testing, security
+- `naming.md` — names for types, files and resource keys
+- `git.md` — branches, commits and PRs
 
-The layer rules apply to the matching packages inside each `feature:*` module (`data`, `domain`, the
-screen packages) and to the `core:*` modules named in their scope line — not to separate layer modules.
+The rest are path-scoped: each loads only when a session reads or edits a file its `paths:` frontmatter
+matches.
+
+- `presentation.md` — `core:ui` and each feature's screens, ViewModels, UI state and components
+- `domain.md` — `core:domain` and each feature's `domain` package
+- `data.md` — `core:network`, `core:database` and each feature's `data` package, including Room schema changes
+- `waterfall.md` — the phase documents under `.claude/waterfall/`
+
+A new screen file outside those name patterns (`*Screen.kt`, `*ViewModel.kt`, `*UiState.kt`, …) won't
+trigger `presentation.md`; add a pattern to its `paths:` when a new kind of file appears.
 
 ## Claude Code setup (.claude/)
 
@@ -227,9 +232,12 @@ screen packages) and to the `core:*` modules named in their scope line — not t
   go in `settings.local.json` (git-ignored).
 - `hooks/` — `block-prod-db.sh` (stops database commands against non-local hosts),
   `protect-generated.sh` (stops hand edits to Room schemas and build output), `scan-secrets.sh`
-  (flags hardcoded secrets in the working tree when Claude finishes).
-- `skills/` — recipes for this repo, loaded on demand: `verify`, `new-feature-module`,
-  `add-destination`, `room-migration`, `move-resource`; and `/waterfall`, `/relay`, which drive the agents.
-- `agents/` — `waterfall-engineer` (gated Requirements → Design → Implementation → Verification →
-  Handover) and the `relay-*` agents (advisor → planner → implementer → reviewer). Their working
-  documents go in `.claude/waterfall/` and `.claude/relay/` (git-ignored).
+  (flags hardcoded secrets in the working tree when Claude finishes), and `waterfall-write-guard.sh`
+  (registered in the `waterfall-*` agents' frontmatter, not `settings.json`: keeps each one to the
+  documents and files it owns).
+- `skills/` — `/waterfall`, which drives the agents. The `waterfall-standards` and
+  `waterfall-<phase>` skills aren't user-invocable — each `waterfall-*` agent preloads the shared
+  one and its own phase's. `waterfall-standards` holds the build/test checks to run per changed path.
+- `agents/` — the `waterfall-*` agents, one per gated phase (analyst → architect → implementer →
+  verifier, which also writes the handover). Their working documents go in `.claude/waterfall/`
+  (git-ignored), and `rules/waterfall.md` loads only when a session touches them.

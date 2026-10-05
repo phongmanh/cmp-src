@@ -51,7 +51,6 @@ Thumbs.db
 # ##########################################
 # 5. Claude Code working files
 # ##########################################
-# Phase and relay documents for in-flight tasks; the code and the PR are the record.
+# Waterfall phase documents for in-flight tasks; the code and the PR are the record.
 .claude/waterfall/
-.claude/relay/
 .claude/settings.local.json

@@ -21,7 +21,7 @@ deny() {
 
 case "$path" in
   */schemas/*/[0-9]*.json)
-    deny "is a schema Room exports. Change the entity, bump DATABASE_VERSION and compile core:database — the room-migration skill has the steps."
+    deny "is a schema Room exports. Change the entity, bump DATABASE_VERSION and compile core:database — that regenerates it."
     ;;
 esac
 
