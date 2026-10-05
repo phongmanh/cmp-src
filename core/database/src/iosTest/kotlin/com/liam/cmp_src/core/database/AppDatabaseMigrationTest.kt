@@ -5,6 +5,7 @@ import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import androidx.sqlite.execSQL
 import com.liam.cmp_src.core.database.entities.Customer
+import com.liam.cmp_src.core.database.entities.CustomerSyncState
 import com.liam.cmp_src.core.database.entities.EncryptedAuthTokens
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.flow.first
@@ -78,6 +79,16 @@ class AppDatabaseMigrationTest {
         assertEquals(DATABASE_VERSION, userVersionOf(databasePath))
     }
 
+    /** Rows from before offline editing all came from the server, so they arrive settled. */
+    @Test
+    fun `a version 3 customer comes through as synced and known to the server by its id`() = runTest {
+        seedVersion3Database()
+
+        val row = openDatabase().customerDAO.rowOf(CUSTOMER.id)
+
+        assertEquals(CUSTOMER.copy(remoteId = CUSTOMER.id, syncState = CustomerSyncState.SYNCED), row)
+    }
+
     /** Opens [databasePath] through the same builder settings the app uses. */
     private fun openDatabase(): AppDatabase =
         getRoomDatabase(
@@ -101,6 +112,29 @@ class AppDatabaseMigrationTest {
                 it.step()
             }
             connection.execSQL("PRAGMA user_version = 2")
+        }
+    }
+
+    /** The version 3 schema: version 2 plus `customers` as [MIGRATION_2_3] creates it, with one row. */
+    private suspend fun seedVersion3Database() {
+        seedVersion2Database(payload = STORED_PAYLOAD)
+        BundledSQLiteDriver().open(databasePath).use { connection ->
+            MIGRATION_2_3.migrate(connection)
+            connection.prepare(
+                "INSERT INTO customers (id, ownerId, firstName, lastName, companyName, email, phone, " +
+                    "addressLine1, addressLine2, city, region, postalCode, countryCode, notes, status, " +
+                    "createdAt, updatedAt, deletedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)",
+            ).use { statement ->
+                listOf(
+                    CUSTOMER.id, CUSTOMER.ownerId, CUSTOMER.firstName, CUSTOMER.lastName,
+                    CUSTOMER.companyName, CUSTOMER.email, CUSTOMER.phone, CUSTOMER.addressLine1,
+                    CUSTOMER.addressLine2, CUSTOMER.city, CUSTOMER.region, CUSTOMER.postalCode,
+                    CUSTOMER.countryCode, CUSTOMER.notes, CUSTOMER.status, CUSTOMER.createdAt,
+                    CUSTOMER.updatedAt,
+                ).forEachIndexed { index, value -> statement.bindText(index + 1, requireNotNull(value)) }
+                statement.step()
+            }
+            connection.execSQL("PRAGMA user_version = 3")
         }
     }
 

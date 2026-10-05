@@ -18,11 +18,12 @@ internal const val DATABASE_NAME = "app.db"
  *
  * - 2 — the two plaintext token columns became one encrypted blob.
  * - 3 — added the `customers` table.
+ * - 4 — `customers` gained `remoteId` and `syncState`, for offline editing.
  *
  * A bump here needs a matching entry in [APP_MIGRATIONS]; nothing but a version 1 file is
  * recreated from scratch any more.
  */
-internal const val DATABASE_VERSION = 3
+internal const val DATABASE_VERSION = 4
 
 /**
  * Finishes a platform's [builder] into a usable database.

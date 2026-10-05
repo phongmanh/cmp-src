@@ -42,6 +42,23 @@ internal val MIGRATION_2_3 = Migration(startVersion = 2, endVersion = 3) { conne
 }
 
 /**
+ * Gives `customers` the two columns offline editing needs: `remoteId`, the server's id for a row,
+ * and `syncState`, whether the server has heard about the row's latest change.
+ *
+ * Nothing wrote the table before this version, so any row already there can only have come from
+ * the server: it is already synced, and its `id` is the server's. The `DEFAULT` is the one Room
+ * records for the entity's `@ColumnInfo(defaultValue = ...)` — the two have to agree or the
+ * post-migration schema check fails.
+ */
+internal val MIGRATION_3_4 = Migration(startVersion = 3, endVersion = 4) { connection ->
+    connection.execSQL("ALTER TABLE `customers` ADD COLUMN `remoteId` TEXT")
+    connection.execSQL(
+        "ALTER TABLE `customers` ADD COLUMN `syncState` TEXT NOT NULL DEFAULT 'SYNCED'",
+    )
+    connection.execSQL("UPDATE `customers` SET `remoteId` = `id`")
+}
+
+/**
  * The migration chain [getRoomDatabase] installs, ordered oldest first.
  *
  * Every schema change from version 2 onwards belongs here. A bump to [DATABASE_VERSION] without a
@@ -51,4 +68,4 @@ internal val MIGRATION_2_3 = Migration(startVersion = 2, endVersion = 3) { conne
  * Declared below the migrations it holds: top-level properties initialize in file order, so an
  * entry declared later than this array would read as `null` at startup.
  */
-internal val APP_MIGRATIONS: Array<Migration> = arrayOf(MIGRATION_2_3)
+internal val APP_MIGRATIONS: Array<Migration> = arrayOf(MIGRATION_2_3, MIGRATION_3_4)

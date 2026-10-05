@@ -26,6 +26,7 @@ kotlin {
             implementation(projects.core.database)
             implementation(projects.core.ui)
             implementation(projects.feature.auth)
+            implementation(projects.feature.customers)
             implementation(projects.feature.home)
             implementation(projects.feature.profile)
 

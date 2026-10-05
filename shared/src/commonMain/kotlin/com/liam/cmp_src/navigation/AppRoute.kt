@@ -29,6 +29,14 @@ sealed interface AppRoute : NavKey {
     /** Where a successful sign-in lands, showing the [user] it signed in as. */
     @Serializable
     data class Home(val user: UserResponse) : AppRoute
+
+    /**
+     * The customer editor, pushed over [Home]: the customer [customerId] of [ownerId], or a new
+     * one when [customerId] is `null`. Pushed rather than handed over to, so back returns to the
+     * list exactly as it was left.
+     */
+    @Serializable
+    data class CustomerEditor(val ownerId: String, val customerId: String?) : AppRoute
 }
 
 /**
@@ -45,6 +53,7 @@ internal val appNavConfiguration = SavedStateConfiguration {
             subclass(AppRoute.Login::class)
             subclass(AppRoute.SignUp::class)
             subclass(AppRoute.Home::class)
+            subclass(AppRoute.CustomerEditor::class)
         }
     }
 }
@@ -52,8 +61,8 @@ internal val appNavConfiguration = SavedStateConfiguration {
 /**
  * Makes [route] the only entry on the back stack.
  *
- * Both of this app's transitions are handovers rather than pushes: signing in must not leave the
- * login screen behind to go back to, and signing out must not leave the home screen.
+ * For handovers rather than pushes: signing in must not leave the login screen behind to go back
+ * to, and signing out must not leave the home screen — or an editor open over it.
  */
 internal fun NavBackStack<NavKey>.resetTo(route: AppRoute) {
     clear()

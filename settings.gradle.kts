@@ -53,3 +53,4 @@ include(":feature:auth")
 include(":feature:home")
 include(":feature:profile")
 
+include(":feature:customers")

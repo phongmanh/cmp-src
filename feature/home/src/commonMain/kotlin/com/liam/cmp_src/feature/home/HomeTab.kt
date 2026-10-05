@@ -5,12 +5,12 @@ import cmpsrc.core.ui.generated.resources.Res as UiRes
 import cmpsrc.core.ui.generated.resources.ic_person
 import cmpsrc.feature.home.generated.resources.Res
 import cmpsrc.feature.home.generated.resources.home_tab_activity
+import cmpsrc.feature.home.generated.resources.home_tab_customers
 import cmpsrc.feature.home.generated.resources.home_tab_home
 import cmpsrc.feature.home.generated.resources.home_tab_profile
-import cmpsrc.feature.home.generated.resources.home_tab_search
 import cmpsrc.feature.home.generated.resources.ic_bolt
 import cmpsrc.feature.home.generated.resources.ic_home
-import cmpsrc.feature.home.generated.resources.ic_search
+import cmpsrc.feature.home.generated.resources.ic_people
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 
@@ -27,9 +27,11 @@ import org.jetbrains.compose.resources.StringResource
 enum class HomeTab(
     val label: StringResource,
     val icon: DrawableResource,
+    /** The tab is a scrolling list, laid out to fill the screen rather than centred in it. */
+    val isList: Boolean = false,
 ) {
     HOME(label = Res.string.home_tab_home, icon = Res.drawable.ic_home),
-    SEARCH(label = Res.string.home_tab_search, icon = Res.drawable.ic_search),
+    CUSTOMERS(label = Res.string.home_tab_customers, icon = Res.drawable.ic_people, isList = true),
     ACTIVITY(label = Res.string.home_tab_activity, icon = Res.drawable.ic_bolt),
     PROFILE(label = Res.string.home_tab_profile, icon = UiRes.drawable.ic_person),
     ;

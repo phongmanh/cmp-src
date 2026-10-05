@@ -5,6 +5,7 @@ import com.liam.cmp_src.core.network.ApiConfig
 import com.liam.cmp_src.core.network.TokenStore
 import com.liam.cmp_src.core.network.createHttpClient
 import com.liam.cmp_src.feature.auth.di.authModule
+import com.liam.cmp_src.feature.customers.di.customersModule
 import com.liam.cmp_src.feature.home.di.homeModule
 import com.liam.cmp_src.feature.profile.di.profileModule
 import io.ktor.client.HttpClient
@@ -25,11 +26,11 @@ import org.koin.dsl.module
  *
  * `SignOutUseCase` is bound here rather than in a feature because home and profile both offer it.
  *
- * [TokenStore] is bound by `rememberPlatformModule` rather than here: where the tokens live
+ * [TokenStore] is bound by the platform module (`androidPlatformModule`, `iosPlatformModule`) rather than here: where the tokens live
  * differs by target, and only Android can supply the `Context` its database builder needs.
  */
 val appModule = module {
-    includes(authModule, homeModule, profileModule)
+    includes(authModule, homeModule, profileModule, customersModule)
 
     single<CoroutineDispatcher> { Dispatchers.Default }
 

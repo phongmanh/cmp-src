@@ -8,7 +8,7 @@
 
     <!-- Home bottom navigation -->
     <string name="home_tab_home">Home</string>
-    <string name="home_tab_search">Search</string>
+    <string name="home_tab_customers">Customers</string>
     <string name="home_tab_activity">Activity</string>
     <string name="home_tab_profile">Profile</string>
 

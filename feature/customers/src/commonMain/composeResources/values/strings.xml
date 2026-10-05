@@ -1,0 +1,77 @@
+<resources>
+    <!-- Customer list -->
+    <string name="customers_search_label">Search customers</string>
+    <string name="customers_search_placeholder">Name, company or email</string>
+    <string name="customers_empty_title">No customers yet</string>
+    <string name="customers_empty_body">Add your first one with the + button. It works offline too.</string>
+    <string name="customers_no_results">No customers match “%1$s”</string>
+    <string name="customers_loading">Loading your customers</string>
+    <string name="customers_unnamed">Unnamed customer</string>
+    <string name="customers_row_pending">Waiting to sync</string>
+    <string name="customers_row_rejected">Not accepted — tap to fix</string>
+    <string name="customers_deleted">Customer deleted</string>
+
+    <!-- Sync banner -->
+    <plurals name="customers_pending_changes">
+        <item quantity="one">%1$d change waiting to sync</item>
+        <item quantity="other">%1$d changes waiting to sync</item>
+    </plurals>
+    <string name="customers_sync_offline">You’re offline. Your changes are saved and will sync when you’re back.</string>
+    <string name="customers_sync_failed">Couldn’t sync just now. Pull down to try again.</string>
+    <string name="customers_sync_session">Sign in again to sync your changes.</string>
+
+    <!-- Delete confirmation -->
+    <string name="customers_delete_title">Delete %1$s?</string>
+    <string name="customers_delete_body">They’ll be removed from this device now, and from your account the next time you’re online.</string>
+    <string name="customers_delete_confirm">Delete</string>
+    <string name="customers_delete_cancel">Cancel</string>
+
+    <!-- Customer status (CustomerStatus) -->
+    <string name="customer_status_lead">Lead</string>
+    <string name="customer_status_active">Active</string>
+    <string name="customer_status_inactive">Inactive</string>
+
+    <!-- Customer editor -->
+    <string name="customer_editor_title_new">New customer</string>
+    <string name="customer_editor_title_edit">Edit customer</string>
+    <string name="customer_editor_not_found">This customer no longer exists. It may have been deleted on another device.</string>
+    <string name="customer_editor_rejected">The server didn’t accept the last change to this customer. Check the details and save again.</string>
+    <string name="customer_editor_section_contact">Contact</string>
+    <string name="customer_editor_section_address">Address</string>
+    <string name="customer_editor_section_notes">Notes</string>
+    <string name="customer_editor_save">Save customer</string>
+    <string name="customer_editor_delete">Delete customer</string>
+    <string name="customer_editor_back_to_list">Back to customers</string>
+
+    <string name="customer_first_name">First name</string>
+    <string name="customer_last_name">Last name</string>
+    <string name="customer_company">Company</string>
+    <string name="customer_email">Email</string>
+    <string name="customer_phone">Phone</string>
+    <string name="customer_phone_placeholder">+447700900123</string>
+    <string name="customer_status">Status</string>
+    <string name="customer_status_placeholder">Choose a status</string>
+    <string name="customer_address_line1">Address line 1</string>
+    <string name="customer_address_line2">Address line 2</string>
+    <string name="customer_city">City</string>
+    <string name="customer_region">State or region</string>
+    <string name="customer_postal_code">Postal code</string>
+    <string name="customer_country_code">Country code</string>
+    <string name="customer_country_code_placeholder">GB</string>
+    <string name="customer_notes">Notes</string>
+
+    <!-- Validation (CustomerFieldError) -->
+    <string name="validation_customer_required">Required</string>
+    <string name="validation_customer_too_long">Use at most %1$d characters</string>
+    <string name="validation_customer_email">Enter an email like name@example.com</string>
+    <string name="validation_customer_phone">Use international format, like +447700900123</string>
+    <string name="validation_customer_country_code">Use a two-letter code, like GB or US</string>
+
+    <!-- Content descriptions -->
+    <string name="cd_add_customer">Add customer</string>
+    <string name="cd_scroll_to_top">Back to top</string>
+    <string name="cd_clear_search">Clear search</string>
+    <string name="cd_delete_customer">Delete %1$s</string>
+    <string name="cd_back">Back</string>
+    <string name="cd_search">Search</string>
+</resources>

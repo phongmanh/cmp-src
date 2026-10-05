@@ -57,6 +57,7 @@ class AppRouteTest {
                     linkedProviders = listOf(SocialProvider.GOOGLE.key),
                 ),
             ),
+            AppRoute.CustomerEditor(ownerId = "demo-user", customerId = "customer-1"),
         )
     }
 }

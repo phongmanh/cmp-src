@@ -25,6 +25,7 @@ navigation3 = "1.1.1"
 ktor = "3.5.2"
 room3 = "3.0.2"
 sqlite = "2.7.0"
+work = "2.12.0"
 ksp = "2.3.11"
 
 [libraries]
@@ -108,6 +109,10 @@ filekit-dialogs-compose = { module = "io.github.vinceglb:filekit-dialogs-compose
 androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
 androidx-room3-runtime = { module = "androidx.room3:room3-runtime", version.ref = "room3" }
 androidx-room3-compiler = { module = "androidx.room3:room3-compiler", version.ref = "room3" }
+
+# WorkManager — pushes customer changes made offline once the device is back online, even with
+# the app closed. Android only; iOS uses BGTaskScheduler from the platform SDK.
+androidx-work-runtime = { module = "androidx.work:work-runtime", version.ref = "work" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

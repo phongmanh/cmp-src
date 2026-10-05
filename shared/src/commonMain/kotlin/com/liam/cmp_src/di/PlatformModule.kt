@@ -1,6 +1,5 @@
 package com.liam.cmp_src.di
 
-import androidx.compose.runtime.Composable
 import androidx.room3.RoomDatabase
 import com.liam.cmp_src.core.database.AppDatabase
 import com.liam.cmp_src.core.database.RoomTokenStore
@@ -9,18 +8,26 @@ import com.liam.cmp_src.core.database.dto.TokenStoreDto
 import com.liam.cmp_src.core.database.getRoomDatabase
 import com.liam.cmp_src.core.network.TokenStore
 import com.liam.cmp_src.core.security.TokenCipher
+import org.koin.core.context.startKoin
 import org.koin.core.module.Module
+import org.koin.mp.KoinPlatform
 
 /**
- * The bindings [appModule] cannot make for itself, because they differ by target.
+ * Starts the app's object graph: [appModule] plus [platformModule], the bindings that differ by
+ * target (`androidPlatformModule(context)`, `iosPlatformModule()`).
  *
- * Composable, and remembered, for one reason: Android's `Room.databaseBuilder` needs a `Context`,
- * and the only place shared code can reach one is `LocalContext`. Koin is started inside `App()`,
- * so the module is assembled there too rather than at class-init. iOS ignores the composition and
- * just builds its module once.
+ * Called by each platform's entry point *before* any UI — the Android `Application`, iOS's
+ * `setUpApp()` — never from inside `App()`. The customer sync runs from WorkManager and
+ * BGTaskScheduler, which can wake the app with no screen at all, and they reach the graph through
+ * the global Koin instance; a graph that only existed inside a composition would not be there.
+ *
+ * Safe to call twice: a second call, as a configuration change or an iOS background launch
+ * followed by a foreground one can cause, keeps the graph already running.
  */
-@Composable
-expect fun rememberPlatformModule(): Module
+fun initKoin(platformModule: Module) {
+    if (KoinPlatform.getKoinOrNull() != null) return
+    startKoin { modules(appModule, platformModule) }
+}
 
 /**
  * The persistence graph both targets build on.

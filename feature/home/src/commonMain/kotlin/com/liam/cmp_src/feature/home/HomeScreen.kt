@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -80,13 +81,15 @@ private const val TAB_SLIDE_DIVISOR = 6
  * [onSignedOut] fires once the session has actually been ended, so the app never returns to the
  * login screen while the old tokens are still live.
  *
- * [profileTab] is the profile feature, supplied by whoever hosts this route: home must not depend
- * on another feature, so it only reserves the slot. It is handed the callback to report an edited
- * account through, which this route uses to keep the header in step with the profile.
+ * [customersTab] and [profileTab] are other features, supplied by whoever hosts this route: home
+ * must not depend on another feature, so it only reserves the slots. [profileTab] is handed the
+ * callback to report an edited account through, which this route uses to keep the header in step
+ * with the profile.
  */
 @Composable
 fun HomeRoute(
     user: UserResponse,
+    customersTab: @Composable () -> Unit,
     profileTab: @Composable (onProfileUpdated: (UserResponse) -> Unit) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = koinViewModel(),
@@ -110,6 +113,7 @@ fun HomeRoute(
         user = currentUser,
         // The profile tab is a whole feature with its own ViewModel, handed in as a slot so
         // HomeScreen itself stays stateless and Koin-free (and therefore previewable).
+        customersTab = customersTab,
         profileTab = { profileTab { updated -> currentUser = updated } },
         modifier = modifier,
     )
@@ -137,6 +141,7 @@ private val UserResponseSaver = Saver<UserResponse, String>(
 @Composable
 fun HomeScreen(
     user: UserResponse,
+    customersTab: @Composable () -> Unit,
     profileTab: @Composable () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -202,6 +207,7 @@ fun HomeScreen(
                     tab = tab,
                     user = user,
                     isVisible = isVisible,
+                    customersTab = customersTab,
                     profileTab = profileTab,
                     contentPadding = contentPadding,
                 )
@@ -229,6 +235,7 @@ private fun HomeTabContent(
     tab: HomeTab,
     user: UserResponse,
     isVisible: Boolean,
+    customersTab: @Composable () -> Unit,
     profileTab: @Composable () -> Unit,
     contentPadding: PaddingValues,
     modifier: Modifier = Modifier,
@@ -238,12 +245,15 @@ private fun HomeTabContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        ContentColumn {
+        // A list fills the height it is given and scrolls inside it; every other tab is a short
+        // column of cards centred in the viewport.
+        ContentColumn(modifier = if (tab.isList) Modifier.fillMaxHeight() else Modifier) {
             when (tab) {
                 HomeTab.HOME -> HomeOverview(user = user, isVisible = isVisible)
+                HomeTab.CUSTOMERS -> customersTab()
                 HomeTab.PROFILE -> profileTab()
 
-                HomeTab.SEARCH, HomeTab.ACTIVITY -> TabPlaceholder(
+                HomeTab.ACTIVITY -> TabPlaceholder(
                     tab = tab,
                     isVisible = isVisible,
                 )
@@ -328,6 +338,7 @@ private fun HomeScreenPreview() {
         HomeScreen(
             user = sampleUser(),
             // The real tab belongs to another feature; the preview only needs the shell around it.
+            customersTab = { Box(Modifier.fillMaxSize()) },
             profileTab = { Box(Modifier.fillMaxSize()) },
         )
     }

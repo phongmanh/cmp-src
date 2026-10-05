@@ -4,6 +4,7 @@ import androidx.room3.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.liam.cmp_src.core.database.dto.CustomerDao
 import com.liam.cmp_src.core.database.entities.Customer
+import com.liam.cmp_src.core.database.entities.CustomerSyncState
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -14,6 +15,7 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 /**
  * Exercises [CustomerDao] against a real SQLite file on the simulator, via `iosSimulatorArm64Test`.
@@ -47,7 +49,7 @@ class CustomerDaoTest {
         val dao = openDao()
         listOf(MIDDLE, NEWEST, OLDEST).forEach { dao.save(it) }
 
-        assertEquals(listOf(NEWEST, MIDDLE, OLDEST), dao.customers().first())
+        assertEquals(listOf(NEWEST, MIDDLE, OLDEST), dao.customers(OWNER).first())
     }
 
     @Test
@@ -57,7 +59,7 @@ class CustomerDaoTest {
         val first = customer(id = "customer-a", createdAt = OLDEST.createdAt)
         listOf(second, first).forEach { dao.save(it) }
 
-        assertEquals(listOf(first, second), dao.customers().first())
+        assertEquals(listOf(first, second), dao.customers(OWNER).first())
     }
 
     @Test
@@ -76,7 +78,7 @@ class CustomerDaoTest {
 
         dao.softDelete(NEWEST.id, DELETED_AT)
 
-        assertEquals(listOf(OLDEST), dao.customers().first())
+        assertEquals(listOf(OLDEST), dao.customers(OWNER).first())
     }
 
     @Test
@@ -143,6 +145,168 @@ class CustomerDaoTest {
         assertEquals(emptyList(), storedStamps(NEWEST.id))
     }
 
+    @Test
+    fun `the list holds only the owner's customers`() = runTest {
+        val dao = openDao()
+        dao.save(NEWEST)
+        dao.save(OLDEST.copy(ownerId = "someone-else"))
+
+        assertEquals(listOf(NEWEST), dao.customers(OWNER).first())
+    }
+
+    @Test
+    fun `a search matches the start of a name or company or email whatever the case`() = runTest {
+        val dao = openDao()
+        val grace = customer(id = "grace", createdAt = MIDDLE.createdAt).copy(
+            firstName = "Grace",
+            lastName = "Hopper",
+            companyName = "Navy",
+            email = "grace@navy.mil",
+        )
+        listOf(NEWEST, grace).forEach { dao.save(it) }
+
+        assertEquals(listOf(grace), dao.customers(OWNER, "gra").first())
+        assertEquals(listOf(grace), dao.customers(OWNER, "HOP").first())
+        assertEquals(listOf(NEWEST), dao.customers(OWNER, "analytical").first())
+        assertEquals(listOf(grace), dao.customers(OWNER, "grace@").first())
+    }
+
+    @Test
+    fun `a search does not match the middle of a word`() = runTest {
+        val dao = openDao()
+        dao.save(NEWEST)
+
+        assertEquals(emptyList(), dao.customers(OWNER, "lace").first())
+    }
+
+    /** `%` and `_` are what the user typed, not wildcards that would match everyone. */
+    @Test
+    fun `a search treats like wildcards as plain characters`() = runTest {
+        val dao = openDao()
+        val percent = customer(id = "percent", createdAt = MIDDLE.createdAt).copy(companyName = "100% Co")
+        listOf(NEWEST, percent).forEach { dao.save(it) }
+
+        assertEquals(emptyList(), dao.customers(OWNER, "%").first())
+        assertEquals(emptyList(), dao.customers(OWNER, "_").first())
+        assertEquals(listOf(percent), dao.customers(OWNER, "100%").first())
+    }
+
+    @Test
+    fun `the pending queue holds unsent edits and tombstones oldest first`() = runTest {
+        val dao = openDao()
+        val edited = NEWEST.copy(syncState = CustomerSyncState.PENDING)
+        val rejected = MIDDLE.copy(syncState = CustomerSyncState.REJECTED)
+        listOf(edited, rejected, OLDEST).forEach { dao.save(it) }
+        dao.softDelete(OLDEST.id, DELETED_AT)
+
+        assertEquals(listOf(edited.id, OLDEST.id), dao.pending(OWNER).map { it.id })
+        assertEquals(2, dao.pendingCount(OWNER).first())
+    }
+
+    @Test
+    fun `editing details queues the change and keeps the server id`() = runTest {
+        val dao = openDao()
+        dao.save(NEWEST.copy(remoteId = "server-1"))
+
+        val changed = dao.updateDetails(
+            id = NEWEST.id, firstName = "Augusta", lastName = null, companyName = null,
+            email = null, phone = null, addressLine1 = null, addressLine2 = null, city = null,
+            region = null, postalCode = null, countryCode = null, notes = null,
+            status = "lead", updatedAt = LATER_THAN_DELETED_AT,
+        )
+
+        assertEquals(1, changed)
+        val row = dao.rowOf(NEWEST.id)
+        assertEquals("Augusta", row?.firstName)
+        assertEquals("server-1", row?.remoteId)
+        assertEquals(CustomerSyncState.PENDING, row?.syncState)
+    }
+
+    @Test
+    fun `editing a tombstoned customer changes nothing`() = runTest {
+        val dao = openDao()
+        dao.save(NEWEST)
+        dao.softDelete(NEWEST.id, DELETED_AT)
+
+        val changed = dao.updateDetails(
+            id = NEWEST.id, firstName = "Augusta", lastName = null, companyName = null,
+            email = null, phone = null, addressLine1 = null, addressLine2 = null, city = null,
+            region = null, postalCode = null, countryCode = null, notes = null,
+            status = "lead", updatedAt = LATER_THAN_DELETED_AT,
+        )
+
+        assertEquals(0, changed)
+    }
+
+    @Test
+    fun `the server's copy replaces a row that has not changed since it was sent`() = runTest {
+        val dao = openDao()
+        val sent = NEWEST.copy(syncState = CustomerSyncState.PENDING)
+        dao.save(sent)
+
+        dao.acceptServerCopy(sent.id, sent.updatedAt, serverCopy(remoteId = "server-1", email = "ADA@x.io"))
+
+        val row = dao.rowOf(sent.id)
+        assertEquals("server-1", row?.remoteId)
+        assertEquals("ADA@x.io", row?.email)
+        assertEquals(CustomerSyncState.SYNCED, row?.syncState)
+    }
+
+    /** The edit made while the request was in flight is newer than the server's answer. */
+    @Test
+    fun `a row edited while it was being sent only learns its server id`() = runTest {
+        val dao = openDao()
+        val sent = NEWEST.copy(syncState = CustomerSyncState.PENDING)
+        dao.save(sent.copy(firstName = "Edited", updatedAt = LATER_THAN_DELETED_AT))
+
+        dao.acceptServerCopy(sent.id, sent.updatedAt, serverCopy(remoteId = "server-1"))
+
+        val row = dao.rowOf(sent.id)
+        assertEquals("server-1", row?.remoteId)
+        assertEquals("Edited", row?.firstName)
+        assertEquals(CustomerSyncState.PENDING, row?.syncState)
+    }
+
+    @Test
+    fun `a server page adds new customers and updates settled ones under their local id`() = runTest {
+        val dao = openDao()
+        dao.save(OLDEST.copy(id = "local-1", remoteId = "server-1"))
+
+        dao.applyServerPage(
+            OWNER,
+            listOf(serverCopy(remoteId = "server-1", email = "new@x.io"), serverCopy(remoteId = "server-2")),
+        )
+
+        assertEquals("new@x.io", dao.rowOf("local-1")?.email)
+        assertEquals("server-2", dao.rowOf("server-2")?.remoteId)
+        assertEquals(null, dao.rowOf("server-1"), "the settled row must not be duplicated")
+    }
+
+    @Test
+    fun `a server page leaves a row with an unsent change alone`() = runTest {
+        val dao = openDao()
+        val edited = OLDEST.copy(id = "local-1", remoteId = "server-1", syncState = CustomerSyncState.PENDING)
+        dao.save(edited)
+
+        dao.applyServerPage(OWNER, listOf(serverCopy(remoteId = "server-1", email = "new@x.io")))
+
+        assertEquals(edited, dao.rowOf("local-1"))
+    }
+
+    @Test
+    fun `settled rows the server no longer lists are dropped but unsent ones are kept`() = runTest {
+        val dao = openDao()
+        dao.save(NEWEST.copy(remoteId = "gone"))
+        dao.save(MIDDLE.copy(remoteId = "kept"))
+        dao.save(OLDEST.copy(remoteId = "edited-but-gone", syncState = CustomerSyncState.PENDING))
+
+        dao.purgeSyncedMissing(OWNER, setOf("kept"))
+
+        assertNull(dao.rowOf(NEWEST.id))
+        assertTrue(dao.rowOf(MIDDLE.id) != null)
+        assertTrue(dao.rowOf(OLDEST.id) != null)
+    }
+
     /** Opens [databasePath] through the same builder settings the app uses. */
     private fun openDao(): CustomerDao =
         getRoomDatabase(
@@ -171,6 +335,7 @@ class CustomerDaoTest {
 
     private companion object {
 
+        const val OWNER = "owner-1"
         const val DELETED_AT = "2026-09-17T09:00:00Z"
         const val LATER_THAN_DELETED_AT = "2026-09-17T10:30:00Z"
 
@@ -180,7 +345,7 @@ class CustomerDaoTest {
          */
         fun customer(id: String, createdAt: String) = Customer(
             id = id,
-            ownerId = "owner-1",
+            ownerId = OWNER,
             firstName = "Ada",
             lastName = "Lovelace",
             companyName = "Analytical Engines",
@@ -198,6 +363,12 @@ class CustomerDaoTest {
             updatedAt = createdAt,
             deletedAt = null,
         )
+
+        /** The server's copy of a customer, as the sync maps a response to a row. */
+        fun serverCopy(remoteId: String, email: String = "ada@example.com") = customer(
+            id = remoteId,
+            createdAt = "2026-09-10T12:00:00Z",
+        ).copy(remoteId = remoteId, email = email)
 
         val NEWEST = customer(id = "customer-newest", createdAt = "2026-09-16T12:00:00Z")
         val MIDDLE = customer(id = "customer-middle", createdAt = "2026-09-15T12:00:00Z")
