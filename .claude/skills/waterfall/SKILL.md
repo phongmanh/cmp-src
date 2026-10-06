@@ -32,7 +32,7 @@ Spawn it with the slug.
 
 ## 3. Design sign-off
 
-Read `02-design.md` and give the user a short summary: module placement, the build steps, the test plan and the riskiest part. Ask them to approve it or request changes. Nothing is built until they approve.
+Read `02-design.md` and give the user a short summary: module placement, its **Change summary** table (what is added, changed and removed), the build steps, the test plan and the riskiest part. Point them to its **System design** section for the class and sequence diagrams, which render in any Mermaid viewer (GitHub, the IDE's Markdown preview). Ask them to approve it or request changes. Nothing is built until they approve.
 
 - **Changes requested** — reopen design with their changes, and repeat from step 2.
 

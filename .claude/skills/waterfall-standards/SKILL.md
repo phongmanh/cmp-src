@@ -16,11 +16,13 @@ Why the gates matter: in Waterfall, moving upstream is the expensive move. A req
 
 | Phase | Document | Owner | Reads first |
 |---|---|---|---|
-| 1. Requirements | `01-requirements.md` | `waterfall-analyst` | the task, the code it touches |
-| 2. Design | `02-design.md` | `waterfall-architect` | `01`, the code |
+| 1. Requirements | `01-requirements.md` | `waterfall-analyst` | the task, the code it touches, `docs/design/` |
+| 2. Design | `02-design.md` | `waterfall-architect` | `01`, the code, `docs/design/` |
 | 3. Implementation | `03-implementation.md` | `waterfall-implementer` | `02` (`01` for context); the latest `04` round in a fix round |
 | 4. Verification | `04-verification.md` | `waterfall-verifier` | `01`–`03`, `git diff` |
 | 5. Handover | `05-handover.md` | `waterfall-verifier` | `01`–`04` |
+
+`docs/design/` is the checked-in, as-built class and sequence design, one file per module. The architect highlights a change against it in `02`; the implementer saves the result back as the design's last build step; the verifier checks it matches the diff.
 
 Write only your own documents. Never edit an upstream one, not even to fix a typo — report the defect in your own document. A `waterfall-write-guard` hook enforces this for the Write and Edit tools; don't route around it with Bash.
 

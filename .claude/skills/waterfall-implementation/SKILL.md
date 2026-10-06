@@ -13,6 +13,10 @@ Build exactly the design, step by step, running each step's **Verify** before st
 - **Mechanical** — a renamed symbol, a missing import, a path typo, a test name that clashes. Fix it and log it under **Deviations**.
 - **A decision** — the step is impossible, contradicts the code, or needs a choice the design didn't make. Stop. Log it under **Blocked**, leave the remaining steps undone, and gate `FAILED — design`. A halted phase costs one round trip; an improvised fix costs the verifier's trust in the whole diff.
 
+## System design step
+
+The last step copies the design's diagrams into `docs/design/`, highlights stripped as its `README.md` describes. Draw what you built, not what was planned: a logged deviation that renames or reshapes something changes the diagram too. Touch only the sections the step names, and never add highlights to these files.
+
 ## Fix round
 
 You're in a fix round when `04-verification.md` ends in `FAILED — implementation`. Read its latest round and address **every** finding, in order. If you believe a finding is wrong, leave the code it points at unchanged and say why — never skip one silently. Append a new round; don't rewrite earlier ones — the verifier reads the history.

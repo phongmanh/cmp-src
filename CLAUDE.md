@@ -6,31 +6,35 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 CMPsrc is a Kotlin Multiplatform / Compose Multiplatform project targeting **mobile only — Android and iOS**. The code is split by feature into KMP modules — `core:*` building blocks and one `feature:*` module per feature — assembled by the `shared` app module; each platform module is a thin shell that just hosts the shared `App()` composable. Package/namespace across all modules is `com.liam.cmp_src`.
 
-The desktop (JVM) and browser (JS/Wasm) targets that this project started with have been removed. Adding one back is not a one-line change: it needs the target declared in `cmpsrc.kmp.library` (which gives it to every module, and `cmpsrc.room` then adds the Room compiler for it on its own), actuals for every `expect` — `getPlatform` (`feature:home`), `platformEngine`/`localApiHost` (`core:network`), `createSocialAuthClient` (`feature:auth`), `rememberPlatformModule` (`shared`) — plus a database builder (`core:database`) and token cipher (`core:security`) for the target, and — for JS/Wasm — the Node/Yarn/Binaryen ivy repositories back in `settings.gradle.kts`, because `FAIL_ON_PROJECT_REPOS` rejects the ones the Kotlin plugin registers for itself.
+The desktop (JVM) and browser (JS/Wasm) targets that this project started with have been removed. Adding one back is not a one-line change: it needs the target declared in `cmpsrc.kmp.library` (which gives it to every module, and `cmpsrc.room` then adds the Room compiler for it on its own), actuals for every `expect` — `getPlatform` (`feature:home`), `platformEngine`/`localApiHost` (`core:network`), `createSocialAuthClient` (`feature:auth`), `customerSyncPlatformModule` (`feature:customers`), `formatDecimal`/`formatDate`/`formatDateTime`/`rememberPermissionController` (`core:utils`) — plus a database builder (`core:database`), a token cipher (`core:security`), a platform Koin module beside `androidPlatformModule`/`iosPlatformModule` (`shared`) and an entry point that calls `initKoin` with it, and — for JS/Wasm — the Node/Yarn/Binaryen ivy repositories back in `settings.gradle.kts`, because `FAIL_ON_PROJECT_REPOS` rejects the ones the Kotlin plugin registers for itself.
 
 ## Module layout
 
 ```
 androidApp ─┐
-iosApp ─────┴─> :shared ──> :feature:auth ────┐
-                        ──> :feature:home ────┼─> :core:ui ──> :core:domain ──> api-contract
-                        ──> :feature:profile ─┘    (auth and profile also ─> :core:network)
+iosApp ─────┴─> :shared ──> :feature:auth ───────┐
+                        ──> :feature:home ───────┤
+                        ──> :feature:profile ────┼─> :core:ui ──> :core:domain ──> api-contract
+                        ──> :feature:customers ──┘
                         ──> :core:database ──> :core:network, :core:security
+feature:auth, feature:profile, feature:customers ──> :core:network
+feature:customers ──> :core:database
 feature:*, core:ui ──> :core:utils
 tests only: feature:*, core:domain ──> :core:testing
 ```
 
-- `shared` — the app module. `App()`/`AppRoot` (navigation), the Koin graph (`di/AppModule.kt` includes each feature's module; `di/PlatformModule*.kt` binds the database and cipher per target), the Coil avatar `ImageLoader`, and `MainViewController()` for iOS. It links `Shared.framework`, the only framework the iOS app imports. No feature code lives here.
-- `feature:auth`, `feature:home`, `feature:profile` — one module per feature, each with its own `data`/`domain`/presentation packages, Compose resources, tests and Koin module (`authModule`, `homeModule`, `profileModule`).
+- `shared` — the app module. `App()`/`AppRoot` (navigation), the Koin graph (`di/AppModule.kt` includes each feature's module; `di/PlatformModule*.kt` has `initKoin`, which each platform's entry point calls once before any UI, and `androidPlatformModule`/`iosPlatformModule`, which build Room and pick the token cipher through `roomPersistence`), the Coil avatar `ImageLoader`, and `setUpApp()` and `MainViewController()` for iOS. It links `Shared.framework`, the only framework the iOS app imports. No feature code lives here.
+- `feature:auth`, `feature:home`, `feature:profile`, `feature:customers` — one module per feature, each with its own `data`/`domain`/presentation packages, Compose resources, tests and Koin module (`authModule`, `homeModule`, `profileModule`, `customersModule`).
+- `feature:customers` is offline-first: every write lands in Room as `PENDING`, and `CustomerRepository.sync` pushes pending rows, then pulls the server's pages. A save or delete asks the platform's `CustomerSyncScheduler` to sync — WorkManager on Android, `BGTaskScheduler` on iOS — which retries while offline. The full flow is in `docs/design/feature-customers.md`.
 - `core:domain` — the account types every feature shares (`AuthResult`, `AuthError`, `SocialProvider`, `PasswordError`), the `AuthRepository` interface and `SignOutUseCase`. Pure Kotlin.
 - `core:ui` — theme, modifiers, the shared components (`GlassCard`, `PrimaryActionButton`, `AuthTextField`, `ErrorBanner`, `UserAvatar`, …), the `asMessage()`/`asLabel()` mappers for the domain types, and the resources those use. Text fields take a `TextFieldState`, never `value`/`onValueChange`: a ViewModel owns each one as an `input/FormField` — edits reach it through `onEdit`, and submit reads `field.submit()` — and tests type with `core:testing`'s `TextFieldState.type()`.
 - `core:utils` — platform helpers with no domain meaning: `format` (`formatDecimal`, `formatDate`/`formatDateTime`, `formatByteSize` — always in the device's locale and time zone) and `permission` (`rememberPermissionController()` for camera, microphone, location and notifications). A permission still has to be declared by the app — the manifest entry on Android, the `NS…UsageDescription` key in `iosApp/iosApp/Info.plist` on iOS (see `Permission`'s KDoc) — and none are declared yet.
 - `core:network`, `core:database`, `core:security` — Ktor plumbing, Room, and the platform token ciphers (see "Networking").
 - `core:testing` — fakes that more than one module's tests use (`FakeAuthRepository`). Only ever a `commonTest` dependency.
-- `androidApp` — Android application shell. `MainActivity` just calls `setContent { App() }`.
-- `iosApp` — native Xcode/SwiftUI project. `iOSApp.swift` hosts `ContentView`, which wraps `Shared.framework` via `MainViewController()` (`shared/src/iosMain/.../MainViewController.kt`). Its build phase runs `:shared:embedAndSignAppleFrameworkForXcode`.
+- `androidApp` — Android application shell. `CmpApplication.onCreate` calls `initAndroidApp(this)` to start Koin; `MainActivity` just calls `setContent { App() }`.
+- `iosApp` — native Xcode/SwiftUI project. `iOSApp.init` calls `setUpApp()` (Koin, and the customer sync's background task, which iOS requires before launch finishes); `iOSApp.swift` hosts `ContentView`, which wraps `Shared.framework` via `MainViewController()` (`shared/src/iosMain/.../MainViewController.kt`). Its build phase runs `:shared:embedAndSignAppleFrameworkForXcode`.
 
-**Features never depend on one another** — Gradle rejects it, since no feature module declares another. A symbol lives in the module of its only consumer; when a second module needs it, it moves *down* into `core` rather than being imported sideways, and `shared` is the only place features meet. For example, `HomeRoute` takes the profile tab as a slot that `App.kt` fills with `ProfileRoute`, and `ProfileApi` reads `GET /users/me` itself instead of borrowing `AuthApi`.
+**Features never depend on one another** — Gradle rejects it, since no feature module declares another. A symbol lives in the module of its only consumer; when a second module needs it, it moves *down* into `core` rather than being imported sideways, and `shared` is the only place features meet. For example, `HomeRoute` takes the customers and profile tabs as slots that `App.kt` fills with `CustomersRoute` and `ProfileRoute`, and `ProfileApi` reads `GET /users/me` itself instead of borrowing `AuthApi`.
 
 Packages follow modules (`com.liam.cmp_src.core.network`, `com.liam.cmp_src.feature.auth`, …); `shared` keeps the root package. New features and platform behavior belong in a `feature:*` or `core:*` module, with `shared` and the platform apps limited to wiring/entry points.
 
@@ -91,7 +95,7 @@ app never spells a path or a payload by hand. A route the server renames breaks 
 - `ApiResult.kt` / `ApiCall.kt` — every call returns `ApiResult<T>`; `sendRequest` is the one place
   an exception becomes an `ApiError`, so nothing above the data layer catches anything.
 - `TokenStore.kt` — what the `Auth` plugin reads and refreshes into. Both targets bind
-  `RoomTokenStore` (`core:database`, via `rememberPlatformModule`), which keeps the session in
+  `RoomTokenStore` (`core:database`, via `shared`'s `roomPersistence`), which keeps the session in
   SQLite with the row encrypted by the platform key store (`core:security`) — Android Keystore, iOS
   Keychain. `InMemoryTokenStore` is the test double.
 
@@ -103,7 +107,7 @@ goes through the helpers in `core:ui`'s `component/UserIdentity.kt` (`displayLab
 stays a domain enum, bridged to the wire by its `key`/`fromKey`.
 
 Per-feature API classes live with the feature (`AuthApi` in `feature:auth`, `ProfileApi` in
-`feature:profile`), not in `core`. A typed POST must set `contentType(ContentType.Application.Json)`
+`feature:profile`, `CustomerApi` in `feature:customers`), not in `core`. A typed POST must set `contentType(ContentType.Application.Json)`
 — ContentNegotiation silently declines to serialize a body without it, and the call fails before
 leaving the device.
 
@@ -129,13 +133,13 @@ demo account. Other features reach it only through the `AuthRepository` interfac
   Both platform actuals still delegate to `DemoSocialAuthClient`, which returns a placeholder
   token — the exchange after it is real, so social sign-in works only against a deployment that
   accepts one.
-- **Sign-out** — `HomeViewModel` or `ProfileViewModel` → `SignOutUseCase` (`core:domain`) →
+- **Sign-out** — `ProfileViewModel` → `SignOutUseCase` (`core:domain`) →
   `AuthApi.logout`, which drops the local tokens whether or not the server answered. `signOut()` is
   `NonCancellable`, because the caller is a screen on its way out and a cancelled call would leave a
   live refresh token behind.
 
 Failures are mapped once per feature: `AuthMapping.kt` in `feature:auth`, `ProfileMapping.kt` in
-`feature:profile`. Only the email/password path can report `AuthError.InvalidCredentials`; the same
+`feature:profile`, `CustomerMapping.kt` in `feature:customers` (to a `SyncOutcome`). Only the email/password path can report `AuthError.InvalidCredentials`; the same
 401 on the social path becomes `Unknown`, since the user never typed a password to get wrong.
 
 ## Gradle/toolchain notes
@@ -205,6 +209,7 @@ Run a single test class (works with `testAndroidHostTest`/`testDebugUnitTest`):
 - Match existing patterns in the file/module before introducing new ones.
 - Prefer editing existing files over creating new ones unless the change clearly belongs in a new class.
 - New features belong in a `feature:*` module and building blocks two features share in `core:*`; keep `shared` and the platform apps limited to wiring/entry points.
+- `docs/design/` holds the as-built class and sequence diagrams, one Mermaid file per module (conventions in its `README.md`). Read a module's file before designing a change to it, and update it in the same change when its classes or flows change — the waterfall does this as the design's last build step.
 - Run the relevant build/test commands above before considering a task done.
 
 ## Team conventions (.claude/rules)
@@ -239,5 +244,6 @@ trigger `presentation.md`; add a pattern to its `paths:` when a new kind of file
   `waterfall-<phase>` skills aren't user-invocable — each `waterfall-*` agent preloads the shared
   one and its own phase's. `waterfall-standards` holds the build/test checks to run per changed path.
 - `agents/` — the `waterfall-*` agents, one per gated phase (analyst → architect → implementer →
-  verifier, which also writes the handover). Their working documents go in `.claude/waterfall/`
+  verifier, which also writes the handover). The architect's design draws class and sequence
+  diagrams with the change highlighted against `docs/design/`, and the implementer saves them back. Their working documents go in `.claude/waterfall/`
   (git-ignored), and `rules/waterfall.md` loads only when a session touches them.

@@ -13,7 +13,7 @@ Prove the requirements, not just the build. **The diff is the truth; `03-impleme
 1. `git diff` and `git status --short` — what actually changed, new files included.
 2. Run the **Checks** in `waterfall-standards` for those paths.
 3. **Traceability** — for every `R`, find the test that proves it in the diff and confirm it ran and passed; for every `N`, the test or check the design named, and its result. A requirement with no test or check, or one that doesn't verify what its criterion says, is a finding.
-4. **Design conformance** — every build step landed; nothing in the diff that no step asked for.
+4. **Design conformance** — every build step landed; nothing in the diff that no step asked for. The `docs/design/` files the design named match the code: every class, signature and call they draw exists, nothing in the diff they should show is missing, and no highlight is left in them.
 5. **Mobile checklist** — review the diff against it (`waterfall-standards`).
 6. In round N > 1, check every finding of round N-1 against the code: resolved, unresolved, or disputed — and whether the dispute holds.
 
@@ -76,6 +76,9 @@ Write it only when `04` has passed, in the same run.
 
 ## Files changed
 - `path/File.kt` — <one line>
+
+## System design
+<The **Change summary** from `02`, as built, and the `docs/design/` files updated.>
 
 ## How to try it
 - **Android** — <steps>
